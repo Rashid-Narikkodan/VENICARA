@@ -5,6 +5,9 @@
     box-sizing: border-box;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
+html, body {        /* Remove default padding */
+  overflow-x: hidden; /* Prevent horizontal scrolling */
+}
 
 body {
     background-color: #f5f5f5;
@@ -24,5 +27,42 @@ input, button, textarea {
 }
 
 .header-logo{
-  width:15rem
+  width:15rem;
+}
+div>i{
+    font-size:large;
+    position: absolute;
+    right:1rem;
+    top:.5rem
+}
+#sidebar > ul > li{
+    border:none;
+    padding:.4rem 1rem
+}
+#sidebar > ul > li > a:hover:not(.logout){
+    background-color: rgb(178, 178, 178);
+    color:black
+}
+#sidebar > ul > li > a{
+    color:black
+}
+/* Active sidebar button */
+#sidebar .nav .active {
+  background-color: #212529 !important; /* dark bg */
+  color: #fff !important; /* white text */
+}
+
+#sidebar .nav .active i {
+  color: #fff !important; /* white icon */
+}
+nav{
+    width:18rem;
+    transition: width 0.3s;
+}
+#sidebar.collapsed {
+ width:5rem
+}
+
+#sidebar.collapsed span {
+  display: none; /* hide text, keep icons */
 }

@@ -16,21 +16,33 @@ const handleLogin=async(req,res)=>{
   console.log(email+password);
   try{
     //validate input
-    if(!email||!password) return res.status(400).json({message:'Email and Password required'})
+    if(!email||!password) {
+      req.flash('error','Email and password is required')
+      return res.redirect('/admin/login')
+    }
     //find admin by email
     const admin=await Admin.findOne({email})
-    if(!admin) return res.status(401).json({message:"Invalid credentials"})
+    if(!admin){
+      req.flash('error','invald credentials')
+      return res.redirect('/admin/login')
+    }
     const isMatch=await bcrypt.compare(password,admin.password)
-    if(!isMatch) return res.status(401).json({message:"Invalid credentials"})
-    if(!admin.isActive) return res.status(403).json({ message: "Account is not active." })
+    if(!isMatch){
+         req.flash('error','invald credentials')
+      return res.redirect('/admin/login')
+    }
+    if(!admin.isActive){
+      req.flash('error', 'Account is not active.');
+      return res.redirect('/admin/login');
+    }
     //session create
      req.session.admin = {
       id: admin._id,
       email: admin.email,
       role: admin.role
     }
-
-    return res.redirect('/admin/dashboard')
+    req.flash('success','logged in successfully')
+    res.redirect('/admin/dashboard')
   }catch(err){
     res.status(500).send(err)
   }
@@ -38,13 +50,32 @@ const handleLogin=async(req,res)=>{
 
 const showDashboard=(req,res)=>{
   try{
-    return res.render('adminPages/dashboard')
+    return res.render('adminPages/dashboard',{page:'dashboard'})
   }catch(er){
     res.status(500).send(er.message)
   }
 }
+const showCustomers=async(req,res)=>{
+  try{
+    return res.render('adminPages/customers',{page:'customers'})
+  }catch(er){
+    res.status(500).send(er.message)
+  }
+}
+const handleLogout=(req,res)=>{
+  req.session.destroy((err)=>{
+    if(err){
+      res.flash('error','not abled to logout due to server issues')
+      return res.redirect('/admin/dashboard')
+    }
+    res.clearCookie('connect.sid')
+    res.redirect('/admin/login')
+  })
+}
 module.exports = {
   showLogin,
   handleLogin,
-  showDashboard
+  showDashboard,
+  showCustomers,
+  handleLogout
 }

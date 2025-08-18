@@ -1,3 +1,6 @@
+body,html{
+    overflow:hidden
+}
 .container {
     height: 100vh !important;
     display: flex;
@@ -12,12 +15,12 @@
     justify-content: center;
     align-items: center;
     padding: 5rem 5rem;
-    background-color: rgb(255, 255, 255);
+    background-color: rgb(233, 233, 233);
 }
 
 .logo {
     width: 15rem;
-    margin-bottom: 5rem !important;
+    margin-bottom: 3rem !important;
 }
 
 form > input {
@@ -36,9 +39,22 @@ form > div > a:hover {
     color: rgb(166, 166, 166);
 }
 
-form > i {
+form >div> i {
     font-size: medium;
     position: absolute;
-    bottom: 5rem;
+    bottom: 4.5rem;
     right: 1rem;
+}
+@media (max-width: 576px){
+    .loginBox{
+        height:25rem !important;
+        margin-bottom:10rem !important;
+        padding:3rem 3rem !important;
+
+    }
+    .logo{
+        width: 10rem;
+        margin-bottom: 3rem !important;
+    }
+
 }

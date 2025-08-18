@@ -28,13 +28,22 @@
   <div class="container h-100">
     <div class="loginBox shadow w-75 h-75">
     <div>
-      <img class="logo mb-5" src="/images/logo.avif" alt="E commerce website name VENICARA">
+      <img class="logo" src="/images/logo.avif" alt="E commerce website name VENICARA">
     </div>
-    <div class="w-50">
+    <% if (messages.error.length > 0) { %>
+  <div class="alert alert-danger">
+    <%= messages.error[0] %>
+  </div>
+<% } %>
+    <div class="w-100 w-sm-50">
       <form action="/admin/login" method="post" class="form position-relative">
+        <div>
         <input placeholder="Email" name="email" type="text" class="form-control mb-2">
+        </div>
+        <div class="">
         <input placeholder="Password" name="password" type="password" id="password" class="form-control ">
         <i class="fa-solid fa-eye-slash" id="eye"></i>
+        </div>
         <button type="submit" class="btn btn-dark mt-4 w-100">Login</button>
       </form>
     </div>

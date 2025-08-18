@@ -1,0 +1,74 @@
+<div class="d-flex">
+  <!-- Sidebar -->
+  <nav id="sidebar" class="">
+    <ul id="list" class="nav flex-column mt-4 w-100">
+      <li class="d-flex justify-content-end">
+      <button id="arrow" class="btn btn-dark"><i class="fa-solid fa-angles-left"></i></button>
+      </li>
+      <li class="nav-item">
+        <a class="btn btn-white rounded-4 d-flex align-items-center gap-2 p-3 w-100 <%=page==='dashboard'?'active':''%>" href="/admin/dashboard">
+          <i class=" fa-solid fa-chart-line d-inline"></i>
+          <span>Dashboard</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="btn btn-white rounded-4 d-flex align-items-center gap-2 p-3 w-100 <%=page==='orders'?'active':''%>" href="/admin/orders">
+          <i class="fa-solid fa-bag-shopping"></i>
+          <span>Order</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="btn btn-white rounded-4 d-flex align-items-center gap-2 p-3 w-100 <%=page==='products'?'active':''%>" href="/admin/products">
+          <i class="fa-solid fa-boxes-stacked"></i>
+          <span>Products</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="btn btn-white rounded-4 d-flex align-items-center gap-2 p-3 w-100 <%=page==='reports'?'active':''%>" href="/admin/reports">
+          <i class="fa-solid fa-receipt"></i>
+          <span>Sales Report</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="btn btn-white rounded-4 d-flex align-items-center gap-2 p-3 w-100 <%=page === 'customers'?'active':'' %>" href="/admin/customers">
+          <i class="fa-solid fa-people-carry-box"></i>
+          <span>Customers</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="btn btn-white rounded-4 d-flex align-items-center gap-2 p-3 w-100 <%=page==='coupens'?'active':''%>" href="/admin/coupens">
+          <i class="fa-solid fa-ticket"></i>
+          <span>Coupen</span></a>
+      </li>
+      <li class="nav-item">
+        <a class="btn btn-white rounded-4 d-flex align-items-center gap-2 p-3 w-100 <%=page==='categories'?'active':''%>" href="/admin/categories">
+          <i class="fa-solid fa-layer-group"></i>
+          <span>Category</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="btn btn-white rounded-4 d-flex align-items-center gap-2 p-3 w-100 <%=page==='returns'?'active':''%>" href="/admin/return">
+          <i class="fa-solid fa-arrow-rotate-left"></i>
+          <span>Refund/Return</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="btn btn-white rounded-4 d-flex align-items-center gap-2 p-3 w-100 <%=page==='banners'?'active':''%>" href="/admin/banners">
+          <i class="fa-solid fa-rectangle-list"></i>
+          <span>Banners</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="btn btn-white rounded-4 d-flex align-items-center gap-2 p-3 w-100 <%=page==='refferals'?'active':''%>" href="/admin/refferals">
+          <i class="fa-solid fa-users-line"></i>
+         <span>Refferals</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="btn btn-danger text-white rounded-4 d-flex align-items-center gap-2 p-3 w-100 logout" href="/admin/logout">
+          <i class="fa-solid fa-arrow-right-from-bracket"></i>
+          <span>Sign Out</span>
+        </a>
+      </li>
+    </ul>
+  </nav>

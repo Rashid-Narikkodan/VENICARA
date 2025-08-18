@@ -9,5 +9,9 @@ router
   .post(adminController.handleLogin)
 router
   .route('/dashboard')
-  .get(adminController.showDashboard)
+  .get(auth.isAdminLoggedIn,adminController.showDashboard)
+router
+  .route('/customers')
+  .get(adminController.showCustomers)
+router.post('/logout',adminController.handleLogout)
 module.exports = router

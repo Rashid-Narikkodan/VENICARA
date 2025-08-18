@@ -45,9 +45,19 @@ const userSchema=new Schema({
     unique:true,
     index:true
   },
-  refferedBy:{
+  referredBy:{
     type:String,
     default:null
+  },
+  otp:{
+    type:String,
+  },
+  otpExpiry:{
+    type:Date,
+  },
+  isVerified:{
+    type:Boolean,
+    default:false
   }
 },{timestamps:true})
 

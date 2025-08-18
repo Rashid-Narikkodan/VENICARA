@@ -1,0 +1,22 @@
+.searchForm > input{
+  border-radius: 10px solid black !important;
+  border:1px solid rgb(122, 122, 122) !important
+}
+.searchForm > button{  
+  padding:.75rem 1rem
+}
+@media (max-width:576px){
+  .logo {
+  margin-left: .5rem;
+  width: 6rem;
+}
+header > .row > div >a> button{
+  font-size:xx-small
+}
+
+}
+/* Logo */
+.logo {
+  margin-left: 1rem;
+  width: 12rem;
+}
