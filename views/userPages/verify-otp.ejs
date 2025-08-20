@@ -9,25 +9,31 @@
    rel="stylesheet"
   />
 <link rel="stylesheet" href="/css/userAuth.css" />
-<script defer src="/js/userSignUp.js"></script>
+<script defer src="/js/signupOTP.js"></script>
 </head>
   <body class="vh-100 d-flex align-items-center bg-dark">
       <div class="container-fluid text-center d-flex justify-content-center">
         <div class="card shadow-lg border-0 rounded-5 overflow-hidden mt-3 p-5 d-flex justify-content-center" style="max-width: 800px; width: 100%">
-          <div class="row g-0 d-flex justify-content-center">
-            <div class="col-12">
+          <%if(messages.success.length>0){%>
+              <div id="success-otp" class="alert alert-success successOTP"><%=messages.success[0]%></div>
+            <%}%>
+             <%if(messages.error.length>0){%>
+              <div id="success-otp" class="alert alert-danger successOTP"><%=messages.error[0]%></div>
+            <%}%>
+          <div class="row g-0 d-flex justify-content-center pt-md-5 pb-md-5">
+            <div class="col-12 mb-md-3">
               <h1 class="">Confirm with OTP</h1>
               <p>Please check your mail address for OTP</p>
             </div>
             <div class="col-12 col-sm-6 mt-3">
-              <form action="/signup/verify-otp" method="post">
-                <input type="text" name="otp" placeholder="Enter OTP" class="p-3 text-center w-100 form-control">
-                <div class="mb-3 mt-3 ">
+              <form action="/signup/verify-otp" method="post" class="">
+                <input type="text" name="otp" placeholder="Enter OTP" class="p-3 mb-md-3 text-center w-100 form-control fs-3" maxlength="6">
+                <div class="mb-3 mt-3">
                   <span>Remaining Time <span id="timer" style="color:blueviolet" >00:50s</span></span>
                   <br class="d-md-none d-block">
                   <span class="ms-md-5">Didn’t you receive code? <a href="#" id="resend-otp" class="text-decoration-none"><span style="color:blueviolet">Resend</span></a></span>
                 </div>
-                <button class="btn btn-dark w-75 w-25 mb-3" type="submit">Confirm</button>
+                <button class="btn btn-dark w-75  mb-3 p-md-3 p-2" type="submit">Confirm</button>
               </form>
             </div>
             <div class="col-12">

@@ -8,6 +8,7 @@ const adminRoutes=require('./routes/adminRoutes')
 const sessionConfig=require('./middlewares/session')
 const flash=require('connect-flash')
 const flashMsg=require('./middlewares/flash')
+const method=require('method-override')
 
 //settings
 app.set('view engine','ejs')
@@ -16,6 +17,9 @@ app.locals.title=process.env.TITLE
 
 //session
 sessionConfig(app)
+
+//methodOverride
+app.use(method('_method'))
 
 //flash
 app.use(flash())
