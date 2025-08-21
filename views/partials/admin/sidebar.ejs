@@ -1,9 +1,9 @@
 <div class="d-flex">
   <!-- Sidebar -->
-  <nav id="sidebar" class="">
-    <ul id="list" class="nav flex-column mt-4 w-100">
-      <li class="d-flex justify-content-end">
-      <button id="arrow" class="btn btn-dark"><i class="fa-solid fa-angles-left"></i></button>
+  <nav id="sidebar" class="p-2">
+    <ul id="list" class="nav d-flex flex-column mt-1 pb-1 pt-1 pe-1 rounded-3 w-100" style="background:rgb(223, 223, 223)">
+      <li id="liBtn" class="d-flex justify-content-end">
+      <button id="arrow" class="btn"><i class="fa-solid fa-angles-left"></i></button>
       </li>
       <li class="nav-item">
         <a class="btn btn-white rounded-4 d-flex align-items-center gap-2 p-3 w-100 <%=page==='dashboard'?'active':''%>" href="/admin/dashboard">
@@ -18,36 +18,36 @@
         </a>
       </li>
       <li class="nav-item">
-        <a class="btn btn-white rounded-4 d-flex align-items-center gap-2 p-3 w-100 <%=page==='products'?'active':''%>" href="/admin/products">
+        <a class="btn btn-white rounded-4 d-flex align-items-center gap-2 p-3 w-100 <%=page==='products'?'active':''%>" href="/admin/products?page=1">
           <i class="fa-solid fa-boxes-stacked"></i>
           <span>Products</span>
         </a>
       </li>
       <li class="nav-item">
-        <a class="btn btn-white rounded-4 d-flex align-items-center gap-2 p-3 w-100 <%=page==='reports'?'active':''%>" href="/admin/reports">
+        <a class="btn btn-white rounded-4 d-flex align-items-center gap-2 p-3 w-100 <%=page==='salesReport'?'active':''%>" href="/admin/salesReport">
           <i class="fa-solid fa-receipt"></i>
           <span>Sales Report</span>
         </a>
       </li>
       <li class="nav-item">
-        <a class="btn btn-white rounded-4 d-flex align-items-center gap-2 p-3 w-100 <%=page === 'customers'?'active':'' %>" href="/admin/customers">
-          <i class="fa-solid fa-people-carry-box"></i>
+        <a class="btn btn-white rounded-4 d-flex align-items-center gap-2 p-3 w-100 <%=page === 'customers'?'active':''%>" href="/admin/customers">
+          <i class="fa-solid fa-people-group"></i>
           <span>Customers</span>
         </a>
       </li>
       <li class="nav-item">
-        <a class="btn btn-white rounded-4 d-flex align-items-center gap-2 p-3 w-100 <%=page==='coupens'?'active':''%>" href="/admin/coupens">
+        <a class="btn btn-white rounded-4 d-flex align-items-center gap-2 p-3 w-100 <%=page==='coupons'?'active':''%>" href="/admin/coupons">
           <i class="fa-solid fa-ticket"></i>
           <span>Coupen</span></a>
       </li>
       <li class="nav-item">
         <a class="btn btn-white rounded-4 d-flex align-items-center gap-2 p-3 w-100 <%=page==='categories'?'active':''%>" href="/admin/categories">
           <i class="fa-solid fa-layer-group"></i>
-          <span>Category</span>
+          <span>Categories</span>
         </a>
       </li>
       <li class="nav-item">
-        <a class="btn btn-white rounded-4 d-flex align-items-center gap-2 p-3 w-100 <%=page==='returns'?'active':''%>" href="/admin/return">
+        <a class="btn btn-white rounded-4 d-flex align-items-center gap-2 p-3 w-100 <%=page==='returnRefund'?'active':''%>" href="/admin/returnRefund">
           <i class="fa-solid fa-arrow-rotate-left"></i>
           <span>Refund/Return</span>
         </a>
@@ -59,9 +59,9 @@
         </a>
       </li>
       <li class="nav-item">
-        <a class="btn btn-white rounded-4 d-flex align-items-center gap-2 p-3 w-100 <%=page==='refferals'?'active':''%>" href="/admin/refferals">
+        <a class="btn btn-white rounded-4 d-flex align-items-center gap-2 p-3 w-100 <%=page==='referrals'?'active':''%>" href="/admin/referrals">
           <i class="fa-solid fa-users-line"></i>
-         <span>Refferals</span>
+         <span>Referrals</span>
         </a>
       </li>
       <li class="nav-item">

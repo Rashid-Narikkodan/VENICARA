@@ -21,17 +21,18 @@
   ></script>
   <link rel="stylesheet" href="/css/userAuth.css" />
   <link rel="stylesheet" href="/css/userHeader.css" />
+  <script src="/js/userHeader.js"></script>
  </head>
  <body>
-  <header class="p-md-4 pt-4 pb-4 w-100 shadow sticky-top">
+  <header class="p-md-4 pt-4 pb-4 w-100 shadow sticky-top position-relative">
    <div class="container-fluid">
     <div class="row">
      <div class="col-4 position-relative">
       <img class="logo img-fluid" src="/images/logo.avif" alt="" />
      </div>
      <div class="col-4 d-flex justify-content-center align-items-center">
-      <a href="/home" class="text-decoration-none text-black"><p class="d-inline mb-0 fw-semibold fs-md-5">HOME</p></a>
-      <a href="/shop" class="text-decoration-none text-black"><p class="d-inline ms-md-4 ms-2 mb-0 fw-semibold fs-md-5">SHOP</p></a>
+      <a href="/home" class="text-decoration-none text-black"><p class="d-inline mb-0 fw-semibold fs-md-4">HOME</p></a>
+      <a href="/shop" class="text-decoration-none text-black"><p class="d-inline ms-md-4 ms-2 mb-0 fw-semibold fs-md-4">SHOP</p></a>
      </div>
      <div class="col-4 d-flex justify-content-end align-items-center">
       <form
@@ -60,5 +61,15 @@
       ></a>
      </div>
     </div>
+    <div id="successBox" class="successBox w-100 d-flex justify-content-center">
+    <%if(messages.success.length>0){%>
+    <div class="alert alert-success text-center w-md-25 w-75"><%=messages.success[0]%></div>
+    <%}%>
+  </div>
+    <div id="errorBox" class="errorBox w-100 d-flex justify-content-center">
+    <%if(messages.error.length>0){%>
+    <div class="alert alert-danger text-center w-md-25 w-75"><%=messages.error[0]%></div>
+    <%}%>
+  </div>
    </div>
   </header>

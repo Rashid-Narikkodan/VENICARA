@@ -57,12 +57,36 @@ div>i{
 }
 nav{
     width:18rem;
-    transition: width 0.3s;
+    transition: width .3s;
 }
 #sidebar.collapsed {
- width:5rem
+ width:6rem
 }
 
 #sidebar.collapsed span {
   display: none; /* hide text, keep icons */
+}
+.center{
+  justify-content: center !important;
+}
+
+
+/* all success and error handle in header */
+.successBox,.errorBox {
+  position: fixed;
+  top: 6rem;
+  left: 0;
+  width: 100%;
+  z-index: 9999; /* stays above everything */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  padding: 12px;
+  font-weight: bold;
+  transition: opacity 1s ease,transform 1s ease;
+}
+.fadeOut{
+  opacity:0;
+  transform: translateY(-2rem);
 }

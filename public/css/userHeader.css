@@ -20,3 +20,21 @@ header > .row > div >a> button{
   margin-left: 1rem;
   width: 12rem;
 }
+.successBox,.errorBox {
+  position: fixed;
+  top: 6rem;
+  left: 0;
+  width: 100%;
+  z-index: 9999; /* stays above everything */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  padding: 12px;
+  font-weight: bold;
+  transition: opacity 1s ease,transform 1s ease;
+}
+.fadeOut{
+  opacity:0;
+  transform: translateY(-2rem);
+}

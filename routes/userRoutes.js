@@ -2,8 +2,12 @@ const express=require('express')
 const router=express.Router()
 const userController = require('../controllers/userControllers')
 const auth=require('../middlewares/authUser')
+const passport=require('passport')
 
 router.get('/',auth.loggedIn,userController.landingPage)
+
+router.get('/auth/google',passport.authenticate('google',{scope:['profile','email']}))
+router.get('/auth/google/callback',passport.authenticate('google',{failureRedirect:'/login'}),userController.handleGoogleAuth)
 
 router
   .route('/login')
@@ -38,4 +42,5 @@ router.post('/signup/resend-otp',userController.resendOTP)
 
 router.get('/home',auth.requireLogin,userController.showHome)
 
+router.get('/logout',userController.handleLogout)
 module.exports = router

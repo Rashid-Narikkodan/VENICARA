@@ -66,6 +66,19 @@ const handleLogin = async (req, res) => {
   }
 }
 
+const handleGoogleAuth=(req,res)=>{
+  try{
+    req.session.user={
+      id:req.user._id,
+      isVerified:true
+    }
+    req.flash('success','Logged in successfully with Google')
+    res.redirect('/home')
+  }catch(er){
+    res.status(500).send('Internal server issue in handleGoogleAuth - '+er.message)
+  }
+}
+
 const showForgot = (req, res) => {
   try {
     return res.render('userPages/forgot')
@@ -327,6 +340,19 @@ const showHome = (req, res) => {
   }
 }
 
+const handleLogout=('/logout', (req, res) => {
+  req.logout(() => {
+    req.session.destroy(err => {
+      if (err) {
+        console.log(err);
+        return res.status(500).redirect('/');
+      }
+      res.clearCookie('connect.sid');
+      res.redirect('/'); 
+    });
+  });
+});
+
 // ============================
 // Module Exports
 // ============================
@@ -335,6 +361,8 @@ module.exports = {
 
   showLogin,
   handleLogin,
+  handleGoogleAuth,
+
   showForgot,
   handleForgot,
   showForgotOTP,
@@ -349,5 +377,6 @@ module.exports = {
   handleSignupOTP,
   resendOTP,
 
-  showHome
+  showHome,
+  handleLogout,
 }
