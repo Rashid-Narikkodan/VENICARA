@@ -1,46 +1,46 @@
 const express=require('express')
 const router=express.Router()
-const userController = require('../controllers/userControllers')
+const {authController,userController} = require('../controllers/user/index')
 const auth=require('../middlewares/authUser')
 const passport=require('passport')
 
 router.get('/',auth.loggedIn,userController.landingPage)
 
 router.get('/auth/google',passport.authenticate('google',{scope:['profile','email']}))
-router.get('/auth/google/callback',passport.authenticate('google',{failureRedirect:'/login'}),userController.handleGoogleAuth)
+router.get('/auth/google/callback',passport.authenticate('google',{failureRedirect:'/login'}),authController.handleGoogleAuth)
 
 router
   .route('/login')
-  .get(auth.loggedIn,userController.showLogin)
-  .post(userController.handleLogin)
+  .get(auth.loggedIn,authController.showLogin)
+  .post(authController.handleLogin)
 router
   .route('/forgot')
-  .get(auth.loggedIn,userController.showForgot)
-  .post(userController.handleForgot)
+  .get(auth.loggedIn,authController.showForgot)
+  .post(authController.handleForgot)
 router
   .route('/forgotOTP')
-  .get(auth.loggedIn,userController.showForgotOTP)
-  .post(userController.handleForgotOTP)
+  .get(auth.loggedIn,authController.showForgotOTP)
+  .post(authController.handleForgotOTP)
 
-router.post('/resendForgotOTP',userController.resendForgotOTP)
+router.post('/resendForgotOTP',authController.resendForgotOTP)
 
 router
   .route('/forgot/changePass')
-  .get(auth.loggedIn,userController.showChangePass)
-  .patch(userController.handleChangePass)
+  .get(auth.loggedIn,authController.showChangePass)
+  .patch(authController.handleChangePass)
 router
   .route('/signup')
-  .get(auth.loggedIn,userController.showSignup)
-  .post(userController.handleSignup)
+  .get(auth.loggedIn,authController.showSignup)
+  .post(authController.handleSignup)
 
 router
   .route('/signup/verify-otp')
-  .get(auth.loggedIn,userController.showSignupOTP)
-  .post(userController.handleSignupOTP)
+  .get(auth.loggedIn,authController.showSignupOTP)
+  .post(authController.handleSignupOTP)
 
-router.post('/signup/resend-otp',userController.resendOTP)
+router.post('/signup/resend-otp',authController.resendOTP)
 
 router.get('/home',auth.requireLogin,userController.showHome)
 
-router.get('/logout',userController.handleLogout)
+router.get('/logout',authController.handleLogout)
 module.exports = router

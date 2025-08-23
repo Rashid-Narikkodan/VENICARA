@@ -3,46 +3,50 @@
     <main class="flex-fill">
      <div class="container my-4 d-flex justify-content-center">
       <div class="w-75 p-5 rounded-4" style="background:rgb(166, 166, 166)">
-  <h1 class="mb-4">Add Product</h1>
-        <div class="alert alert-danger d-none" id="addProductError"></div>
-  <form id="form" method="post" action="/admin/products/add" enctype="multipart/form-data">
+  <h1 class="mb-4">Edit Product</h1>
+        <div class="alert alert-danger d-none" id="editProductError"></div>
+  <form id="editProdectForm" method="POST" action="/admin/products/edit/<%=product._id%>?_method=PUT" enctype="multipart/form-data">
     <div class="mb-3">
       <label class="form-label">Product Name</label>
-      <input type="text" id="name" name="name" class="form-control" placeholder="eg :- Blue de Chanel">
+      <input type="text" id="name" name="name" class="form-control" value="<%=product.name%>">
     </div>
     <div class="mb-3">
       <label class="form-label">Product Description</label>
-      <textarea name="description" id="description" class="form-control" rows="4" placeholder="Write your description here..."></textarea>
+      <textarea name="description" id="description" class="form-control" rows="4"><%=product.description%></textarea>
     </div>
     <div class="mb-3">
       <label class="form-label">Product Images</label>
       <div class="rounded-3 border p-4 bg-light">
-        <!-- Hidden single file input for multiple images -->
         <input type="file" name="images" multiple accept="image/*" id="imgInput" hidden>
-        
-        <!-- Clickable div to open file picker -->
         <div class="border rounded p-5 text-center position-relative" style="cursor:pointer;background: rgb(205, 205, 205);" id="addImgDiv">
           <i class="fa-solid fa-images fa-2x z-5"></i>
       <div>Add Images</div>
       <small>Select only 3 images</small>
     </div>
     <!-- Container to show image previews -->
-    <div id="previewContainer" class="d-flex justify-content-center gap-2 mt-3 flex-wrap"></div>
+    <div id="previewContainer" class="d-flex justify-content-center gap-2 mt-3 flex-wrap">
+      <%product.images.forEach((image,index)=>{%>
+        <div class="position-relative rounded-3 overflow-hidden" style="width:10rem;height:10rem">
+        <button class="position-absolute top-0 end-1 rounded-5 p-0">-</button>
+        <img src="<%=image%>" alt="product images" style="width:10rem">
+          </div>
+      <%})%>
+    </div>
   </div>
 </div>
 
     <div class="row mb-3 g-3">
       <div class="col-md-4">
         <label class="form-label">Base Price (₹)</label>
-        <input name="basePrice" id="basePrice" type="number" class="form-control" placeholder="300">
+        <input name="basePrice" id="basePrice" type="number" class="form-control" value="<%=variant.basePrice%>">
       </div>
       <div class="col-md-4">
         <label class="form-label">Discount Price (₹)</label>
-        <input name="discountPrice" id="discountPrice" type="number" class="form-control" placeholder="Enter discount price">
+        <input name="discountPrice" id="discountPrice" type="number" class="form-control" value="<%=variant.discount%>">
       </div>
       <div class="col-md-4">
         <label class="form-label">Stock</label>
-        <input name="stock" id="stock" type="number" class="form-control" placeholder="Enter stock limit">
+        <input name="stock" id="stock" type="number" class="form-control" value="<%=variant.stock?variant.stock:''%>">
       </div>
     </div>
     <div class="row mb-4 g-3">
@@ -50,15 +54,15 @@
         <select name="categoryId" id="category" class="form-select">
           <option selected disabled>Select Category</option>
           <% categories.forEach(category => { %>
-      <option value="<%= category._id %>" ><%= category.name %></option>
+      <option value="<%= category._id %>" <%=category._id.toString() == product.category._id?'selected':''%>><%=category.name %> </option>
           <% }) %>
         </select>
       </div>
       <div class="col-md-4">
-        <input name="volume" id="volume" type="text" class="form-control" placeholder="Volume (e.g., 50ml)">
+        <input name="volume" id="volume" type="text" class="form-control" value="<%=variant.volume%>">
       </div>
       <div class="col-md-4">
-        <input name="tags" id="tags" type="text" class="form-control" placeholder="tags(seperate with ',')">
+        <input name="tags" id="tags" type="text" class="form-control" value="<%=product.tags?product.tags.join(', '):''%>">
       </div>
     </div>
     <div class="d-flex justify-content-end gap-2">

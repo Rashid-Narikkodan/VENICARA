@@ -1,7 +1,7 @@
 //Import passport and google strategy for passport | userSchema Model
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
-const User=require('../models/userSchema')
+const User=require('../models/User')
 
 //create gogleStrategy
 passport.use(new GoogleStrategy({
@@ -12,7 +12,8 @@ passport.use(new GoogleStrategy({
   async (accessToken, refreshToken, profile, done) => {
     try{
     let user=await User.findOne({googleId:profile.id});
-    if(!user){
+    let email=await User.findOne({email:profile.emails[0].value})
+    if(!user&&!email){
       user=await User.create({
         name: profile.displayName,
         email: profile.emails[0].value,

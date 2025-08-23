@@ -1,63 +1,87 @@
 const express=require('express')
 const router=express.Router()
-const adminController=require('../controllers/adminControllers')
+const {
+authController,
+dashboardController,
+ordersController,
+productsController,
+salesReportController,
+customersController,
+coupensController,
+categoriesController,
+returnRefundController,
+bannersController,
+referralsController
+}=require('../controllers/admin/index')
+
 const auth=require('../middlewares/authAdmin')
-const upload = require('../middlewares/upload');
-router.get('/',auth.isLoggedIn,adminController.handleEntry)
+const upload = require('../middlewares/multer');
+router.get('/',auth.isLoggedIn,authController.handleEntry)
 router
   .route('/login')
-  .get(auth.isLoggedIn,adminController.showLogin)
-  .post(adminController.handleLogin)
+  .get(auth.isLoggedIn,authController.showLogin)
+  .post(authController.handleLogin)
 router
   .route('/dashboard')
-  .get(auth.requireLogin,adminController.showDashboard)
+  .get(auth.requireLogin,dashboardController.showDashboard)
 router
   .route('/customers')
-  .get(auth.requireLogin,adminController.showCustomers)
+  .get(auth.requireLogin,customersController.showCustomers)
+router.patch('/customers/status/:id',customersController.blockCustomer)
+router.patch('/customers/:id',customersController.deleteCustomer)
 
 router
   .route('/orders')
-  .get(auth.requireLogin, adminController.showOrders)
+  .get(auth.requireLogin, ordersController.showOrders)
 
 router
   .route('/products')
-  .get(auth.requireLogin, adminController.showProducts)
+  .get(auth.requireLogin, productsController.showProducts)
   
 router.route('/products/add')
-  .get(adminController.showAddProduct)
-  .post(upload.array('images',10),adminController.addProduct)
+  .get(productsController.showAddProduct)
+  .post(upload.array('images',10),productsController.addProduct)
   
-router.patch('/products/:id',adminController.deleteProduct)
+router.patch('/products/:id',productsController.deleteProduct)
 
 router.route('/products/edit/:id')
-  .get(adminController.showEditProduct)
-  .put(upload.array("images", 10),adminController.editProduct)
+  .get(productsController.showEditProduct)
+  .put(upload.array("images", 10),productsController.editProduct)
+
+  router.patch('/products/status/:id',productsController.toggleProductActive)
 router
   .route('/salesReport')
-  .get(auth.requireLogin, adminController.showSalesReport)
+  .get(auth.requireLogin, salesReportController.showSalesReport)
 
 router
   .route('/coupons')
-  .get(auth.requireLogin, adminController.showCoupons)
+  .get(auth.requireLogin, coupensController.showCoupons)
 
-router
-  .route('/categories')
-  .get(auth.requireLogin, adminController.showCategory)
-router.route('/category/add')
-  .get(adminController.addCategory)
+
+router.route('/categories')
+  .get(auth.requireLogin, categoriesController.showCategory)
+router.route('/categories/add')
+  .get(categoriesController.showAddCategory)
+  .post(categoriesController.addCategory)
+router.route('/categories/edit/:id')
+  .get(categoriesController.showEditCategory)
+  .put(categoriesController.editCategory)
+router.patch('/categories/active/:id',categoriesController.activeCategory)
+router.patch('/categories/:id',categoriesController.deleteCategory)
+
 
 router
   .route('/returnRefund')
-  .get(auth.requireLogin, adminController.showReturnRefund)
+  .get(auth.requireLogin, returnRefundController.showReturnRefund)
 
 router
   .route('/banners')
-  .get(auth.requireLogin, adminController.showBanners)
+  .get(auth.requireLogin, bannersController.showBanners)
 
 router
   .route('/referrals')
-  .get(auth.requireLogin, adminController.showReferrals)
+  .get(auth.requireLogin, referralsController.showReferrals)
 
 
-router.get('/logout',adminController.handleLogout)
+router.get('/logout',authController.handleLogout)
 module.exports = router

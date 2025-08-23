@@ -1,0 +1,23 @@
+<%- include('../partials/admin/header.ejs')%>
+  <%- include('../partials/admin/sidebar.ejs')%>
+    <main class="flex-fill">
+     <div class="container my-4 d-flex justify-content-center">
+      <div class="w-75 p-5 rounded-4 border border-3 border-dark">
+  <h1 class="mb-4">Edit category</h1>
+  <form id="addCategoryForm" method="POST" action="/admin/categories/edit/<%=category._id%>?_method=PUT">
+      <div class="col-12">
+        <input name="name" id="editCategoryId" type="text" class="p-3 form-control border border-dark" value="<%=category.name%>">
+      </div>
+      <div class="col-12 mt-4">
+        <textarea rows="10" name="description" class="form-control border border-dark" value="<%=category.description%>"><%=category.description%></textarea>
+      </div>
+      <div class="d-flex justify-content-center mt-5">
+        <button type="submit" class="btn btn-dark pe-5 ps-5">Save</button>
+      </div>
+    </div>
+  </form>
+  </div>
+</div>
+    </main>
+    </div>
+    <%- include('../partials/admin/footer.ejs')%>

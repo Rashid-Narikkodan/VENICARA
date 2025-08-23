@@ -12,14 +12,11 @@ const flashMsg=require('./middlewares/flash')
 const method=require('method-override')
 const passport=require('passport')
 const nocache=require('nocache')
-const multer=require('multer')
 
 //settings
 app.set('view engine','ejs')
 app.set('views',path.join(__dirname,'views'))
 app.locals.title=process.env.TITLE
-const storage=multer.memoryStorage()
-const upload=multer({storage})
 
 //session
 sessionConfig(app)

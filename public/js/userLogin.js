@@ -25,4 +25,8 @@ form.addEventListener("submit", (e) => {
     }
   });
 
-
+if(document.getElementById('authMsgSuccess')!=''){
+  setTimeout(()=>{
+    document.getElementById('authMsgSuccess').remove()
+  },3000)
+}

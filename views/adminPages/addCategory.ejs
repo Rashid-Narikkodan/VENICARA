@@ -1,0 +1,23 @@
+<%- include('../partials/admin/header.ejs')%>
+  <%- include('../partials/admin/sidebar.ejs')%>
+    <main class="flex-fill">
+     <div class="container my-4 d-flex justify-content-center">
+      <div class="w-75 p-5 rounded-4 border border-3 border-dark">
+  <h1 class="mb-4">Add Category</h1>
+  <form id="addCategoryForm" method="post" action="/admin/categories/add">
+      <div class="col-12">
+        <input name="name" id="addCategoryId" type="text" class="p-3 form-control border border-dark" placeholder="Category name">
+      </div>
+      <div class="col-12 mt-4">
+        <textarea rows="10" name="description" class="form-control border border-dark" placeholder="Describe the category..............."></textarea>
+      </div>
+      <div class="d-flex justify-content-center mt-5">
+        <button type="submit" class="btn btn-dark pe-5 ps-5">Save</button>
+      </div>
+    </div>
+  </form>
+  </div>
+</div>
+    </main>
+    </div>
+    <%- include('../partials/admin/footer.ejs')%>

@@ -1,0 +1,13 @@
+module.exports={
+  authController:require('./authController'),
+  dashboardController:require('./dashboardController'),
+  ordersController:require('./ordersController'),
+  productsController:require('./productsController'),
+  salesReportController:require('./salesReportController'),
+  customersController:require('./customersController'),
+  coupensController:require('./coupensController'),
+  categoriesController:require('./categoriesController'),
+  returnRefundController:require('./returnRefundController'),
+  bannersController:require('./bannersController'),
+  referralsController:require('./referralsController'),
+}
