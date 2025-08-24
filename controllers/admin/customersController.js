@@ -5,10 +5,15 @@ const showCustomers=async(req,res)=>{
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 5;
+    const search = req.query.search || "";
+    let filter = { isDeleted: false };
+    if (search) {
+      filter.name = { $regex: search, $options: "i" };
+    }
 
-    const totalUsers = await User.countDocuments();
+    const totalUsers = await User.countDocuments(filter);
 
-    const users = await User.find({isDeleted:false})
+    const users = await User.find(filter)
       .skip((page - 1) * limit)
       .limit(limit)
       .sort({createdAt:-1})
@@ -22,6 +27,7 @@ const showCustomers=async(req,res)=>{
       currentPage: page,
       totalPages,
       limit,
+      search,
       count: '0'
     });
   } catch (err) {

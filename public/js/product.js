@@ -1,7 +1,6 @@
 const addImgDiv=document.getElementById('addImgDiv')
 const imgInput=document.getElementById('imgInput')
 const previewContainer = document.getElementById('previewContainer');
-console.log('helloooo')
 addImgDiv.addEventListener('click',()=>{
   imgInput.click()
 })
@@ -30,7 +29,7 @@ imgInput.addEventListener('change', (e) => {
 
 //form validation
 document.addEventListener('DOMContentLoaded', () => {
-  const form = document.getElementById('addProductForm');
+  const addProduct = document.getElementById('addProductForm');
   const name = document.getElementById('name');
   const description = document.getElementById('description');
   const basePrice = document.getElementById('basePrice');
@@ -40,7 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const volume = document.getElementById('volume');
   const tags = document.getElementById('tags');
   // Form submission validation
-  form.addEventListener('submit', e => {
+  addProduct.addEventListener('submit', e => {
     e.preventDefault(); // stop form submission
     let errors = [];
 
@@ -61,7 +60,25 @@ document.addEventListener('DOMContentLoaded', () => {
     }else{
       document.getElementById('addProductError').classList.add('d-none')
       document.getElementById('addProductError').innerHTML = ''
-      form.submit()
+      addProduct.submit()
     }
   });
 });
+
+function removeImg(image,index,id){
+  alert('are you sure to remove this image?')
+  fetch(`/admin/products/edit/removeImg/${id}?_method=PATCH`,{
+    method:'POST',
+    headers:{
+      'Content-Type':'application/json'
+    },
+    body:JSON.stringify({image,index})
+  }).then((res)=>res.json()).then(data=>{
+    if(data.success){
+      const previewDiv = document.getElementById(`preview-${index}`);
+      if (previewDiv) {
+        previewDiv.remove();
+      }
+    }
+  })
+}

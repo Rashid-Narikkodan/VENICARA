@@ -7,10 +7,16 @@ const showProducts = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 5;
+    const search = req.query.search || "";
+    // Filter object
+    let filter = { isDeleted: false };
+    if (search) {
+      filter.name = { $regex: search, $options: "i" }; // case-insensitive search
+    }
 
-    const totalProducts = await Product.countDocuments({ isDeleted: false });
+    const totalProducts = await Product.countDocuments(filter);
 
-    const products = await Product.find({ isDeleted: false })
+    const products = await Product.find(filter)
       .populate('category', 'name')
       .skip((page - 1) * limit)
       .limit(limit)
@@ -41,6 +47,7 @@ const showProducts = async (req, res) => {
       currentPage: page,
       totalPages,
       limit,
+      search,
       count: '0'
     });
   } catch (err) {
@@ -121,7 +128,6 @@ const showEditProduct = async (req, res) => {
     const product=await Product.findById(req.params.id).populate('category')
     const categories=await Category.find({isDeleted:false,isActive:true})
     const variant=product.variants[0]
-    console.log(product)
     res.render('adminPages/editProduct',{
       page:'products',
       product,
@@ -140,6 +146,9 @@ const editProduct = async (req, res) => {
     const { name, description, categoryId, tags, basePrice, discountPrice, stock, volume } = req.body;
     const update={}
     const variants={}
+    let images=[]
+    if (req.files && req.files.length > 0) images = await processImages(req.files)
+    if(images && images.length>0) update.images=images
     if(name!='') update.name=name
     if(description!='') update.description=description
     if(categoryId!='') update.categoryId=categoryId
@@ -158,6 +167,24 @@ const editProduct = async (req, res) => {
     res.status(500).send(err.message);
   }
 };
+const removeImage=async(req,res)=>{
+  try {  
+    console.log('hello image remove')
+    const {image,index}=req.body
+    const productId=req.params.id
+    const product=await Product.findById(productId)
+    if(!product){
+      req.flash('error','product not found')
+      return res.redirect('/admin/products/edit/'+productId)
+    }
+    product.images.splice(index,1)
+    await product.save()
+    return res.json({success:true})
+  } catch (er) {
+    res.status(500).send(er.message)
+  }
+}
+
 const toggleProductActive=async(req,res)=>{
   try {
     const id=req.params.id
@@ -182,4 +209,5 @@ module.exports={
   showEditProduct,
   editProduct,
   toggleProductActive,
+  removeImage,
 }

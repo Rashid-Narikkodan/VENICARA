@@ -28,7 +28,7 @@ const userSession = session({
     collectionName: 'userSessions'
   }),
   cookie: {
-    maxAge: 1000 * 60 * 60 * 24, // 2 hrs
+    maxAge: 1000 * 60 * 60 * 24,
     httpOnly: true,
     sameSite: 'lax',
     secure: false
@@ -36,13 +36,10 @@ const userSession = session({
 });
 
 function sessionConfig(app) {
-  // Admin session → ONLY for /admin routes
   app.use('/admin', adminSession);
-
-  // User session → apply everywhere EXCEPT /admin
   app.use((req, res, next) => {
     if (req.path.startsWith('/admin')) {
-      return next(); // skip user session
+      return next();
     }
     userSession(req, res, next);
   });

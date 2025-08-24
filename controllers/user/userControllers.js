@@ -1,6 +1,8 @@
-
+const Product=require('../../models/Product')
 const landingPage = async (req, res) => {
   try {
+    const products = await Product
+    .find({ isDeleted: false, isAvailable: true })
     return res.render('userPages/landing')
   } catch (err) {
     console.log(err.message)

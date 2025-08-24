@@ -51,6 +51,9 @@ const handleLogin = async (req, res) => {
     req.session.user = {
       id: user._id,
       isVerified: user.isVerified,
+      isDeleted: user.isDeleted,
+      isBlocked: user.isBlocked,
+      referralCode: user.referralCode,
     }
     return res.redirect('/home')
   } catch (err) {
@@ -60,11 +63,6 @@ const handleLogin = async (req, res) => {
 
 const handleGoogleAuth = async (req, res) => {
   try {
-    const isUserExist = await User.findOne({ email: req.user.email })
-    if (isUserExist) {
-      req.flash('error', 'User already exists, please login using email and password')
-      return res.redirect('/signup')
-    }
     const user = await User.findById(req.user._id)
     if(user.isBlocked){
       req.flash('error', 'This account is blocked')
@@ -84,7 +82,10 @@ const handleGoogleAuth = async (req, res) => {
     }
     req.session.user = {
       id: req.user._id,
-      isVerified: true
+      isVerified: user.isVerified,
+      isDeleted: user.isDeleted,
+      isBlocked: user.isBlocked,
+      referralCode: user.referralCode,
     }
     req.flash('success', 'Logged in successfully with Google')
     return res.redirect('/home')

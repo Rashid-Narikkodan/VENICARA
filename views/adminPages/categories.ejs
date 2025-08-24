@@ -7,8 +7,10 @@
             <h1>Category Managment</h1>
           </div>
           <div class="col-md-6 d-flex justify-content-end gap-2">
-            <input type="text" class="form-control w-50" placeholder="Search...">
+            <form action="/admin/categories" method="GET" class="d-flex gap-2 w-100">
+            <input type="text" name="search" class="form-control w-50" placeholder="Search..." value="<%= search %>">
             <button class="btn btn-dark">Search</button>
+            </form>
             <a href="/admin/categories/add"><button class="btn btn-dark">Add</button></a>
           </div>
         </div>

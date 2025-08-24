@@ -6,7 +6,7 @@ const passport=require('passport')
 
 router.get('/',auth.loggedIn,userController.landingPage)
 
-router.get('/auth/google',passport.authenticate('google',{scope:['profile','email']}))
+router.get('/auth/google',auth.loggedIn,passport.authenticate('google',{scope:['profile','email']}))
 router.get('/auth/google/callback',passport.authenticate('google',{failureRedirect:'/login'}),authController.handleGoogleAuth)
 
 router
@@ -40,7 +40,7 @@ router
 
 router.post('/signup/resend-otp',authController.resendOTP)
 
-router.get('/home',auth.requireLogin,userController.showHome)
+router.get('/home',auth.requireLogin,auth.isUserBlocked,userController.showHome)
 
 router.get('/logout',authController.handleLogout)
 module.exports = router

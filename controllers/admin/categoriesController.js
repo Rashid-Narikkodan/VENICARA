@@ -6,10 +6,15 @@ const showCategory = async (req, res) => {
   try {
         const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 5;
+    const search = req.query.search || "";
+    let filter = { isDeleted: false };
+    if (search) {
+      filter.name = { $regex: search, $options: "i" };
+    }
 
-    const totalCategories = await Category.countDocuments({isDeleted:false});
+    const totalCategories = await Category.countDocuments(filter);
 
-    const categories = await Category.find({isDeleted:false})
+    const categories = await Category.find(filter)
       .skip((page - 1) * limit)
       .limit(limit)
       .sort({createdAt:-1})
@@ -23,6 +28,7 @@ const showCategory = async (req, res) => {
       currentPage: page,
       totalPages,
       limit,
+      search,
       count: '0'
     });
 

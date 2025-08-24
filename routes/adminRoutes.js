@@ -14,6 +14,7 @@ bannersController,
 referralsController
 }=require('../controllers/admin/index')
 
+
 const auth=require('../middlewares/authAdmin')
 const upload = require('../middlewares/multer');
 router.get('/',auth.isLoggedIn,authController.handleEntry)
@@ -37,17 +38,17 @@ router
 router
   .route('/products')
   .get(auth.requireLogin, productsController.showProducts)
-  
+
 router.route('/products/add')
-  .get(productsController.showAddProduct)
+  .get(auth.requireLogin,productsController.showAddProduct)
   .post(upload.array('images',10),productsController.addProduct)
   
 router.patch('/products/:id',productsController.deleteProduct)
 
 router.route('/products/edit/:id')
-  .get(productsController.showEditProduct)
+  .get(auth.requireLogin,productsController.showEditProduct)
   .put(upload.array("images", 10),productsController.editProduct)
-
+  router.patch('/products/edit/removeImg/:id',productsController.removeImage)
   router.patch('/products/status/:id',productsController.toggleProductActive)
 router
   .route('/salesReport')
@@ -57,14 +58,13 @@ router
   .route('/coupons')
   .get(auth.requireLogin, coupensController.showCoupons)
 
-
 router.route('/categories')
   .get(auth.requireLogin, categoriesController.showCategory)
 router.route('/categories/add')
-  .get(categoriesController.showAddCategory)
+  .get(auth.requireLogin,categoriesController.showAddCategory)
   .post(categoriesController.addCategory)
 router.route('/categories/edit/:id')
-  .get(categoriesController.showEditCategory)
+  .get(auth.requireLogin,categoriesController.showEditCategory)
   .put(categoriesController.editCategory)
 router.patch('/categories/active/:id',categoriesController.activeCategory)
 router.patch('/categories/:id',categoriesController.deleteCategory)
