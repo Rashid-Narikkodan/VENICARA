@@ -26,37 +26,48 @@
     <div id="previewContainer" class="d-flex justify-content-center gap-2 mt-3 flex-wrap"></div>
   </div>
 </div>
-
-    <div class="row mb-3 g-3">
-      <div class="col-md-4">
-        <label class="form-label">Base Price (₹)</label>
-        <input name="basePrice" id="basePrice" type="number" class="form-control" placeholder="300">
-      </div>
-      <div class="col-md-4">
-        <label class="form-label">Discount Price (₹)</label>
-        <input name="discountPrice" id="discountPrice" type="number" class="form-control" placeholder="Enter discount price">
-      </div>
-      <div class="col-md-4">
-        <label class="form-label">Stock</label>
-        <input name="stock" id="stock" type="number" class="form-control" placeholder="Enter stock limit">
-      </div>
-    </div>
     <div class="row mb-4 g-3">
       <div class="col-md-4">
+          <label class="form-label">Category</label>
         <select name="categoryId" id="category" class="form-select">
           <option selected disabled>Select Category</option>
           <% categories.forEach(category => { %>
-      <option value="<%= category._id %>" ><%= category.name %></option>
-          <% }) %>
-        </select>
+            <option value="<%= category._id %>" ><%= category.name %></option>
+            <% }) %>
+          </select>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Tags</label>
+          <input name="tags" id="tags" type="text" class="form-control" placeholder="tags(seperate with ',')">
+        </div>
+        <!-- variants -->
+        <p class="mb-0 fw-bold fs-5">Edit Variant</p>
+     <div id="variantContainer">
+
+        <div class="variantSection">
+        <div  class="row mb-3 m-0 g-3" >
+      <div class="col-md-3">
+        <label class="form-label">Base Price (₹)</label>
+        <input name="basePrice" type="number" class="form-control" placeholder="eg :- 5000">
       </div>
-      <div class="col-md-4">
-        <input name="volume" id="volume" type="text" class="form-control" placeholder="Volume (e.g., 50,100)">
+      <div class="col-md-3">
+        <label class="form-label">Discount Price (₹)</label>
+        <input name="discountPrice" type="number" class="form-control" placeholder="eg :- 4500">
       </div>
-      <div class="col-md-4">
-        <input name="tags" id="tags" type="text" class="form-control" placeholder="tags(seperate with ',')">
+      <div class="col-md-3">
+        <label class="form-label">Stock</label>
+        <input name="stock" type="number" class="form-control" placeholder="eg :- 20">
       </div>
+      <div class="col-md-2">
+        <label class="form-label">Volume (ml)</label>
+        <input name="volume" type="text" class="form-control" placeholder="eg :- 100">
+      </div>
+        <div class="col-md-1 d-flex align-items-end">
+          <button type="button" class="btn btn-danger delete-variant-btn">Delete</button>
+        </div>
+
     </div>
+    <button type="button" class="btn btn-primary" onclick="addVariant(document.querySelector('#addProductForm #variantContainer'))">Add Variant</button>
     <div class="d-flex justify-content-end gap-2">
       <a href="/admin/products"><button type="button" class="btn btn-outline-secondary">Cancel</button></a>
       <button type="submit" class="btn btn-primary">Save</button>

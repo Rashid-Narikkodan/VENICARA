@@ -13,7 +13,6 @@ const showProducts = async (req, res) => {
     if (search) {
       filter.name = { $regex: search, $options: "i" }; // case-insensitive search
     }
-
     const totalProducts = await Product.countDocuments(filter);
 
     const products = await Product.find(filter)
@@ -91,21 +90,29 @@ const showAddProduct = async (req, res) => {
 const addProduct = async (req, res) => {
   try {
     const { name, description, categoryId, tags, basePrice, discountPrice, stock, volume } = req.body;
-    const images=await processImages(req.files)
-    const variants = [{
-      volume: volume,
-      basePrice: Number(basePrice),
-      discount: Number(discountPrice || 0),
-      stock: Number(stock || 0)
-    }];
 
-    const tagsArray = tags ? tags.split(',').map(tag => tag.trim()) : [];
+    const images = await processImages(req.files);
 
+    // Handle variants
+    const variants = Array.isArray(volume)
+      ? volume.map((vol, i) => ({
+          volume: vol,
+          basePrice: Number(basePrice[i]),
+          discount: Number(discountPrice?.[i] || 0),
+          stock: Number(stock?.[i] || 0),
+        }))
+      : [{
+          volume,
+          basePrice: Number(basePrice),
+          discount: Number(discountPrice || 0),
+          stock: Number(stock || 0),
+        }];
+    const tagsArray = tags?.split(',').map(tag => tag.trim()) || [];
     const product = new Product({
       name,
       description,
       category: categoryId,
-      images: images,
+      images,
       tags: tagsArray,
       variants,
       isAvailable: true,
@@ -113,12 +120,13 @@ const addProduct = async (req, res) => {
     });
 
     await product.save();
+
     req.flash('success', 'Product added successfully');
     res.redirect('/admin/products');
 
   } catch (err) {
-    console.error(err);
-    res.status(500).send(err.message);
+    console.error('Error adding product:', err);
+    res.status(500).send('Internal Server Error');
   }
 };
 
@@ -127,12 +135,12 @@ const showEditProduct = async (req, res) => {
   try {
     const product=await Product.findById(req.params.id).populate('category')
     const categories=await Category.find({isDeleted:false,isActive:true})
-    const variant=product.variants[0]
+    const variants=product.variants
     res.render('adminPages/editProduct',{
       page:'products',
       product,
       categories,
-      variant
+      variants
     })
   } catch (err) {
     console.error(err);
@@ -143,30 +151,60 @@ const showEditProduct = async (req, res) => {
 const editProduct = async (req, res) => {
   try {
     const productId = req.params.id;
+    const product = await Product.findById(productId);
+    if (!product) {
+      req.flash('error', 'Product not found.');
+      return res.redirect('/admin/products');
+    }
+
     const { name, description, categoryId, tags, basePrice, discountPrice, stock, volume } = req.body;
-    const update={}
-    const variants={}
-    let images=[]
-    if (req.files && req.files.length > 0) images = await processImages(req.files)
-    if(images && images.length>0) update.images=images
-    if(name!='') update.name=name
-    if(description!='') update.description=description
-    if(categoryId!='') update.categoryId=categoryId
-    if(tags!='') update.tags=tags.split(',').map((v)=>v.trim())
-    if(basePrice!='') variants.basePrice=Number(basePrice) 
-    if(discountPrice!='') variants.discount=Number(discountPrice) 
-    if(stock!='') variants.stock=Number(stock) 
-    if(volume!='') variants.volume=volume 
-    update.variants=[]
-    update.variants.push(variants)
+    const update = {};
+    let variants = [];
+    let images = [];
+
+    const volumes = Array.isArray(volume) ? volume : [volume];
+    const basePrices = Array.isArray(basePrice) ? basePrice : [basePrice];
+    const discountPrices = Array.isArray(discountPrice) ? discountPrice : [discountPrice];
+    const stocks = Array.isArray(stock) ? stock : [stock];
+
+    // Build variants
+    for (let i = 0; i < volumes.length; i++) {
+      if (!volumes[i] && !basePrices[i] && !discountPrices[i] && !stocks[i]) continue;
+      variants.push({
+        volume: volumes[i] || product.variants[i]?.volume || '',
+        basePrice: Number(basePrices[i] || product.variants[i]?.basePrice || 0),
+        discount: Number(discountPrices[i] || product.variants[i]?.discount || 0),
+        stock: Number(stocks[i] || product.variants[i]?.stock || 0),
+      });
+    }
+
+    // Check for duplicate volumes
+    const isDuplicateVariant = new Set(variants.map(v => v.volume)).size !== variants.length;
+    if (isDuplicateVariant) {
+      req.flash('error', 'Duplicate variant volumes are not allowed.');
+      return res.redirect(`/admin/products/edit/${productId}`);
+    }
+
+    // Process images if uploaded
+    if (req.files?.length) images = await processImages(req.files);
+    if (images.length) update.images = product.images.concat(images);
+
+    // Add other updates if provided
+    if (name) update.name = name;
+    if (description) update.description = description;
+    if (categoryId) update.categoryId = categoryId;
+    if (tags) update.tags = tags.split(',').map(v => v.trim());
+    update.variants = variants;
+
     await Product.findByIdAndUpdate(productId, update, { new: true });
-    req.flash("success", "Product updated successfully");
-    res.redirect("/admin/products");
+    req.flash('success', 'Product updated successfully');
+    res.redirect('/admin/products');
   } catch (err) {
-    console.error("Error in editProduct:", err);
+    console.error('Error in editProduct:', err);
     res.status(500).send(err.message);
   }
 };
+
 const removeImage=async(req,res)=>{
   try {  
     console.log('hello image remove')

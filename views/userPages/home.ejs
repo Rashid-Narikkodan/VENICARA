@@ -1,4 +1,250 @@
 <%-include("../partials/user/header.ejs")%>
-<main>
+<style>
+ .hero-section {
+  margin-top: 40px;
+ }
+
+ .hero-img {
+  width: 100%;
+  height: 450px;
+  object-fit: cover;
+  border-radius: 10px;
+ }
+
+ .hero-text h1 {
+  font-size: 3rem;
+  font-weight: bold;
+ }
+
+ .hero-text h1 span {
+  color: red;
+ }
+
+ .hero-text p {
+  letter-spacing: 2px;
+  font-weight: 500;
+ }
+
+ .btn-shop {
+  background-color: red;
+  color: white;
+  border-radius: 5px;
+  padding: 10px 20px;
+  font-weight: 600;
+  transition: 0.3s;
+ }
+ .btn-shop:hover {
+  background-color: darkred;
+ }
+ .collection-card img,
+ .product-card img {
+  width: 100%;
+  object-fit: cover;
+  border-radius: 10px;
+  transition: transform 0.3s ease-in-out;
+ }
+ .collection-card img:hover,
+ .product-card img:hover {
+  transform: scale(1.05);
+ }
+
+ .collection-title,
+ .product-name {
+  margin-top: 15px;
+  font-weight: 600;
+  text-transform: uppercase;
+ }
+
+ /* Specific for product images */
+ .product-card img {
+  height: 300px;
+ }
+ .product-price {
+  font-weight: 500;
+  color: #333;
+ }
+ .section-title {
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+ }
+ .underline {
+  width: 60px;
+  height: 2px;
+  background: black;
+  margin: 10px auto;
+ }
+</style>
+<main class="flex-grow-1 bg-light">
+ <div class="container">
+  <div class="row text-center">
+   <div class="col-md-12 mb-5 pt-3 pb-5">
+    <div class="container hero-section">
+     <div class="row align-items-center">
+      <!-- Left Image -->
+      <div class="col-md-4 mb-4 mb-md-0">
+       <img src="/images/hero-1.avif" alt="Left Banner" class="hero-img" />
+      </div>
+
+      <!-- Center Text -->
+      <div
+       class="col-md-4 text-center hero-text d-flex flex-column justify-content-center align-items-center"
+      >
+       <h1
+        class="display-5 fw-bold mb-3"
+        style="font-family: 'Playfair Display', serif; color: #4d3903"
+       >
+        The Essence of Elegance
+       </h1>
+       <p class="lead mb-4" style="color: #2e2201; max-width: 320px">
+        Discover fragrances that whisper luxury and linger with unforgettable
+        charm. A scent crafted not just to wear, but to define your presence.
+       </p>
+       <a
+        href="/shop"
+        style="background-color: rgb(237, 185, 51)"
+        class="btn btn-lg rounded-pill px-4 shadow"
+       >
+        Shop Now
+       </a>
+      </div>
+      <!-- Right Image -->
+      <div class="col-md-4 mt-4 mt-md-0">
+       <img src="/images/hero-2.avif" alt="Right Banner" class="hero-img" />
+      </div>
+     </div>
+    </div>
+   </div>
+   <div class="col-md-12 mt-5">
+  <div class="banner-section position-relative rounded-4 overflow-hidden d-flex align-items-center justify-content-center"
+       style="background: linear-gradient(135deg, #1a1a1a, #3d2c1a); height: 400px;">
+
+    <!-- Decorative overlay for golden shimmer -->
+    <div class="overlay position-absolute w-100 h-100" style="background: rgba(0,0,0,0.4); mix-blend-mode: overlay;"></div>
+
+    <!-- Banner Content -->
+    <div class="banner-content position-relative text-center text-white px-3 d-flex flex-column flex-md-row align-items-center justify-content-center gap-4">
+      
+      <!-- Perfume Image -->
+      <div class="perfume-img flex-shrink-0">
+        <img src="https://via.placeholder.com/250x350" alt="Perfume Bottle" 
+             class="img-fluid rounded-3 shadow-lg" style="max-height: 350px;">
+      </div>
+
+      <!-- Text & CTA -->
+      <div class="text-content text-md-start">
+        <h1 class="display-4 fw-bold text-gold" style="color: #FFD700;">Golden Touch Perfume</h1>
+        <p class="lead text-light mb-3">Experience luxury and elegance in every drop. The scent that defines sophistication.</p>
+        <a href="/shop" class="btn btn-warning btn-lg shadow-sm">Shop Now</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+   <div class="col-md-12 mt-5">
+    <h6 class="text-uppercase">Explore</h6>
+    <h2 class="fw-bold">Our Fragrance Collections</h2>
+
+    <div class="row mt-4 g-4">
+     <!-- Men -->
+     <div class="col-md-4 col-sm-6">
+      <a href="" class="text-decoration-none text-black"
+       ><div class="collection-card overflow-hidden rounded-5">
+        <img
+         src="/images/category-MEN.avif"
+         alt="Men"
+         class="img-fluid rounded-5"
+        />
+        <div class="collection-title">
+         <h3 class="mt-4">Men</h3>
+        </div>
+       </div></a
+      >
+     </div>
+
+     <!-- Women -->
+     <div class="col-md-4 col-sm-6">
+      <a href="" class="text-decoration-none text-black"
+       ><div class="collection-card overflow-hidden rounded-5">
+        <img
+         src="/images/category-women.avif"
+         alt="Women"
+         class="img-fluid rounded-5"
+        />
+        <div class="collection-title">
+         <h3 class="mt-4">Women</h3>
+        </div>
+       </div></a
+      >
+     </div>
+
+     <!-- Unisex -->
+     <div class="col-md-4 col-sm-6">
+      <a href="/youtube.com" class="text-decoration-none text-black"
+       ><div class="collection-card overflow-hidden rounded-5">
+        <img
+         src="/images/category-unisex.avif"
+         alt="Unisex"
+         class="img-fluid rounded-5"
+        />
+        <div class="collection-title">
+         <h3 class="mt-4">Unisex</h3>
+        </div>
+       </div>
+      </a>
+     </div>
+    </div>
+   </div>
+   <div class="col-md-12 mt-5">
+    <div class="container text-center mt-5">
+     <h6 class="text-uppercase">Explore</h6>
+     <h2 class="section-title">Featured Products</h2>
+     <div class="underline"></div>
+
+     <div class="row mt-4 g-4">
+      <!-- Product 1 -->
+      <div class="col-md-4 col-sm-6">
+       <div class="product-card">
+        <img
+         src="/images/featuredProduct.avif"
+         alt="Tom Ford"
+         class="img-fluid rounded-5"
+        />
+        <div class="product-name mt-4 fs-4">Tom Ford Ombre Leather</div>
+        <div class="product-price">Rs.4999.00</div>
+       </div>
+      </div>
+
+      <!-- Product 2 -->
+      <div class="col-md-4 col-sm-6">
+       <div class="product-card">
+        <img
+         src="/images/featuredProduct-2.avif"
+         alt="Givenchy"
+         class="img-fluid rounded-5"
+        />
+        <div class="product-name mt-4 fs-4">Givenchy Gentlemen</div>
+        <div class="product-price">Rs.5999.00</div>
+       </div>
+      </div>
+
+      <!-- Product 3 -->
+      <div class="col-md-4 col-sm-6">
+       <div class="product-card">
+        <img
+         src="/images/featuredProduct-3.avif"
+         alt="Dolce & Gabbana"
+         class="img-fluid rounded-5"
+        />
+        <div class="product-name mt-4 fs-4">Dolce & Gabbana</div>
+        <div class="product-price">Rs.6999.00</div>
+       </div>
+      </div>
+     </div>
+    </div>
+   </div>
+  </div>
+ </div>
 </main>
 <%- include('../partials/user/footer.ejs')%>

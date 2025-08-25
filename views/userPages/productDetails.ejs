@@ -1,0 +1,83 @@
+<%- include("../partials/user/header.ejs") %>
+
+<main class="container py-5">
+
+  <!-- Breadcrumb -->
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb bg-white px-0">
+      <li class="breadcrumb-item"><a href="/">Home</a></li>
+      <li class="breadcrumb-item"><a href="/shop?category=<%=product.category._id%>"><%=product.category.name%></a></li>
+      <li class="breadcrumb-item active" aria-current="page"><%=product.name%></li>
+    </ol>
+  </nav>
+
+  <div class="row">
+    <!-- LEFT: Product Images -->
+    <div class="col-md-6">
+      <div class="mb-3 text-center">
+        <img id="mainImage" src="<%=product.images[0]%>" alt="<%=product.name%>" class="img-fluid rounded" />
+      </div>
+      <div class="row g-2">
+        <% product.images.forEach((img, idx) => { if(idx > 0){ %>
+          <div class="col-4">
+            <img src="<%=img%>" class="img-fluid rounded thumb" />
+          </div>
+        <% } }) %>
+      </div>
+    </div>
+
+    <!-- RIGHT: Product Details -->
+    <div class="col-md-6">
+      <h2 class="fw-bold"><%=product.name%></h2>
+      <p class="mb-1">★ <%=product.rating || 4.5%> (Reviews)</p>
+      <p class="text-success mb-2"><%= product.stock > 0 ? 'In Stock' : 'Out of Stock' %></p>
+      <h4 class="mb-3">₹<%=product.price%></h4>
+
+      <!-- Variant Buttons -->
+      <div class="mb-3">
+        <% product.variants.forEach(v => { %>
+          <button class="btn btn-outline-dark btn-sm me-2 mb-2"><%=v.volume%>ML</button>
+        <% }) %>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="mb-4">
+        <button class="btn btn-dark me-2">Add to Wishlist</button>
+        <button class="btn btn-primary">Add to Cart</button>
+      </div>
+
+      <!-- Description & Highlights -->
+      <h5 class="fw-bold">DESCRIPTION & HIGHLIGHTS</h5>
+      <p><%=product.description%></p>
+      <% if(product.tags && product.tags.length){ %>
+      <ul>
+        <% product.tags.forEach(tag => { %>
+          <li><%=tag%></li>
+        <% }) %>
+      </ul>
+      <% } %>
+    </div>
+  </div>
+
+  <!-- RELATED PRODUCTS -->
+  <% if(relatedProducts && relatedProducts.length){ %>
+  <h4 class="fw-bold mt-5">YOU MAY ALSO LIKE</h4>
+  <div class="row g-3 mt-3">
+    <% relatedProducts.forEach(r => { %>
+      <div class="col-6 col-md-3">
+        <div class="card h-100 border-0 shadow-sm">
+          <a href="/product/<%=r._id%>">
+            <img src="<%=r.images[0]%>" class="card-img-top rounded" alt="<%=r.name%>">
+            <div class="card-body p-2 text-center">
+              <p class="mb-1 small"><%=r.name%></p>
+              <p class="mb-0 fw-semibold">₹<%=r.price%></p>
+            </div>
+          </a>
+        </div>
+      </div>
+    <% }) %>
+  </div>
+  <% } %>
+
+</main>
+<%- include("../partials/user/footer.ejs") %>

@@ -42,5 +42,8 @@ router.post('/signup/resend-otp',authController.resendOTP)
 
 router.get('/home',auth.requireLogin,auth.isUserBlocked,userController.showHome)
 
+router.get('/shop',userController.showShop)
+router.get('/search',userController.searchProducts)
+router.get('/products/:id',userController.showProductDetails)
 router.get('/logout',authController.handleLogout)
 module.exports = router

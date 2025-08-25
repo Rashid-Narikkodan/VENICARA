@@ -4,26 +4,18 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>VENICARA</title>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <link
    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css"
    rel="stylesheet"
    integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr"
    crossorigin="anonymous"
   />
-  <script
-   src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"
-   integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q"
-   crossorigin="anonymous"
-  ></script>
-  <script
-   src="https://kit.fontawesome.com/f45c5ea548.js"
-   crossorigin="anonymous"
-  ></script>
+
   <link rel="stylesheet" href="/css/userAuth.css" />
   <link rel="stylesheet" href="/css/userHeader.css" />
-  <script src="/js/userHeader.js"></script>
  </head>
- <body>
+ <body class="d-flex flex-column w-100">
   <header class="p-md-4 pt-4 pb-4 w-100 shadow sticky-top position-relative">
    <div class="container-fluid">
     <div class="row">
@@ -31,45 +23,100 @@
       <img class="logo img-fluid" src="/images/logo.avif" alt="" />
      </div>
      <div class="col-4 d-flex justify-content-center align-items-center">
-      <a href="/home" class="text-decoration-none text-black"><p class="d-inline mb-0 fw-semibold fs-md-4">HOME</p></a>
-      <a href="/shop" class="text-decoration-none text-black"><p class="d-inline ms-md-4 ms-2 mb-0 fw-semibold fs-md-4">SHOP</p></a>
+      <a href="/home" class="text-decoration-none text-black"
+       ><p class="d-inline mb-0 fw-semibold fs-md-4">HOME</p></a
+      >
+      <a href="/shop" class="text-decoration-none text-black"
+       ><p class="d-inline ms-md-4 ms-2 mb-0 fw-semibold fs-md-4">SHOP</p></a
+      >
      </div>
      <div class="col-4 d-flex justify-content-end align-items-center">
       <form
-       action="/search"
-       method="post"
        class="searchForm position-relative d-md-inline-block d-none"
        id="search-form"
       >
        <input
         type="text"
         name="search"
+        style="border-color: rgb(113, 89, 3) !important"
         class="form-control rounded-5 pe-5"
         placeholder="Search..."
        />
        <button
         type="submit"
-        class="btn border-0 btn-secondary rounded-5 position-absolute top-50 end-0 translate-middle-y"
+        style="
+         background: rgb(213, 190, 12);
+         border: none;
+         padding: 0.6rem 0.8rem;
+         right: 0.2rem;
+        "
+        class="btn border-0 btn-secondary rounded-5 position-absolute top-50 translate-middle-y"
        >
         <i class="fs-5 text-black fa-solid fa-magnifying-glass"></i>
        </button>
+       <div id="searchResults" class="position-absolute rounded-4" style="top:5rem;right:-4rem;left:-4rem">
+        
+       </div>
       </form>
-      <a href="/whishlist"><i class="fs-4 text-black fa-regular fa-heart ms-3"></i></a>
-      <a href="/orders"><i class="fs-4 text-black fa-solid fa-box-open ms-3"></i></a>
+      <a href="/whishlist"
+       ><i class="fs-4 text-black fa-regular fa-heart ms-3"></i
+      ></a>
+      <a href="/orders"
+       ><i class="fs-4 text-black fa-solid fa-box-open ms-3"></i
+      ></a>
       <a href="/profile"
        ><i class="fs-4 text-black fa-regular fa-circle-user ms-3"></i
       ></a>
      </div>
     </div>
     <div id="successBox" class="successBox w-100 d-flex justify-content-center">
-    <%if(messages.success.length>0){%>
-    <div class="alert alert-success text-center w-md-25 w-75"><%=messages.success[0]%></div>
-    <%}%>
-  </div>
+     <%if(messages.success.length>0){%>
+     <div class="alert alert-success text-center w-md-25 w-75">
+      <%=messages.success[0]%>
+     </div>
+     <%}%>
+    </div>
     <div id="errorBox" class="errorBox w-100 d-flex justify-content-center">
-    <%if(messages.error.length>0){%>
-    <div class="alert alert-danger text-center w-md-25 w-75"><%=messages.error[0]%></div>
-    <%}%>
-  </div>
+     <%if(messages.error.length>0){%>
+     <div class="alert alert-danger text-center w-md-25 w-75">
+      <%=messages.error[0]%>
+     </div>
+     <%}%>
+    </div>
    </div>
   </header>
+  <script>
+   const searchForm = document.getElementById("search-form");
+   searchForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+      const query = searchForm.search.value.trim();
+  if (!query) return; // don’t call API on empty input
+
+  console.log("submitted:", query);
+
+    console.log("submitted");
+    fetch(`/search?search=${encodeURIComponent(query)}`, {
+     method: "GET",
+    })
+     .then((res) => res.json())
+     .then((data) => {
+      console.log(data);
+      const searchResults = document.getElementById("searchResults");
+      searchResults.innerHTML = "";
+      data.products.forEach((product) => {
+        console.log(product.name);
+       const a = document.createElement("a");
+       a.href = `/products/${product._id}`;
+        a.classList.add("text-decoration-none", "text-white", 'd-block', 'mb-2', 'bg-secondary','rounded-4');
+       a.innerHTML = `
+       <div class="searchResults row p-2 text-white rounded-4">
+          <span class="col-md-3"><img src="${product.images[0]}" alt="" class="img-fluid rounded-4"></span>
+          <span class="col-md-9 d-flex align-items-center">${product.name}</span>
+        </div>
+        `;
+       searchResults.appendChild(a);
+      });
+     })
+     .catch((err) => console.log(err));
+   });
+  </script>

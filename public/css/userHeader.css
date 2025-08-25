@@ -38,3 +38,8 @@ header > .row > div >a> button{
   opacity:0;
   transform: translateY(-2rem);
 }
+header{
+  position: sticky !important;
+top: 0;
+z-index: 1020;
+}

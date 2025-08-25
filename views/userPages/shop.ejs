@@ -1,0 +1,161 @@
+<%-include("../partials/user/header.ejs")%>
+  <style>
+    .form-check-input {
+      padding: .7rem .7rem;
+    }
+
+    .form-check-input:checked {
+      border-color: black !important;
+      background-color: black !important;
+      outline: none;
+      box-shadow: none;
+    }
+
+    input.no-arrows::-webkit-outer-spin-button,
+    input.no-arrows::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+  </style>
+  <main class="flex-grow-1 bg-light w-100">
+    <div class="ps-3 mt-5">
+      <div class="row">
+
+        <!-- filtering sidebar -->
+        <div class="col-md-2 col-12 border-end px-5 py-3" style="min-height:100vh;">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h6 class="mb-0 fw-bold">Filters & Sort</h6>
+            <a id="clearAll" href="/shop" class="text-decoration-none small text-black">Clear All</a>
+          </div>
+          <hr>
+          <form action="/shop">
+            <!-- Categories -->
+            <div class="mb-3">
+              <div class="mb-3">
+                <button type="button" class="btn w-100 d-flex justify-content-between align-items-center p-2 border-0 bg-transparent"
+                  data-bs-toggle="collapse" data-bs-target="#categoryCollapse" aria-expanded="true">
+                  <span class="fw-bold">Categories</span>
+                  <i class="fa-solid fa-caret-down"></i>
+                </button>
+                <div class="collapse" id="categoryCollapse">
+                  <div class="pt-2">
+                    <div class="form-check mb-2">
+                      <input class="form-check-input" type="radio" name="category" id="allProduct" value="all" checked>
+                      <label class="form-check-label small fw-semibold ms-2" for="allProduct">All products</label>
+                    </div>
+
+                    <% categories.forEach(category=> { %>
+
+                      <div class="form-check mb-2">
+                        <input class="form-check-input" value="<%=category._id%>" type="radio" name="category"
+                          id="cat-<%=category.name%>" <%=selectedCategory&&selectedCategory.toString()===category._id.toString()?'checked':''%>>
+                        <label class="form-check-label small fw-semibold ms-2" for="cat-<%=category.name%>">
+                          <%=category.name%>
+                        </label>
+                      </div>
+                      <% }) %>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <hr>
+            <!-- Price -->
+            <div class="mb-3">
+              <div class="mb-3">
+                <button type="button" class="btn w-100 d-flex justify-content-between align-items-center p-2 border-0 bg-transparent"
+                  data-bs-toggle="collapse" data-bs-target="#priceCollapse" aria-expanded="true">
+                  <span class="fw-bold">Price</span>
+                  <i class="fa-solid fa-caret-down"></i>
+                </button>
+                <div class="collapse row justify-content-between" id="priceCollapse">
+                  <div class="mb-3 col-5 p-0">
+                    <label for="minPrice" class="form-label">Min Price</label>
+                    <input type="number" class="form-control no-arrows p-1" value="<%=minPrice%>" name="minPrice" id="minPrice" placeholder="0">
+                  </div>
+                  <div class="mb-3 col-5 p-0">
+                    <label for="maxPrice" class="form-label">Max Price</label>
+                    <input type="number" class="form-control no-arrows p-1" name="maxPrice" value="<%=maxPrice%>" id="maxPrice" placeholder="10000">
+                  </div>
+                </div>
+              </div>
+            </div>
+            <hr>
+            <!-- Sort By -->
+            <div class="mb-3">
+              <div class="mb-3">
+                <button type="button" class="btn w-100 d-flex justify-content-between align-items-center p-2 border-0 bg-transparent"
+                  data-bs-toggle="collapse" data-bs-target="#sortCollapse" aria-expanded="true">
+                  <span class="fw-bold">Sort by</span>
+                  <i class="fa-solid fa-caret-down"></i>
+                </button>
+                <div class="collapse " id="sortCollapse">
+                  <div class="pt-2">
+                    <div class="form-check mb-2">
+                      <input class="form-check-input" type="radio" name="sort" value="newest" id="sortNewest" checked>
+                      <label class="form-check-label small fw-semibold ms-2" for="sortNewest">Newest</label>
+                    </div>
+                    <div class="form-check mb-2">
+                      <input class="form-check-input" type="radio" name="sort" value="asc" id="sortPriceAsc">
+                      <label class="form-check-label small fw-semibold ms-2" for="sortPriceAsc">Price: Low To
+                        High</label>
+                    </div>
+                    <div class="form-check mb-2">
+                      <input class="form-check-input" type="radio" name="sort" value="desc" id="sortPriceDesc">
+                      <label class="form-check-label small fw-semibold ms-2" for="sortPriceDesc">Price: High To
+                        Low</label>
+                    </div>
+                    <div class="form-check mb-2">
+                      <input class="form-check-input" type="radio" name="sort" value="az" id="sortAZ">
+                      <label class="form-check-label small fw-semibold ms-2" for="sortAZ">Alphabetic: A-Z</label>
+                    </div>
+                    <div class="form-check mb-2">
+                      <input class="form-check-input" type="radio" name="sort" value="za" id="sortZA">
+                      <label class="form-check-label small fw-semibold ms-2" for="sortZA">Alphabetic: Z-A</label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div>
+              <button type="submit" class="btn btn-dark w-100">Apply Filters</button>
+            </div>
+          </form>
+        </div>
+        <!-- sidebar end -->
+        <div class="col-md-10">
+          <div class="text-center p-4">
+            <h4 style="font-family:Robot 'Courier New', Courier, monospace;">All Products</h4>
+            <p class="text-muted fs-5 mt-4">Fresh Arrivals. One Scent. Every Identity. Discover What’s New.</p>
+          </div>
+          <div class="container">
+            <div class="row gap-4 justify-content-center">
+              <!-- open -->
+              <% products.forEach(product=> { %>
+                <a href="/products/<%=product._id%>" class="card text-decoration-none shadow-sm p-3 rounded-4 border-0"
+                  style="max-width: 18rem;background:linear-gradient(to right, #fff5d1, #fde3a7);">
+                  <img src="<%=product.images[0]%>" class="card-img-top rounded-4" alt="Product Image">
+                  <div class="card-body p-0 pt-3">
+                    <h6 class="card-title mb-1">
+                      <%=product.name%>
+                    </h6>
+                    <p class="text-muted mb-2" style="font-size:0.85rem;">Category: <%=product.category.name%></p>
+                    <p class="mb-0 justify-content-between d-flex align-items-center">
+                      <span>
+                        <span class="text-success fw-bold">₹<%=product.variants[0].discount%></span> <!-- 80% off -->
+                        <span class="text-muted text-decoration-line-through">₹<%=product.variants[0].basePrice%></span>
+                      </span>
+                      <!-- change to dynamic - rating average -->
+                      <span class="mb-2 text-end" style="font-size:0.85rem;">
+                        <span class="text-warning">★★★★☆</span>
+                        <span class="text-muted">(200)</span>
+                      </span>
+                    </p>
+                  </div>
+                </a>
+                <% }) %>
+                  <!-- close -->
+            </div>
+          </div>
+        </div>
+  </main>
+  <%- include('../partials/user/footer.ejs')%>

@@ -4,7 +4,7 @@
      <div class="container my-4 d-flex justify-content-center">
       <div class="w-75 p-5 rounded-4" style="background:rgb(166, 166, 166)">
   <h1 class="mb-4">Edit Product</h1>
-        <div class="alert alert-danger d-none" id="editProductError"></div>
+        <div class="alert alert-danger d-none" id="editProductError">rgre</div>
   <form id="editProductForm" method="POST" action="/admin/products/edit/<%=product._id%>?_method=PUT" enctype="multipart/form-data">
     <div class="mb-3">
       <label class="form-label">Product Name</label>
@@ -34,37 +34,53 @@
     </div>
   </div>
 </div>
-
-    <div class="row mb-3 g-3">
-      <div class="col-md-4">
-        <label class="form-label">Base Price (₹)</label>
-        <input name="basePrice" id="basePrice" type="number" class="form-control" value="<%=variant.basePrice%>">
-      </div>
-      <div class="col-md-4">
-        <label class="form-label">Discount Price (₹)</label>
-        <input name="discountPrice" id="discountPrice" type="number" class="form-control" value="<%=variant.discount%>">
-      </div>
-      <div class="col-md-4">
-        <label class="form-label">Stock</label>
-        <input name="stock" id="stock" type="number" class="form-control" value="<%=variant.stock?variant.stock:''%>">
-      </div>
-    </div>
     <div class="row mb-4 g-3">
       <div class="col-md-4">
+        <label class="form-label">Category</label>
         <select name="categoryId" id="category" class="form-select">
           <option selected disabled>Select Category</option>
           <% categories.forEach(category => { %>
       <option value="<%= category._id %>" <%=category._id.toString() == product.category._id?'selected':''%>><%=category.name %> </option>
           <% }) %>
         </select>
-      </div>
+      </div>   
       <div class="col-md-4">
-        <input name="volume" id="volume" type="text" class="form-control" value="<%=variant.volume%>">
-      </div>
-      <div class="col-md-4">
+        <label class="form-label">Tags</label>
         <input name="tags" id="tags" type="text" class="form-control" value="<%=product.tags?product.tags.join(', '):''%>">
       </div>
     </div>
+    <!-- variants -->
+     <p class="mb-0 fw-bold fs-5">Edit Variant</p>
+     <div id="variantContainer">
+     <%variants.forEach((variant,index)=>{%>
+        <div class="variantSection">
+        <div  class="row mb-3 m-0 g-3" >
+      <div class="col-md-3">
+        <label class="form-label">Base Price (₹)</label>
+        <input name="basePrice" type="number" class="form-control" value="<%=variant.basePrice%>">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Discount Price (₹)</label>
+        <input name="discountPrice" type="number" class="form-control" value="<%=variant.discount%>">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Stock</label>
+        <input name="stock" type="number" class="form-control" value="<%=variant.stock?variant.stock:''%>">
+      </div>
+      <div class="col-md-2">
+        <label class="form-label">Volume (ml)</label>
+        <input name="volume" type="text" class="form-control" value="<%=variant.volume%>">
+      </div>
+       <div class="col-md-1 d-flex align-items-end">
+        <%if(index>0){%>
+          <button type="button" class="btn btn-danger delete-variant-btn">Delete</button>
+        <%}%>
+        </div>
+    </div>
+  </div>
+    <% }) %>
+    </div>
+      <button type="button" class="btn btn-primary" onclick="addVariant(document.querySelector('#editProductForm #variantContainer'))">Add Variant</button>
     <div class="d-flex justify-content-end gap-2">
       <a href="/admin/products"><button type="button" class="btn btn-outline-secondary">Cancel</button></a>
       <button type="submit" class="btn btn-primary">Save</button>
