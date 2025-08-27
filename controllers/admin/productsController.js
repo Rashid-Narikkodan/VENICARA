@@ -2,6 +2,7 @@
 const Product=require('../../models/Product')
 const Category=require('../../models/Category');
 const processImages = require('../../helpers/imgProcess');
+const getDiscountPercent = require('../../helpers/discPercent');
 
 const showProducts = async (req, res) => {
   try {
@@ -95,18 +96,30 @@ const addProduct = async (req, res) => {
 
     // Handle variants
     const variants = Array.isArray(volume)
-      ? volume.map((vol, i) => ({
-          volume: vol,
-          basePrice: Number(basePrice[i]),
-          discount: Number(discountPrice?.[i] || 0),
-          stock: Number(stock?.[i] || 0),
-        }))
-      : [{
-          volume,
-          basePrice: Number(basePrice),
-          discount: Number(discountPrice || 0),
-          stock: Number(stock || 0),
-        }];
+  ? volume.map((vol, i) => {
+      const bp = Number(basePrice?.[i] || 0);
+      const dp = Number(discountPrice?.[i] || 0);
+
+      if (!vol) {
+        throw new Error(`Variant ${i+1}: Volume is required`);
+      }
+
+      return {
+        volume: vol,
+        basePrice: bp,
+        discount: dp,
+        discountPercentage: bp > 0 ? getDiscountPercent(bp, dp) : 0,
+        stock: Number(stock?.[i] || 0),
+      };
+    })
+  : [{
+      volume,
+      basePrice: Number(basePrice || 0),
+      discount: Number(discountPrice || 0),
+      discountPercentage: basePrice > 0 ? getDiscountPercent(basePrice, discountPrice) : 0,
+      stock: Number(stock || 0),
+    }];
+
     const tagsArray = tags?.split(',').map(tag => tag.trim()) || [];
     const product = new Product({
       name,
@@ -126,7 +139,7 @@ const addProduct = async (req, res) => {
 
   } catch (err) {
     console.error('Error adding product:', err);
-    res.status(500).send('Internal Server Error');
+    res.status(500).send('Internal Server Error :- '+err);
   }
 };
 
@@ -174,6 +187,7 @@ const editProduct = async (req, res) => {
         volume: volumes[i] || product.variants[i]?.volume || '',
         basePrice: Number(basePrices[i] || product.variants[i]?.basePrice || 0),
         discount: Number(discountPrices[i] || product.variants[i]?.discount || 0),
+        discountPercentage:getDiscountPercent(basePrice?.[i],discountPrice?.[i]),
         stock: Number(stocks[i] || product.variants[i]?.stock || 0),
       });
     }
@@ -192,7 +206,7 @@ const editProduct = async (req, res) => {
     // Add other updates if provided
     if (name) update.name = name;
     if (description) update.description = description;
-    if (categoryId) update.categoryId = categoryId;
+    if (categoryId) update.category = categoryId;
     if (tags) update.tags = tags.split(',').map(v => v.trim());
     update.variants = variants;
 
@@ -219,6 +233,7 @@ const removeImage=async(req,res)=>{
     await product.save()
     return res.json({success:true})
   } catch (er) {
+    console.log(er.message)
     res.status(500).send(er.message)
   }
 }

@@ -148,100 +148,49 @@
 
     <div class="row mt-4 g-4">
      <!-- Men -->
-     <div class="col-md-4 col-sm-6">
-      <a href="" class="text-decoration-none text-black"
-       ><div class="collection-card overflow-hidden rounded-5">
-        <img
-         src="/images/category-MEN.avif"
-         alt="Men"
-         class="img-fluid rounded-5"
-        />
-        <div class="collection-title">
-         <h3 class="mt-4">Men</h3>
-        </div>
-       </div></a
-      >
-     </div>
-
-     <!-- Women -->
-     <div class="col-md-4 col-sm-6">
-      <a href="" class="text-decoration-none text-black"
-       ><div class="collection-card overflow-hidden rounded-5">
-        <img
-         src="/images/category-women.avif"
-         alt="Women"
-         class="img-fluid rounded-5"
-        />
-        <div class="collection-title">
-         <h3 class="mt-4">Women</h3>
-        </div>
-       </div></a
-      >
-     </div>
-
-     <!-- Unisex -->
-     <div class="col-md-4 col-sm-6">
-      <a href="/youtube.com" class="text-decoration-none text-black"
-       ><div class="collection-card overflow-hidden rounded-5">
-        <img
-         src="/images/category-unisex.avif"
-         alt="Unisex"
-         class="img-fluid rounded-5"
-        />
-        <div class="collection-title">
-         <h3 class="mt-4">Unisex</h3>
-        </div>
-       </div>
-      </a>
-     </div>
+      <% categories.forEach(category => { %>
+        <div class="col-md-4 col-sm-6">
+          <a href="/shop?category=<%=category._id%>" class="text-decoration-none text-black"
+            ><div class="collection-card overflow-hidden rounded-5">
+              <img
+              src="<%=category.img%>"
+              alt="<%=category.name%>"
+              class="img-fluid rounded-5"
+              />
+              <div class="collection-title">
+                <h3 class="mt-4"><%=category.name%></h3>
+              </div>
+            </div></a
+            >
+          </div>
+          <% }) %>
     </div>
    </div>
    <div class="col-md-12 mt-5">
     <div class="container text-center mt-5">
+
      <h6 class="text-uppercase">Explore</h6>
      <h2 class="section-title">Featured Products</h2>
      <div class="underline"></div>
 
+
+     <!-- //featured products -->
      <div class="row mt-4 g-4">
-      <!-- Product 1 -->
-      <div class="col-md-4 col-sm-6">
-       <div class="product-card">
-        <img
-         src="/images/featuredProduct.avif"
-         alt="Tom Ford"
-         class="img-fluid rounded-5"
-        />
-        <div class="product-name mt-4 fs-4">Tom Ford Ombre Leather</div>
-        <div class="product-price">Rs.4999.00</div>
-       </div>
+      <% products.forEach(product => { %>
+        <a href="products/<%=product._id%>" class="col-md-4 text-decoration-none text-black col-sm-6">
+          <div class="product-card">
+            <img
+            src="<%=product.images[0]%>"
+            alt="<%=product.name%>"
+            class="img-fluid rounded-5"
+            />
+            <div class="product-name mt-4 fs-4"><%=product.name%></div>
+            <div class="product-price">Rs.<%=Math.min(...product.variants.map(v=>v.discount-1))%>.99</div>
+          </div>
+        </a>
+        <% }) %>
       </div>
 
-      <!-- Product 2 -->
-      <div class="col-md-4 col-sm-6">
-       <div class="product-card">
-        <img
-         src="/images/featuredProduct-2.avif"
-         alt="Givenchy"
-         class="img-fluid rounded-5"
-        />
-        <div class="product-name mt-4 fs-4">Givenchy Gentlemen</div>
-        <div class="product-price">Rs.5999.00</div>
-       </div>
-      </div>
-
-      <!-- Product 3 -->
-      <div class="col-md-4 col-sm-6">
-       <div class="product-card">
-        <img
-         src="/images/featuredProduct-3.avif"
-         alt="Dolce & Gabbana"
-         class="img-fluid rounded-5"
-        />
-        <div class="product-name mt-4 fs-4">Dolce & Gabbana</div>
-        <div class="product-price">Rs.6999.00</div>
-       </div>
-      </div>
-     </div>
     </div>
    </div>
   </div>

@@ -38,14 +38,16 @@
        <input
         type="text"
         name="search"
+        id="inputSearch"
         style="border-color: rgb(113, 89, 3) !important"
         class="form-control rounded-5 pe-5"
         placeholder="Search..."
        />
        <button
         type="submit"
+        id="cancel"
         style="
-         background: rgb(213, 190, 12);
+         background: linear-gradient(to bottom,rgb(93, 88, 21),rgb(227, 195, 8));
          border: none;
          padding: 0.6rem 0.8rem;
          right: 0.2rem;
@@ -86,15 +88,14 @@
    </div>
   </header>
   <script>
-   const searchForm = document.getElementById("search-form");
-   searchForm.addEventListener("submit", (e) => {
-    e.preventDefault();
+    const searchForm = document.getElementById("search-form");
+    searchForm.addEventListener("input", (e) => {
       const query = searchForm.search.value.trim();
-  if (!query) return; // don’t call API on empty input
-
-  console.log("submitted:", query);
-
-    console.log("submitted");
+      if (!query) return; // don’t call API on empty input
+      
+      const input=document.getElementById('inputSearch')
+      const cancel=document.getElementById('cancel')
+      if(searchForm.value!="") cancel.innerHTML='<i class="fa-solid fa-xmark"></i>'
     fetch(`/search?search=${encodeURIComponent(query)}`, {
      method: "GET",
     })

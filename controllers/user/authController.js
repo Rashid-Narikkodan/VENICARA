@@ -35,12 +35,16 @@ const handleLogin = async (req, res) => {
       req.flash('error', 'User not exist')
       return res.redirect('/login')
     }
-
+    if(!user.password){
+      req.flash('error', 'Incorrect Email or Password')
+      return res.redirect('/login')
+    }
     const isMatch = await bcrypt.compare(password, user.password)
     if (!isMatch) {
       req.flash('error', 'Incorrect Email or Password')
       return res.redirect('/login')
     }
+  
 
     if (!user.isVerified) {
       req.flash('error', 'Verify before login (OTP)')
@@ -113,6 +117,10 @@ const handleForgot = async (req, res) => {
     }
     if(user.isDeleted){
        req.flash('error', 'User not exist')
+      return res.redirect('/forgot')
+    }
+    if(user.isBlocked){
+       req.flash('error', 'This account is blocked')
       return res.redirect('/forgot')
     }
     const otp = generateOTP()

@@ -1,83 +1,297 @@
 <%- include("../partials/user/header.ejs") %>
+  <style>
+    .thumb {
+      cursor: pointer;
+      transition: transform 0.3s ease;
+    }
 
-<main class="container py-5">
+    .thumb:hover {
+      transform: scale(1.1);
+    }
 
-  <!-- Breadcrumb -->
-  <nav aria-label="breadcrumb">
-    <ol class="breadcrumb bg-white px-0">
-      <li class="breadcrumb-item"><a href="/">Home</a></li>
-      <li class="breadcrumb-item"><a href="/shop?category=<%=product.category._id%>"><%=product.category.name%></a></li>
-      <li class="breadcrumb-item active" aria-current="page"><%=product.name%></li>
-    </ol>
-  </nav>
+    .small-container {
+      position: relative;
+    }
 
-  <div class="row">
-    <!-- LEFT: Product Images -->
-    <div class="col-md-6">
-      <div class="mb-3 text-center">
-        <img id="mainImage" src="<%=product.images[0]%>" alt="<%=product.name%>" class="img-fluid rounded" />
-      </div>
-      <div class="row g-2">
-        <% product.images.forEach((img, idx) => { if(idx > 0){ %>
-          <div class="col-4">
-            <img src="<%=img%>" class="img-fluid rounded thumb" />
-          </div>
-        <% } }) %>
-      </div>
-    </div>
+    #lens {
+      position: absolute;
+      width: 150px;
+      height: 100px;
+      background: rgba(0, 0, 0, 0.2);
+      pointer-events: none;
+      display: none;
+    }
 
-    <!-- RIGHT: Product Details -->
-    <div class="col-md-6">
-      <h2 class="fw-bold"><%=product.name%></h2>
-      <p class="mb-1">★ <%=product.rating || 4.5%> (Reviews)</p>
-      <p class="text-success mb-2"><%= product.stock > 0 ? 'In Stock' : 'Out of Stock' %></p>
-      <h4 class="mb-3">₹<%=product.price%></h4>
+    .zoom-container {
+      position: absolute;
+      top: 10%;
+      right: 0;
+      border: 1px solid #ccc;
+      background-repeat: no-repeat;
+      margin-left: 20px;
+    }
 
-      <!-- Variant Buttons -->
-      <div class="mb-3">
-        <% product.variants.forEach(v => { %>
-          <button class="btn btn-outline-dark btn-sm me-2 mb-2"><%=v.volume%>ML</button>
-        <% }) %>
-      </div>
+    .breadcrumb-item+.breadcrumb-item::before {
+      content: ">";
+      font-weight: bolder;
+      color: #6c757d;
+      padding: 0 .5rem;
+    }
 
-      <!-- Action Buttons -->
-      <div class="mb-4">
-        <button class="btn btn-dark me-2">Add to Wishlist</button>
-        <button class="btn btn-primary">Add to Cart</button>
-      </div>
+    .relatedProducts {
+      transition: transform .3s ease;
+    }
 
-      <!-- Description & Highlights -->
-      <h5 class="fw-bold">DESCRIPTION & HIGHLIGHTS</h5>
-      <p><%=product.description%></p>
-      <% if(product.tags && product.tags.length){ %>
-      <ul>
-        <% product.tags.forEach(tag => { %>
-          <li><%=tag%></li>
-        <% }) %>
-      </ul>
-      <% } %>
-    </div>
-  </div>
+    .relatedProducts:hover {
+      transform: scale(1.1);
+    }
+  </style>
+  <main class="flex-grow-1 bg-light w-100">
 
-  <!-- RELATED PRODUCTS -->
-  <% if(relatedProducts && relatedProducts.length){ %>
-  <h4 class="fw-bold mt-5">YOU MAY ALSO LIKE</h4>
-  <div class="row g-3 mt-3">
-    <% relatedProducts.forEach(r => { %>
-      <div class="col-6 col-md-3">
-        <div class="card h-100 border-0 shadow-sm">
-          <a href="/product/<%=r._id%>">
-            <img src="<%=r.images[0]%>" class="card-img-top rounded" alt="<%=r.name%>">
-            <div class="card-body p-2 text-center">
-              <p class="mb-1 small"><%=r.name%></p>
-              <p class="mb-0 fw-semibold">₹<%=r.price%></p>
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-md-7 text-center p-4">
+          <div class="row">
+            <div id="imageZoom" class="col-md-12 p-4 mx-auto small-container" style="width:60%">
+              <img id="mainImg" src="<%= product.images[0]%>" class="img-fluid rounded-4 shadow" alt="Product Image" />
+              <div id="lens"></div>
             </div>
-          </a>
+            <div style="right:2rem;width:50%;height:40rem" class="zoom-container d-none rounded-5 border border-1 border-dark"
+              id="zoomBox"></div>
+            <div class="col-md-12">
+              <div class="row justify-content-center">
+                <%product.images.forEach((image)=>{%>
+                  <div class="col-md-3">
+                    <img src="<%=image%>" class="img-fluid rounded-4 thumb shadow" alt="<%=product.name%>">
+                  </div>
+                  <%})%>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-5 p-5">
+          <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+              <li class="breadcrumb-item"><a href="/home" class="text-decoration-none text-muted">Home</a></li>
+              <li class="breadcrumb-item"><a href="/shop" class="text-decoration-none text-muted">Shop</a></li>
+              <% if(product.category) { %>
+                <li class="breadcrumb-item">
+                  <a class="text-decoration-none text-muted" href="/shop?category=<%= product.category._id %>">
+                    <%= product.category.name %>
+                  </a>
+                </li>
+                <% } %>
+                  <% if(product) { %>
+                    <li class="breadcrumb-item active" aria-current="page">
+                      <%= product.name %>
+                    </li>
+                    <% } %>
+            </ol>
+          </nav>
+          <!-- Product Name -->
+          <h3 class="text-uppercase">
+            <%= product.name%>
+          </h3>
+          <p class="fs-5 text-muted ">A fragrance crafted for <%=product.category.name%>
+          </p>
+          <div id="variantDetails" class="mt-3">
+            <div class="d-flex align-items-center mb-3">
+              <span class="rounded-5 me-2 text-white bg-success px-3 py-1 fw-bold d-flex align-items-center">
+                &#x2606; 4.4
+              </span>
+              <span class="text-muted fw-semibold fs-5">
+                (count)
+              </span>
+            </div>
+            <div>
+              <span id="variantPrice" class="fw-bold fs-4">RS. <%= Math.min(...product.variants.map(v=>v.discount))-1
+                  %>.99</span>
+              <span id="variantBasePrice" class="ms-2 me-2 fw-semibold fs-5 text-muted text-decoration-line-through">₹
+                <%=Math.min(...product.variants.map(v=>v.basePrice-1))%>.99
+              </span>
+              <span id="variantPerc" class="rounded text-success fw-bold p-1">
+                <%=Math.min(...product.variants.map(v=>Math.round(v.discountPercentage)))%>% off
+              </span>
+            </div>
+          </div>
+
+          <div class="d-flex flex-column mt-3 gap-2">
+            <a href="#" class="btn btn-dark w-50 p-3 rounded-5">
+              <span class="fw-bold">ADD TO WHISHLIST</span>
+            </a>
+            <a href="#" class="btn btn-dark w-50 p-3 rounded-5">
+              <span class="fw-bold">ADD TO CART</span>
+            </a>
+          </div>
+
+          <!-- Variant buttons -->
+          <div class="mt-4">
+            <% product.variants.forEach((variant, index)=> { %>
+              <button class="btn btn-outline-dark rounded-5 variant-btn <%= index === 0 ? 'active' : '' %>"
+                data-price="<%= variant.discount%>" data-volume="<%= variant.volume %>"
+                data-basePrice="<%= variant.basePrice%>" data-discountPerc="<%= variant.discountPercentage %>">
+                <%= variant.volume %>ML
+              </button>
+              <% }) %>
+          </div>
+
+          <!-- description and reviews -->
+          <div>
+            <p class="mb-1 mt-4 fs-5">
+              <span onclick="callDescription()" class="text-black fw-semibold product-tab"
+                data-description="<%=product.description%>" data-tags="<%=product.tags%>">
+                Descriptipn
+              </span>
+              <span onclick="callReviews()" class="ms-3 product-tab">
+                Reviews
+              </span>
+            </p>
+            <hr class="mt-0">
+            <div id="content">
+              <p style="font-size: large;" id="productDescription">
+                <%=product.description%>
+              </p>
+              <p class="mt-2" id="productTags">
+                <span class="fw-bold ">Highlights </span>:
+              <ul>
+                <% product.tags.forEach(t=> { %>
+                  <li style="font-size: large;">
+                    <%=t.charAt(0).toUpperCase()+t.slice(1)%>
+                  </li>
+                  <% }) %>
+              </ul>
+              </p>
+            </div>
+          </div>
+        </div>
+        <hr>
+        <div class="col-md-12">
+          <h3 class="p-5 ms-5">YOU MAY ALSO LIKE</h3>
+          <div class="container">
+            <div class="row justify-content-center">
+              <% relatedProducts.forEach(product=> { %>
+                <div class="col-md-3 relatedProducts">
+                  <a href="/products/<%=product._id%>" class="card text-decoration-none p-3 rounded-4 border-0 shadow"
+                    style="max-width: 18rem;background:white">
+                    <img src="<%=product.images[0]%>" class="card-img-top rounded-4" alt="Product Image">
+                    <div class="card-body p-0 pt-3">
+                      <h6 class="card-title mb-1">
+                        <%=product.name%>
+                      </h6>
+                      <p class="text-muted mb-2" style="font-size:0.85rem;">Category: <%=product.category.name%>
+                      </p>
+                      <p class="mb-0 justify-content-between d-flex align-items-center">
+                        <span>
+                          <span class="text-success fw-bold">₹<%=Math.min(...product.variants.map(v=>
+                              v.discount-1))%></span> <!-- 80% off -->
+                          <span class="text-muted text-decoration-line-through">₹<%=Math.min(...product.variants.map(v=>
+                              v.basePrice-1))%></span>
+                          <span class="text-success fw-bold">
+                            <%=Math.min(...product.variants.map(v=>
+                              v.discountPercentage&&Math.round(v.discountPercentage)))%>% off
+                          </span>
+                        </span>
+                      </p>
+                    </div>
+                  </a>
+                </div>
+                <% }) %>
+            </div>
+          </div>
         </div>
       </div>
-    <% }) %>
-  </div>
-  <% } %>
+  </main>
+  <script>
+    // image like gallary
+    const mainImg = document.getElementById('mainImg');
+    const thumbs = document.getElementsByClassName('thumb');
+    for (let i = 0; i < thumbs.length; i++) {
+      thumbs[i].addEventListener('click', function () {
+        mainImg.src = this.src;
+      })
+    }
 
-</main>
-<%- include("../partials/user/footer.ejs") %>
+    // variant based changing
+    const variantButtons = document.querySelectorAll(".variant-btn");
+    const variantPrice = document.getElementById("variantPrice");
+    const variantBasePrice = document.getElementById("variantBasePrice");
+    const variantPerc = document.getElementById("variantPerc");
+
+    variantButtons.forEach(btn => {
+      btn.addEventListener("click", () => {
+        variantButtons.forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        const price = btn.getAttribute("data-price");
+        const basePrice = btn.getAttribute("data-basePrice");
+        const percentage = btn.getAttribute("data-discountPerc");
+        variantPrice.textContent = `RS. ${price - 1}.99`;
+        variantBasePrice.textContent = `₹${basePrice - 1}.99`
+        variantPerc.textContent = `${Math.round(percentage)}% off`
+
+      });
+    });
+
+    const productTab = document.querySelectorAll('.product-tab')
+    productTab.forEach(tab => {
+      tab.addEventListener("click", () => {
+        productTab.forEach(t => t.classList.remove("fw-semibold", "text-black"));
+        tab.classList.add("fw-semibold", "text-black");
+      });
+    });
+
+    //call reviews
+    async function callReviews() {
+      const content = document.getElementById('content')
+      content.innerHTML = `reviews and prespective of people`
+    }
+    async function callDescription() {
+      const content = document.getElementById('content')
+      content.innerHTML = `
+      <p style="font-size: large;" id="productDescription"><%=product.description%></p>
+              <p class="mt-2" id="productTags">
+                <span class="fw-bold ">Highlights </span>:
+                <ul>
+                  <% product.tags.forEach(t => { %>
+                   <li style="font-size: large;"><%=t.charAt(0).toUpperCase()+t.slice(1)%></li>
+                  <% }) %>
+                </ul>
+              </p>
+      `
+    }
+
+
+    //image magnifier
+    //main img already taken
+    const lens = document.getElementById("lens");
+    const zoomBox = document.getElementById("zoomBox");
+
+    mainImg.addEventListener("mouseenter", () =>{
+      lens.style.display = "block"
+      zoomBox.classList.remove('d-none')
+    });
+    mainImg.addEventListener("mouseleave",() =>{
+      lens.style.display = "none"
+      zoomBox.classList.add('d-none')
+    })
+
+    
+
+   mainImg.addEventListener("mousemove", function (e) {
+  const rect = mainImg.getBoundingClientRect();
+  let x = e.clientX - rect.left;
+  let y = e.clientY - rect.top;
+
+  // Keep lens centered on cursor
+  lens.style.left = x - lens.offsetWidth / 2 + "px";
+  lens.style.top = y - lens.offsetHeight / 2 + "px";
+
+  // Show zoomed image
+  zoomBox.style.backgroundImage = `url('${mainImg.src}')`;
+  zoomBox.style.backgroundSize = `${mainImg.width * 3}px ${mainImg.height * 3}px`;
+  zoomBox.style.backgroundPosition =
+    `-${x * 3 - zoomBox.offsetWidth / 2}px -${y * 3 - zoomBox.offsetHeight / 2}px`;
+});
+
+
+  </script>
+  <%- include("../partials/user/footer.ejs") %>
