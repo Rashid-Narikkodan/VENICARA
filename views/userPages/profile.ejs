@@ -1,0 +1,96 @@
+<%-include("../partials/user/header.ejs")%>
+<%-include("../partials/user/sidebarProfile.ejs")%>
+
+<main class="container mt-4">
+  <div class="row justify-content-center">
+    <div class="col-12 col-md-8 col-lg-6 p-5">
+      <div class="card shadow px-5 rounded-5">
+        <div class="card-body p-4">
+          <!-- Profile Header -->
+          <div class="text-center mb-4">
+            <h2 class="fw-bold text-dark mb-3">PROFILE</h2>
+            <!-- Profile Avatar -->
+             <!-- set input image in a form -->
+              <div class="rounded-circle overflow-hidden" style="width:5rem;height:5rem;background:rgb(214, 214, 214)">
+                <div class="shadow rounded-circle bg-secondary w-50 h-50 mt-2" style="margin-left:1.2rem" ></div>
+                <div style=" margin-left: .5rem;" class="shadow bg-secondary mt-1 w-75 h-75 rounded-circle"></div>
+              </div>
+          </div>
+
+          <!-- Profile Form -->
+          <form>
+            <!-- Name Field -->
+            <div class="mb-3">
+              <div class="row align-items-center">
+                <div class="col-12 col-sm-3">
+                  <label for="name" class="form-label fw-medium text-dark mb-1">Name:</label>
+                </div>
+                <div class="col-12 col-sm-9">
+                  <input type="text" class="form-control bg-light border-0" id="name" value="<%= user.name?user.name:''%>" name="name" placeholder="Name">
+                </div>
+              </div>
+            </div>
+
+            <!-- Email Field -->
+            <div class="mb-3">
+              <div class="row align-items-center">
+                <div class="col-12 col-sm-3">
+                  <label for="email" class="form-label fw-medium text-dark mb-1">Email:</label>
+                </div>
+                <div class="col-12 col-sm-9">
+                  <input type="email" class="form-control bg-light border-0" id="email" value="<%= user.email?user.email:'' %>" name="email" placeholder="Email">
+                </div>
+              </div>
+            </div>
+
+            <!-- Phone Field -->
+            <div class="mb-3">
+              <div class="row align-items-center">
+                <div class="col-12 col-sm-3">
+                  <label for="phone" class="form-label fw-medium text-dark mb-1">Phone:</label>
+                </div>
+                <div class="col-12 col-sm-9">
+                  <input type="tel" class="form-control bg-light border-0" id="phone" value="<%= user.mobile?user.mobile:''%>" name="phone" placeholder="Mobile.no">
+                </div>
+              </div>
+            </div>
+
+            <!-- Gender Field -->
+            <div class="mb-4">
+              <div class="row align-items-center">
+                <div class="col-12 col-sm-3">
+                  <label class="form-label fw-medium text-dark mb-1">Gender:</label>
+                </div>
+                <div class="col-12 col-sm-9">
+                  <div class="d-flex gap-3">
+                    <div class="form-check">
+                      <input class="form-check-input" type="radio" name="gender" id="female" value="female">
+                      <label class="form-check-label text-dark" for="female">
+                        Female
+                      </label>
+                    </div>
+                    <div class="form-check">
+                      <input class="form-check-input" type="radio" name="gender" id="male" value="male">
+                      <label class="form-check-label text-dark" for="male">
+                        Male
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center gap-3">
+              <a href="/change-password" class="text-primary text-decoration-none fw-medium">Change password</a>
+              <button type="submit" class="btn btn-dark px-4 py-2 fw-medium">Save changes</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+</div>
+</body>
+</html>

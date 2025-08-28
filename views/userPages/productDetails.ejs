@@ -45,6 +45,11 @@
     .relatedProducts:hover {
       transform: scale(1.1);
     }
+     @media (min-width: 768px) { /* md breakpoint */
+    .d-flex.flex-column a.btn {
+      width: 50% !important;
+    }
+  }
   </style>
   <main class="flex-grow-1 bg-light w-100">
 
@@ -56,8 +61,8 @@
               <img id="mainImg" src="<%= product.images[0]%>" class="img-fluid rounded-4 shadow" alt="Product Image" />
               <div id="lens"></div>
             </div>
-            <div style="right:2rem;width:50%;height:40rem" class="zoom-container d-none rounded-5 border border-1 border-dark"
-              id="zoomBox"></div>
+            <div style="right:2rem;width:50%;height:40rem"
+              class="zoom-container d-none rounded-5 border border-1 border-dark" id="zoomBox"></div>
             <div class="col-md-12">
               <div class="row justify-content-center">
                 <%product.images.forEach((image)=>{%>
@@ -70,7 +75,7 @@
           </div>
         </div>
         <div class="col-md-5 p-5">
-          <nav aria-label="breadcrumb">
+          <nav aria-label="breadcrumb" class="d-md-block d-none">
             <ol class="breadcrumb">
               <li class="breadcrumb-item"><a href="/home" class="text-decoration-none text-muted">Home</a></li>
               <li class="breadcrumb-item"><a href="/shop" class="text-decoration-none text-muted">Shop</a></li>
@@ -113,13 +118,19 @@
                 <%=Math.min(...product.variants.map(v=>Math.round(v.discountPercentage)))%>% off
               </span>
             </div>
+            <div>
+              <span id="variantStock" class="text-danger fs-4 fw-bold">
+                <%=!product.isAvailable?'Product not Available': product.variants.reduce((min, v)=> v.discount <
+                    min.discount ? v : min).stock <=0 ?'Out of Stock':''%>
+              </span>
+            </div>
           </div>
 
-          <div class="d-flex flex-column mt-3 gap-2">
-            <a href="#" class="btn btn-dark w-50 p-3 rounded-5">
-              <span class="fw-bold">ADD TO WHISHLIST</span>
+          <div class="d-flex flex-column mt-3 gap-2 align-items-start">
+            <a href="#" class="btn btn-dark p-3 rounded-5" style="width: 100%; max-width: 100%;">
+              <span class="fw-bold">ADD TO WISHLIST</span>
             </a>
-            <a href="#" class="btn btn-dark w-50 p-3 rounded-5">
+            <a href="#" class="btn btn-dark p-3 rounded-5" style="width: 100%; max-width: 100%;">
               <span class="fw-bold">ADD TO CART</span>
             </a>
           </div>
@@ -129,12 +140,27 @@
             <% product.variants.forEach((variant, index)=> { %>
               <button class="btn btn-outline-dark rounded-5 variant-btn <%= index === 0 ? 'active' : '' %>"
                 data-price="<%= variant.discount%>" data-volume="<%= variant.volume %>"
-                data-basePrice="<%= variant.basePrice%>" data-discountPerc="<%= variant.discountPercentage %>">
+                data-basePrice="<%= variant.basePrice%>" data-discountPerc="<%= variant.discountPercentage %>"
+                data-stock="<%=variant.stock%>" data-isAvailable="<%=product.isAvailable%>">
                 <%= variant.volume %>ML
               </button>
               <% }) %>
           </div>
 
+          <!-- Coupons Section -->
+          <div class="mt-4">
+            <h5 class="fw-bold mb-2"><i class="fa-solid fa-tags"></i> Available Coupons</h5>
+            <div id="couponList" class="list-group w-md-75">
+              <!-- Example coupon -->
+              <div class="list-group-item d-flex justify-content-between align-items-center rounded-4 mb-2 shadow-sm">
+                <div>
+                  <span class="fw-bold">SAVE10</span>
+                  <small class="d-block text-muted">Get 10% off on orders above ₹500</small>
+                </div>
+                <button class="btn btn-outline-dark btn-sm rounded-4 copy-coupon" data-code="SAVE10">Copy</button>
+              </div>
+            </div>
+          </div>
           <!-- description and reviews -->
           <div>
             <p class="mb-1 mt-4 fs-5">
@@ -184,8 +210,10 @@
                         <span>
                           <span class="text-success fw-bold">₹<%=Math.min(...product.variants.map(v=>
                               v.discount-1))%></span> <!-- 80% off -->
-                          <span class="text-muted text-decoration-line-through">₹<%=Math.min(...product.variants.map(v=>
-                              v.basePrice-1))%></span>
+                          <span class="text-muted text-decoration-line-through">₹
+                            <%=Math.min(...product.variants.map(v=>
+                              v.basePrice-1))%>
+                          </span>
                           <span class="text-success fw-bold">
                             <%=Math.min(...product.variants.map(v=>
                               v.discountPercentage&&Math.round(v.discountPercentage)))%>% off
@@ -216,6 +244,7 @@
     const variantPrice = document.getElementById("variantPrice");
     const variantBasePrice = document.getElementById("variantBasePrice");
     const variantPerc = document.getElementById("variantPerc");
+    const variantStock = document.getElementById('variantStock')
 
     variantButtons.forEach(btn => {
       btn.addEventListener("click", () => {
@@ -224,10 +253,12 @@
         const price = btn.getAttribute("data-price");
         const basePrice = btn.getAttribute("data-basePrice");
         const percentage = btn.getAttribute("data-discountPerc");
+        const stock = btn.getAttribute('data-stock')
+        const isAvailable = btn.getAttribute('data-isAvailable') === 'true'
         variantPrice.textContent = `RS. ${price - 1}.99`;
         variantBasePrice.textContent = `₹${basePrice - 1}.99`
         variantPerc.textContent = `${Math.round(percentage)}% off`
-
+        variantStock.textContent = !isAvailable ? 'Product not Available' : stock <= 0 ? 'Out of Stock' : ''
       });
     });
 
@@ -242,7 +273,52 @@
     //call reviews
     async function callReviews() {
       const content = document.getElementById('content')
-      content.innerHTML = `reviews and prespective of people`
+      content.innerHTML = `<div class="container my-4">
+  <h4 class="fw-bold">4.4</h4>
+  <div class="text-warning fs-4">★★★★★</div>
+  <p>Product Rating</p>
+  <div>
+    <div class="d-flex align-items-center">
+      <span class="me-2">5 ★</span>
+      <div class="progress flex-grow-1 me-2">
+        <div class="progress-bar bg-success" style="width:70%"></div>
+      </div>
+      <span>70%</span>
+    </div>
+    <div class="d-flex align-items-center">
+      <span class="me-2">4 ★</span>
+      <div class="progress flex-grow-1 me-2">
+        <div class="progress-bar bg-success" style="width:15%"></div>
+      </div>
+      <span>15%</span>
+    </div>
+    <!-- repeat for 3, 2, 1 stars -->
+  </div>
+
+  <hr>
+
+  <!-- Reviews -->
+  <div class="mt-3">
+    <div class="d-flex mb-3">
+      <div class="me-2">👤</div>
+      <div>
+        <strong>Rashid</strong>
+        <div class="text-warning">★★★★★</div>
+        <p>Absolutely stunning perfume 🔥</p>
+      </div>
+    </div>
+
+    <div class="d-flex mb-3">
+      <div class="me-2">👤</div>
+      <div>
+        <strong>Shifna</strong>
+        <div class="text-warning">★★★★☆</div>
+        <p>The product is so good. Perfect match for a casual meet.</p>
+      </div>
+    </div>
+  </div>
+</div>
+`
     }
     async function callDescription() {
       const content = document.getElementById('content')
@@ -265,32 +341,44 @@
     const lens = document.getElementById("lens");
     const zoomBox = document.getElementById("zoomBox");
 
-    mainImg.addEventListener("mouseenter", () =>{
+    mainImg.addEventListener("mouseenter", () => {
       lens.style.display = "block"
       zoomBox.classList.remove('d-none')
     });
-    mainImg.addEventListener("mouseleave",() =>{
+    mainImg.addEventListener("mouseleave", () => {
       lens.style.display = "none"
       zoomBox.classList.add('d-none')
     })
 
-    
 
-   mainImg.addEventListener("mousemove", function (e) {
-  const rect = mainImg.getBoundingClientRect();
-  let x = e.clientX - rect.left;
-  let y = e.clientY - rect.top;
 
-  // Keep lens centered on cursor
-  lens.style.left = x - lens.offsetWidth / 2 + "px";
-  lens.style.top = y - lens.offsetHeight / 2 + "px";
+    mainImg.addEventListener("mousemove", function (e) {
+      const rect = mainImg.getBoundingClientRect();
+      let x = e.clientX - rect.left;
+      let y = e.clientY - rect.top;
 
-  // Show zoomed image
-  zoomBox.style.backgroundImage = `url('${mainImg.src}')`;
-  zoomBox.style.backgroundSize = `${mainImg.width * 3}px ${mainImg.height * 3}px`;
-  zoomBox.style.backgroundPosition =
-    `-${x * 3 - zoomBox.offsetWidth / 2}px -${y * 3 - zoomBox.offsetHeight / 2}px`;
-});
+      // Keep lens centered on cursor
+      lens.style.left = x - lens.offsetWidth / 2 + "px";
+      lens.style.top = y - lens.offsetHeight / 2 + "px";
+
+      // Show zoomed image
+      zoomBox.style.backgroundImage = `url('${mainImg.src}')`;
+      zoomBox.style.backgroundSize = `${mainImg.width * 3}px ${mainImg.height * 3}px`;
+      zoomBox.style.backgroundPosition =
+        `-${x * 3 - zoomBox.offsetWidth / 2}px -${y * 3 - zoomBox.offsetHeight / 2}px`;
+    });
+
+    //coupen copy
+    document.getElementById('couponList').addEventListener('click', (e) => {
+      console.log('clicked')
+      if (e.target.classList.contains('copy-coupon')) {
+        const code = e.target.getAttribute('data-code');
+        navigator.clipboard.writeText(code).then(() => {
+          e.target.textContent = "Copied!";
+          setTimeout(() => e.target.textContent = "Copy", 1500);
+        });
+      }
+    });
 
 
   </script>

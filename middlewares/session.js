@@ -11,7 +11,7 @@ const adminSession = session({
     collectionName: 'adminSessions'
   }),
   cookie: {
-    maxAge: 1000 * 60 * 60 * 24, // 30 min
+    maxAge: 1000 * 60 * 60 * 24, 
     httpOnly: true,
     sameSite: 'strict',
     secure: false
@@ -19,7 +19,7 @@ const adminSession = session({
 });
 
 const userSession = session({
-  name: 'user.sid', // unique cookie
+  name: 'user.sid', // unique cookie 
   secret: process.env.USER_SECRET,
   resave: false,
   saveUninitialized: false,

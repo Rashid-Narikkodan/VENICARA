@@ -11,7 +11,11 @@
    integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr"
    crossorigin="anonymous"
   />
-
+  <script
+  defer
+   src="https://kit.fontawesome.com/f45c5ea548.js"
+   crossorigin="anonymous"
+  ></script>
   <link rel="stylesheet" href="/css/userAuth.css" />
   <link rel="stylesheet" href="/css/userHeader.css" />
  </head>
@@ -54,7 +58,7 @@
         "
         class="btn border-0 btn-secondary rounded-5 position-absolute top-50 translate-middle-y"
        >
-        <i class="fs-5 text-black fa-solid fa-magnifying-glass"></i>
+        <i class="fs-5 text-white fa-solid fa-magnifying-glass"></i>
        </button>
        <div id="searchResults" class="position-absolute rounded-4" style="top:5rem;right:-4rem;left:-4rem">
         
@@ -63,9 +67,8 @@
       <a href="/whishlist"
        ><i class="fs-4 text-black fa-regular fa-heart ms-3"></i
       ></a>
-      <a href="/orders"
-       ><i class="fs-4 text-black fa-solid fa-box-open ms-3"></i
-      ></a>
+      <a href="/cart"
+       ><i class="fa-solid fa-cart-shopping ms-3 fs-4 text-black"></i></a>
       <a href="/profile"
        ><i class="fs-4 text-black fa-regular fa-circle-user ms-3"></i
       ></a>
@@ -85,16 +88,26 @@
      </div>
      <%}%>
     </div>
-   </div>
-  </header>
-  <script>
+  </div>
+</header>
+<script>
+  const searchInput=document.getElementById('inputSearch')
+  const resultBox=document.getElementById('searchResults')
+  const cancel=document.getElementById('cancel')
+    document.addEventListener("click", (e) => {
+  if (!searchInput.contains(e.target) && !resultBox.contains(e.target)) {
+    searchInput.value = "";   // clear input
+    resultBox.innerHTML = ""; // clear results
+    cancel.innerHTML='<i class="fs-5 text-white fa-solid fa-magnifying-glass"></i>'
+  }
+});
+
     const searchForm = document.getElementById("search-form");
     searchForm.addEventListener("input", (e) => {
       const query = searchForm.search.value.trim();
       if (!query) return; // don’t call API on empty input
       
       const input=document.getElementById('inputSearch')
-      const cancel=document.getElementById('cancel')
       if(searchForm.value!="") cancel.innerHTML='<i class="fa-solid fa-xmark"></i>'
     fetch(`/search?search=${encodeURIComponent(query)}`, {
      method: "GET",

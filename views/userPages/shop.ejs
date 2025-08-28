@@ -123,7 +123,7 @@
         </div>
         <!-- sidebar end -->
         <div class="col-md-10">
-          <div class="text-center p-4">
+          <div class="text-center p-3">
             <h4 style="font-family:Robot 'Courier New', Courier, monospace;">All Products</h4>
             <p class="text-muted fs-5 mt-4">Fresh Arrivals. One Scent. Every Identity. Discover What’s New.</p>
           </div>
@@ -163,6 +163,70 @@
             </div>
           </div>
         </div>
+
+        <!-- pagination -->
+          <div class="d-flex justify-content-end mt-4">
+        <nav aria-label="Page navigation">
+          <ul class="pagination justify-content-end flex-wrap p-3">
+
+            <!-- Previous Button -->
+            <% if (currentPage> 1) { %>
+              <li class="page-item">
+                <a class="page-link bg-dark" href="?page=<%= currentPage - 1 %>&limit=<%= limit %>">
+                  <i class="fa-solid fa-caret-left text-white"></i>
+                </a>
+              </li>
+              <% } else { %>
+                <li class="page-item disabled">
+                  <span class="page-link bg-dark">
+                    <i class="fa-solid fa-caret-left text-white"></i>
+                  </span>
+                </li>
+                <% } %>
+
+                  <!-- Left Page (if exists) -->
+                  <% if (currentPage - 1>= 1) { %>
+                    <li class="page-item">
+                      <a class="page-link" href="?page=<%= currentPage - 1 %>&limit=<%= limit %>">
+                        <%= currentPage - 1 %>
+                      </a>
+                    </li>
+                    <% } %>
+
+                      <!-- Current Page -->
+                      <li class="page-item active">
+                        <span class="page-link bg-white text-dark border-0">
+                          <%= currentPage %>
+                        </span>
+                      </li>
+
+                      <!-- Right Page (if exists) -->
+                      <% if (currentPage + 1 <=totalPages) { %>
+                        <li class="page-item">
+                          <a class="page-link" href="?page=<%= currentPage + 1 %>&limit=<%= limit %>">
+                            <%= currentPage + 1 %>
+                          </a>
+                        </li>
+                        <% } %>
+
+                          <!-- Next Button -->
+                          <% if (currentPage < totalPages) { %>
+                            <li class="page-item">
+                              <a class="page-link bg-dark" href="?page=<%= currentPage + 1 %>&limit=<%= limit %>">
+                                <i class="fa-solid fa-caret-right text-white"></i>
+                              </a>
+                            </li>
+                            <% } else { %>
+                              <li class="page-item disabled">
+                                <span class="page-link bg-dark">
+                                  <i class="fa-solid fa-caret-right text-white"></i>
+                                </span>
+                              </li>
+                              <% } %>
+
+          </ul>
+        </nav>
+      </div>
   </main>
   <script>
   </script>

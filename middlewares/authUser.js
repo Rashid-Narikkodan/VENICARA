@@ -9,14 +9,15 @@ const isUserBlocked=async(req, res, next)=>{
   const User = require('../models/User');
   const user=await User.findById(req.session.user.id);
   if (user.isBlocked||user.isDeleted) {
-     req.session.destroy((err) => {
+     req.logout((err) => {
     if (err) {
       console.log("Error destroying session:", err);
-      return res.status(500).send("Logout failed");
+      return res.status(500).send("Logout failed :- "+err);
     }
     res.clearCookie("connect.sid");
+    req.flash('error','you are blocked')
     res.redirect("/"); 
-})
+  })
   } else {
     next();
   }
@@ -27,6 +28,7 @@ const loggedIn=(req,res,next)=>{
   }
   next()
 }
+
 module.exports ={
   requireLogin,
   loggedIn,

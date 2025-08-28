@@ -53,49 +53,68 @@
       </div>
 
       <!-- //pagination -->
-      <div class="d-flex justify-content-end ">
-      <nav aria-label="Page navigation">
-        <ul class="pagination justify-content-end flex-wrap p-3">
-          <% if (currentPage> 1) { %>
-            <li class="page-item">
-              <a class="page-link bg-dark" href="?page=<%= currentPage - 1 %>&limit=<%= limit %>">
-                <i class="fa-solid fa-caret-left text-white"></i>
-              </a>
-            </li>
-            <% } else { %>
-              <li class="page-item disabled">
-                <span class="page-link bg-dark"><i class="fa-solid fa-caret-left text-white"></i></span>
+      <div class="d-flex justify-content-end">
+        <nav aria-label="Page navigation">
+          <ul class="pagination justify-content-end flex-wrap p-3">
+
+            <!-- Previous Button -->
+            <% if (currentPage> 1) { %>
+              <li class="page-item">
+                <a class="page-link bg-dark" href="?page=<%= currentPage - 1 %>&limit=<%= limit %>">
+                  <i class="fa-solid fa-caret-left text-white"></i>
+                </a>
               </li>
-              <% } %>
-                <!-- Page Numbers -->
-                <% for(let i=1; i <=totalPages; i++) { %>
-                  <li class="page-item <%= i === currentPage ? 'active' : '' %>">
-                    <% if (i===currentPage) { %>
-                      <span class="page-link bg-white text-dark border-0">
-                        <%= i %>
-                      </span>
-                      <% } else { %>
-                        <a class="page-link" href="?page=<%= i %>&limit=<%= limit %>">
-                          <%= i %>
-                        </a>
-                        <% } %>
-                  </li>
-                  <% } %>
-                    <!-- Next Button -->
-                    <% if (currentPage < totalPages) { %>
-                      <li class="page-item">
-                        <a class="page-link bg-dark" href="?page=<%= currentPage + 1 %>&limit=<%= limit %>">
-                          <i class="fa-solid fa-caret-right text-white"></i>
-                        </a>
+              <% } else { %>
+                <li class="page-item disabled">
+                  <span class="page-link bg-dark">
+                    <i class="fa-solid fa-caret-left text-white"></i>
+                  </span>
+                </li>
+                <% } %>
+
+                  <!-- Left Page (if exists) -->
+                  <% if (currentPage - 1>= 1) { %>
+                    <li class="page-item">
+                      <a class="page-link" href="?page=<%= currentPage - 1 %>&limit=<%= limit %>">
+                        <%= currentPage - 1 %>
+                      </a>
+                    </li>
+                    <% } %>
+
+                      <!-- Current Page -->
+                      <li class="page-item active">
+                        <span class="page-link bg-white text-dark border-0">
+                          <%= currentPage %>
+                        </span>
                       </li>
-                      <% } else { %>
-                        <li class="page-item disabled">
-                          <span class="page-link bg-dark"><i class="fa-solid fa-caret-right text-white"></i></span>
+
+                      <!-- Right Page (if exists) -->
+                      <% if (currentPage + 1 <=totalPages) { %>
+                        <li class="page-item">
+                          <a class="page-link" href="?page=<%= currentPage + 1 %>&limit=<%= limit %>">
+                            <%= currentPage + 1 %>
+                          </a>
                         </li>
                         <% } %>
-        </ul>
-      </nav>
-    </div>
+
+                          <!-- Next Button -->
+                          <% if (currentPage < totalPages) { %>
+                            <li class="page-item">
+                              <a class="page-link bg-dark" href="?page=<%= currentPage + 1 %>&limit=<%= limit %>">
+                                <i class="fa-solid fa-caret-right text-white"></i>
+                              </a>
+                            </li>
+                            <% } else { %>
+                              <li class="page-item disabled">
+                                <span class="page-link bg-dark">
+                                  <i class="fa-solid fa-caret-right text-white"></i>
+                                </span>
+                              </li>
+                              <% } %>
+
+          </ul>
+        </nav>
+      </div>
     </main>
     </div>
     <%- include('../partials/admin/footer.ejs')%>

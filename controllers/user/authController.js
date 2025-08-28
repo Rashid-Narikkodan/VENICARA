@@ -59,6 +59,7 @@ const handleLogin = async (req, res) => {
       isBlocked: user.isBlocked,
       referralCode: user.referralCode,
     }
+    req.flash('success','Logged in successfully')
     return res.redirect('/home')
   } catch (err) {
     res.send('from handleLogin: ' + err.message)
@@ -370,7 +371,7 @@ const handleLogout = (req, res) => {
   req.session.destroy((err) => {
     if (err) {
       console.log("Error destroying session:", err);
-      return res.status(500).send("Logout failed");
+      return res.status(500).send("Logout failed :- "+err);
     }
     res.clearCookie("connect.sid");
     res.redirect("/"); 

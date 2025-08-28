@@ -40,7 +40,7 @@
     <!-- Desktop navigation links (visible on md+) -->
     <div class="d-none d-md-flex align-items-center gap-4">
      <a
-     href="/home" 
+     href="/login" 
      class="text-decoration-none text-black fw-semibold">HOME</a>
      <a
       href="/shop"
@@ -51,6 +51,20 @@
     <div class="d-flex align-items-center gap-2">
      <a href="/signup" class="btn btn-outline-dark fw-semibold">SIGN UP</a>
      <a href="/login" class="btn btn-dark text-white fw-semibold">LOG IN</a>
+    </div>
+     <div id="successBox" class="successBox w-100 d-flex justify-content-center">
+     <%if(messages.success.length>0){%>
+     <div class="alert alert-success text-center w-md-25 w-75">
+      <%=messages.success[0]%>
+     </div>
+     <%}%>
+    </div>
+    <div id="errorBox" class="errorBox w-100 d-flex justify-content-center">
+     <%if(messages.error.length>0){%>
+     <div class="alert alert-danger text-center w-md-25 w-75">
+      <%=messages.error[0]%>
+     </div>
+     <%}%>
     </div>
    </div>
   </header>
