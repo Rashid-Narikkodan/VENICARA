@@ -1,13 +1,15 @@
-const User=require('../../models/User')
-const showProfile=async(req,res)=>{
-  try{
-    const user=await User.findById(req.session.user.id)
-    res.render('userPages/profile',{user})
-  }catch(err){
+const User = require('../../models/User')
+const showProfile = async (req, res) => {
+  try {
+    const user = await User.findById(req.session.user.id)
+    res.render('userPages/profile', { user })
+  } catch (err) {
     console.log(err)
-    res.status(500).send('from showProfile :- '+err.message)   
+    res.status(500).send('from showProfile :- ' + err.message)
   }
 }
+const editProfile = (req, res) => {}
 module.exports = {
   showProfile,
+  editProfile,
 }
