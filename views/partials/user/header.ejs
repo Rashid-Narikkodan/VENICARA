@@ -60,7 +60,7 @@
        >
         <i class="fs-5 text-white fa-solid fa-magnifying-glass"></i>
        </button>
-       <div id="searchResults" class="position-absolute rounded-4" style="top:5rem;right:-4rem;left:-4rem">
+       <div id="searchResults" class="position-absolute d-none rounded-4" style="top:5rem;right:-4rem;left:-4rem;height:50vh;overflow-y: scroll;overflow-x: hidden;scrollbar-width: 2px;">
         
        </div>
       </form>
@@ -96,9 +96,12 @@
   const cancel=document.getElementById('cancel')
     document.addEventListener("click", (e) => {
   if (!searchInput.contains(e.target) && !resultBox.contains(e.target)) {
+    resultBox.classList.add('d-none')
     searchInput.value = "";   // clear input
     resultBox.innerHTML = ""; // clear results
     cancel.innerHTML='<i class="fs-5 text-white fa-solid fa-magnifying-glass"></i>'
+  }else if(searchInput.contains(e.target)){
+    searchBox.classList.remove('d-none')
   }
 });
 
@@ -106,7 +109,7 @@
     searchForm.addEventListener("input", (e) => {
       const query = searchForm.search.value.trim();
       if (!query) return; // don’t call API on empty input
-      
+      resultBox.classList.remove('d-none')
       const input=document.getElementById('inputSearch')
       if(searchForm.value!="") cancel.innerHTML='<i class="fa-solid fa-xmark"></i>'
     fetch(`/search?search=${encodeURIComponent(query)}`, {
@@ -114,11 +117,9 @@
     })
      .then((res) => res.json())
      .then((data) => {
-      console.log(data);
       const searchResults = document.getElementById("searchResults");
       searchResults.innerHTML = "";
       data.products.forEach((product) => {
-        console.log(product.name);
        const a = document.createElement("a");
        a.href = `/products/${product._id}`;
         a.classList.add("text-decoration-none", "text-white", 'd-block', 'mb-2', 'bg-secondary','rounded-4');

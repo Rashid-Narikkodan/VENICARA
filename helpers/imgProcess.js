@@ -3,7 +3,6 @@ const path=require('path')
 const fs=require('fs')
 
 const processImages= async (files,folder='public/upload/products') => {
-  console.log(files)
   const imagePaths=[]
   if(!fs.existsSync(folder)) fs.mkdirSync(folder,{recursive:true});
   for(const file of files){
@@ -14,4 +13,4 @@ const processImages= async (files,folder='public/upload/products') => {
   }
   return imagePaths
 }
-module.exports = processImages
+module.exports = processImages

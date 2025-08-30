@@ -3,13 +3,11 @@ const Product = require('../../models/Product')
 const searchProducts = async (req, res) => {
   try {
     const search = req.query.search || "";
-    // Filter object
-    console.log(search)
     let filter = { isDeleted: false, isAvailable: true };
     if (search) {
       filter.name = { $regex: search, $options: "i" }; // case-insensitive search
     }
-    const searchedProducts = await Product.find(filter);
+    const searchedProducts = await Product.find(filter,{name:1,images:1});
     return res.json({ products: searchedProducts })
   } catch (err) {
     console.log(err.message)

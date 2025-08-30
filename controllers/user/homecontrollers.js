@@ -55,6 +55,7 @@ const showShop = async (req, res) => {
         currentPage: page,
         totalPages,
         limit,
+        query:req.query
       });
     }
     const selectedCategory = category && category !== "all" && mongoose.isValidObjectId(category)
@@ -113,6 +114,7 @@ const showShop = async (req, res) => {
       currentPage: page,
       totalPages,
       limit,
+      query:req.query
     });
 
   } catch (err) {

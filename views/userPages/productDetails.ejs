@@ -29,6 +29,7 @@
       border: 1px solid #ccc;
       background-repeat: no-repeat;
       margin-left: 20px;
+      backdrop-filter: blur(5px); 
     }
 
     .breadcrumb-item+.breadcrumb-item::before {
@@ -62,7 +63,7 @@
               <div id="lens"></div>
             </div>
             <div style="right:2rem;width:50%;height:40rem"
-              class="zoom-container d-none rounded-5 border border-1 border-dark" id="zoomBox"></div>
+              class="zoom-container d-none z-3 rounded-5 border-secondary" id="zoomBox"></div>
             <div class="col-md-12">
               <div class="row justify-content-center">
                 <%product.images.forEach((image)=>{%>
