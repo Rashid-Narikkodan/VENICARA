@@ -2,7 +2,7 @@ require("dotenv").config()
 require('./config/passport'); // import Passport config
 const express = require("express")
 const app = express()
-const db = require('./config/db')
+const connectDB = require('./config/db')
 const path = require('path')
 const userRoutes = require('./routes/userRoutes')
 const adminRoutes = require('./routes/adminRoutes')
@@ -43,7 +43,7 @@ app.use((req, res, next) => {
 })
 
 //app.listen to start server based mongoDB connected or not
-db().then(() => {
+connectDB().then(() => {
   app.listen(process.env.PORT, () => {
     console.log(`server running on http://localhost:${process.env.PORT}`);
   })

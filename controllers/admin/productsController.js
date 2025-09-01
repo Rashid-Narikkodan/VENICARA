@@ -21,7 +21,6 @@ const showProducts = async (req, res) => {
       .limit(limit)
       .sort({ createdAt: -1 })
       .lean();
-    console.log(await Product.find(filter).populate("category"));
     const productVariants = products.map((product) => {
       const totalStock = product.variants
         .filter((v) => v)
@@ -207,7 +206,6 @@ const editProduct = async (req, res) => {
     const update = {};
     let variants = [];
     let images = [];
-
     const volumes = Array.isArray(volume) ? volume : [volume];
     const basePrices = Array.isArray(basePrice) ? basePrice : [basePrice];
     const discountPrices = Array.isArray(discountPrice)

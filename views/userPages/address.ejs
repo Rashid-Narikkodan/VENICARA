@@ -1,0 +1,68 @@
+<%- include('../partials/user/header.ejs') %>
+<%- include('../partials/user/sidebarProfile.ejs') %>
+
+<main class="flex-grow-1 bg-light w-100 d-flex justify-content-center">
+  <div class="container py-5" style="max-width: 900px;">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h3 class="fw-bold mb-0">My Addresses</h3>
+      <a href="/address/new" class="btn btn-dark">+ Add New Address</a>
+    </div>
+
+    <% if (addresses && addresses.length > 0) { %>
+      <div class="row g-4">
+        <% addresses.forEach(address => { %>
+          <div class="col-md-6">
+            <div class="card shadow-lg border-0 rounded-4 h-100">
+              <div class="card-body d-flex flex-column justify-content-between">
+                
+                <!-- Address Info -->
+                <div>
+                  <h5 class="fw-bold mb-2"><%= address.fullName %></h5>
+                  <p class="mb-1"><strong>Street:</strong> <%= address.street || '-' %></p>
+                  <p class="mb-1"><strong>Address:</strong> <%= address.address %></p>
+                  <p class="mb-1"><strong>City:</strong> <%= address.city %>, <%= address.state %></p>
+                  <p class="mb-1"><strong>PIN:</strong> <%= address.pin %></p>
+                  
+                  <% if (address.landmark) { %>
+                    <p class="mb-1"><strong>Landmark:</strong> <%= address.landmark %></p>
+                  <% } %>
+
+                  <% if (address.alternateMobile) { %>
+                    <p class="mb-1"><strong>Alt Mobile:</strong> <%= address.alternateMobile %></p>
+                  <% } %>
+
+                  <p class="text-muted small m-0 ">
+                      Added on <%= new Date(address.createdAt).toLocaleDateString() %>
+                    </p>
+                    <span class="badge bg-dark p-2 mt-1 text-capitalize"><%= address.type %></span>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="d-flex justify-content-between align-items-center mt-2">
+                  <div class="btn-group">
+                    <a href="/address/edit/<%= address._id %>" class="btn btn-sm btn-outline-dark">Edit</a>
+                    <form action="/address/delete/<%= address._id %>?_method=DELETE" method="POST" style="display:inline;">
+                      <button type="submit" class="btn btn-sm btn-outline-dark">Delete</button>
+                    </form>
+                  </div>
+                  <a href="/address/setDefault/<%=address._id%>" 
+                     class="btn btn-sm <%= address.isDefault? 'btn-dark' : 'btn-outline-secondary' %>">
+                    Set Default
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+    <% } else { %>
+      <div class="text-center bg-white p-5 rounded-4 shadow-sm">
+        <p class="text-muted mb-3">No addresses saved yet.</p>
+      </div>
+    <% } %>
+  </div>
+</main>
+
+<script src="/js/userHeader.js"></script>
+</body>
+</html>

@@ -167,7 +167,7 @@ const handleForgotOTP = async (req, res) => {
 
 const resendForgotOTP = async (req, res) => {
   try {
-    const user = await User.findOne({ _id: req.session.userId })
+    const user = await User.findOne({ _id: req.session.useId })
     const otp = generateOTP()
     const otpExpiry = new Date(Date.now() + 5 * 60 * 1000)
 
