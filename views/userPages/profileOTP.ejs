@@ -51,7 +51,7 @@ resend.addEventListener('click', async (e) => {
   resend.style.pointerEvents = 'none';
 
   try {
-    const response = await fetch('/resendProfileOTP', {
+    const response = await fetch('/auth/resendProfileOTP', {
       method: "POST",
       headers: { "Content-Type": "application/json" }
     });

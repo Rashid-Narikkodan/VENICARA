@@ -7,13 +7,14 @@ resend.addEventListener('click', async (e) => {
   resend.style.pointerEvents = 'none';
 
   try {
-    const response = await fetch('/resendForgotOTP', {
+    const response = await fetch('/auth/forgot/resend-otp', {
       method: "POST",
       headers: { "Content-Type": "application/json" }
     });
 
     const data = await response.json(); // <-- await here
 
+    console.log('hellooooo')
     if (data.success) {
       resend.innerHTML = 'Resend';
       startTimer(50); // start countdown from 50 seconds

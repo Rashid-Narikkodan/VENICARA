@@ -3,8 +3,11 @@ const User = require('../../models/User.js')
 const generateOTP = require('../../helpers/generateOTP.js')
 const sendEmail = require('../../helpers/sendMail.js')
 const generateRefCode = require('../../helpers/referralCode.js')
-const {nanoid}=require('nanoid')
+const { nanoid } = require('nanoid')
 
+// ============================
+// Login
+// ============================
 const showLogin = (req, res) => {
   try {
     res.render('userPages/login')
@@ -21,34 +24,33 @@ const handleLogin = async (req, res) => {
     // Validation
     if (!email || !password) {
       req.flash('error', 'Email and Password is required')
-      return res.redirect('/login')
+      return res.redirect('/auth/login')
     }
     if (!user) {
       req.flash('error', 'Incorrect Email or Password')
-      return res.redirect('/login')
+      return res.redirect('/auth/login')
     }
-    if(user.isBlocked){
+    if (user.isBlocked) {
       req.flash('error', 'Access denied')
-      return res.redirect('/login')
+      return res.redirect('/auth/login')
     }
-    if(user.isDeleted){
+    if (user.isDeleted) {
       req.flash('error', 'User not exist')
-      return res.redirect('/login')
+      return res.redirect('/auth/login')
     }
-    if(!user.password){
+    if (!user.password) {
       req.flash('error', 'Incorrect Email or Password')
-      return res.redirect('/login')
+      return res.redirect('/auth/login')
     }
     const isMatch = await bcrypt.compare(password, user.password)
     if (!isMatch) {
       req.flash('error', 'Incorrect Email or Password')
-      return res.redirect('/login')
+      return res.redirect('/auth/login')
     }
-  
 
     if (!user.isVerified) {
       req.flash('error', 'Verify before login (OTP)')
-      return res.redirect('/login')
+      return res.redirect('/auth/login')
     }
 
     // Initialize session
@@ -59,23 +61,26 @@ const handleLogin = async (req, res) => {
       isBlocked: user.isBlocked,
       referralCode: user.referralCode,
     }
-    req.flash('success','Logged in successfully')
+    req.flash('success', 'Logged in successfully')
     return res.redirect('/home')
   } catch (err) {
     res.send('from handleLogin: ' + err.message)
   }
 }
 
+// ============================
+// Google OAuth
+// ============================
 const handleGoogleAuth = async (req, res) => {
   try {
     const user = await User.findById(req.user._id)
-    if(user.isBlocked){
+    if (user.isBlocked) {
       req.flash('error', 'This account is blocked')
-      return res.redirect('/login')
+      return res.redirect('/auth/login')
     }
-    if(user.isDeleted){
+    if (user.isDeleted) {
       req.flash('error', 'User not exist')
-      return res.redirect('/login')
+      return res.redirect('/auth/login')
     }
     if (!user.referralCode) {
       user.referralCode = generateRefCode(user.name)
@@ -99,7 +104,9 @@ const handleGoogleAuth = async (req, res) => {
   }
 }
 
-
+// ============================
+// Forgot Password
+// ============================
 const showForgot = (req, res) => {
   try {
     return res.render('userPages/forgot')
@@ -114,15 +121,15 @@ const handleForgot = async (req, res) => {
     const user = await User.findOne({ email })
     if (!user) {
       req.flash('error', 'User not existing')
-      return res.redirect('/forgot')
+      return res.redirect('/auth/forgot')
     }
-    if(user.isDeleted){
-       req.flash('error', 'User not exist')
-      return res.redirect('/forgot')
+    if (user.isDeleted) {
+      req.flash('error', 'User not exist')
+      return res.redirect('/auth/forgot')
     }
-    if(user.isBlocked){
-       req.flash('error', 'This account is blocked')
-      return res.redirect('/forgot')
+    if (user.isBlocked) {
+      req.flash('error', 'This account is blocked')
+      return res.redirect('/auth/forgot')
     }
     const otp = generateOTP()
     const otpExpiry = new Date(Date.now() + 5 * 60 * 1000)
@@ -131,7 +138,7 @@ const handleForgot = async (req, res) => {
     user.save()
     sendEmail(email, otp, user.name)
     req.session.userId = user._id
-    return res.redirect('/forgotOTP')
+    return res.redirect('/auth/forgot/otp')
   } catch (err) {
     res.status(500).send(err.message)
   }
@@ -154,11 +161,10 @@ const handleForgotOTP = async (req, res) => {
       user.otp = null
       user.otpExpiry = null
       await user.save()
-      return res.redirect('/forgot/changePass')
-
+      return res.redirect('/auth/forgot/change-password')
     } else {
       req.flash('error', 'invalid or expired OTP')
-      return res.redirect('/forgotOTP')
+      return res.redirect('/auth/forgot/otp')
     }
   } catch (err) {
     res.status(500).send(err.message)
@@ -178,7 +184,7 @@ const resendForgotOTP = async (req, res) => {
     sendEmail(user.email, otp, user.name)
     return res.json({ success: true })
   } catch (er) {
-    res.status(500).send(err.message)
+    res.status(500).send(er.message)
   }
 }
 
@@ -192,28 +198,25 @@ const showChangePass = (req, res) => {
 
 const handleChangePass = async (req, res) => {
   try {
-
     const user = await User.findOne({ _id: req.session.userId })
     const { password, confirmPassword } = req.body
     if (!user) {
       req.flash('error', 'user not found')
-      return res.redirect('/forgot/changePass')
+      return res.redirect('/auth/forgot/changePass')
     }
     if (password !== confirmPassword) {
       req.flash('error', 'Confirm password is nt matching')
-      return res.redirect('/forgot/changePass')
+      return res.redirect('/auth/forgot/changePass')
     }
     const hashed = await bcrypt.hash(password, 10)
     user.password = hashed
     user.save()
     req.flash('success', 'new password updated')
-    return res.redirect('/login')
+    return res.redirect('/auth/login')
   } catch (err) {
     res.status(500).send(err.message)
   }
 }
-
-
 
 // ============================
 // Signup
@@ -233,54 +236,53 @@ const handleSignup = async (req, res) => {
     const user = await User.findOne({ email })
 
     if (user) {
-      if(user.isDeleted){
-        user.isDeleted=false
-        user.isVerified=false
-           if (refCode !== '') {
-      const code = await User.findOne({ referralCode: refCode })
-      if (!code) {
-        req.flash('error', 'invalid referral code')
-        return res.redirect('/signup')
-      }
-      user.referredBy=refCode
-        if(password == confirmPassword){
-          user.password=await bcrypt.hash(password,10)
-        }else{
-          req.flash('error', 'Confirm password does not match')
-          return res.redirect('/signup')
+      if (user.isDeleted) {
+        user.isDeleted = false
+        user.isVerified = false
+        if (refCode !== '') {
+          const code = await User.findOne({ referralCode: refCode })
+          if (!code) {
+            req.flash('error', 'invalid referral code')
+            return res.redirect('/auth/signup')
+          }
+          user.referredBy = refCode
+          if (password == confirmPassword) {
+            user.password = await bcrypt.hash(password, 10)
+          } else {
+            req.flash('error', 'Confirm password does not match')
+            return res.redirect('/auth/signup')
+          }
+          await user.save()
         }
-        await user.save()
+        if (user.isBlocked) {
+          req.flash('error', 'Access denied')
+          return res.redirect('/auth/signup')
+        }
       }
-      if(user.isBlocked){
-        req.flash('error', 'Access denied')
-        return res.redirect('/signup')
-      }
-    }
       if (user.isVerified) {
         req.flash('error', 'User already exists')
-        return res.redirect('/signup')
+        return res.redirect('/auth/signup')
       } else {
-        
         user.otp = generateOTP()
         user.otpExpiry = new Date(Date.now() + 5 * 60 * 1000)
         await user.save()
         req.session.userId = user._id
         sendEmail(email, user.otp, name)
         req.flash('success', `OTP sent to your email: ${email}`)
-        return res.redirect('/signup/verify-otp')
+        return res.redirect('/auth/signup/verify-otp')
       }
     }
 
     if (password !== confirmPassword) {
       req.flash('error', 'Confirm password does not match')
-      return res.redirect('/signup')
+      return res.redirect('/auth/signup')
     }
 
     if (refCode !== '') {
       const code = await User.findOne({ referralCode: refCode })
       if (!code) {
         req.flash('error', 'invalid referral code')
-        return res.redirect('/signup')
+        return res.redirect('/auth/signup')
       }
     }
 
@@ -288,7 +290,7 @@ const handleSignup = async (req, res) => {
     const otpExpiry = new Date(Date.now() + 5 * 60 * 1000)
     const hashedPass = await bcrypt.hash(password, 10)
     const referralCode = generateRefCode(name)
-    const userId=`USR-${nanoid(6).toUpperCase()}`
+    const userId = `USR-${nanoid(6).toUpperCase()}`
     const newUser = new User({
       name,
       email,
@@ -306,7 +308,7 @@ const handleSignup = async (req, res) => {
     sendEmail(email, otp, name)
 
     req.flash('success', `OTP sent to your email: ${email}`)
-    return res.redirect('/signup/verify-otp')
+    return res.redirect('/auth/signup/verify-otp')
   } catch (err) {
     res.status(500).send('internal server error - ' + err.message)
   }
@@ -327,7 +329,7 @@ const handleSignupOTP = async (req, res) => {
 
     if (!user) {
       req.flash('error', 'user not found')
-      return res.redirect('/signup')
+      return res.redirect('/auth/signup')
     }
 
     if (user.otp == otp && user.otpExpiry > Date.now()) {
@@ -336,12 +338,11 @@ const handleSignupOTP = async (req, res) => {
       user.otpExpiry = null
       await user.save()
 
-
-      req.flash('success','new User Registered successfully')
-      res.redirect('/login')
+      req.flash('success', 'new User Registered successfully')
+      res.redirect('/auth/login')
     } else {
       req.flash('error', 'invalid or expired OTP')
-      return res.redirect('/signup/verify-otp')
+      return res.redirect('/auth/signup/verify-otp')
     }
   } catch (err) {
     res.status(500).send(err.message)
@@ -366,19 +367,21 @@ const resendOTP = async (req, res) => {
   }
 }
 
-
+// ============================
+// Logout
+// ============================
 const handleLogout = (req, res) => {
   req.session.destroy((err) => {
     if (err) {
       console.log("Error destroying session:", err);
-      return res.status(500).send("Logout failed :- "+err);
+      return res.status(500).send("Logout failed :- " + err);
     }
     res.clearCookie("connect.sid");
-    res.redirect("/"); 
-})
+    res.redirect("/");
+  })
 }
 
-module.exports = {  
+module.exports = {
   showLogin,
   handleLogin,
   handleGoogleAuth,

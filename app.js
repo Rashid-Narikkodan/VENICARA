@@ -36,8 +36,8 @@ app.use(express.urlencoded({ extended: true }))
 app.use(express.static(path.join(__dirname, 'public')))
 
 //routers
-app.use('/',userRoute)
 app.use('/admin', adminRoutes)
+app.use('/',userRoute)
 app.use('/', userRoutes)
 //pagenotfound
 app.use((req, res, next) => {

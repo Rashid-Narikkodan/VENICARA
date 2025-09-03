@@ -121,7 +121,7 @@ const resendProfileOTP = async (req, res) => {
     sendEmail(user.email, otp, user.name)
     return res.json({ success: true })
   } catch (er) {
-    res.status(500).send(err.message)
+    res.status(500).send(er.message)
   }
 }
 

@@ -49,7 +49,7 @@ const handleNewAddress = async (req, res) => {
     await newAddress.save();
 
     req.flash("success", "New address added");
-    res.redirect("/profile/address");
+    res.redirect("/address");
   } catch (er) {
     console.log(er.message);
     res.status(500).send("handleNewAddress :- " + er.message);
@@ -84,7 +84,7 @@ const handleEditAddress = async (req, res) => {
     const addressById = await Address.findById(req.params.id);
     if (!addressById) {
       req.flash("error", "Address not found");
-      return res.redirect("/profile/address");
+      return res.redirect("/address");
     }
 
     const update = {
@@ -105,7 +105,7 @@ const handleEditAddress = async (req, res) => {
     await Address.findByIdAndUpdate(req.params.id, update, { new: true });
 
     req.flash("success", "Address updated successfully");
-    res.redirect("/profile/address");
+    res.redirect("/address");
   } catch (err) {
     console.error("handleEditAddress Error:", err.message);
     res.status(500).send("handleEditAddress :- " + err.message);
@@ -115,7 +115,7 @@ const deleteAddress=async(req,res)=>{
     try{
         await Address.findByIdAndDelete(req.params.id)
         req.flash('success','One address removed')
-        res.redirect('/profile/address')
+        res.redirect('/address')
     }catch(er){
         console.log(er.message)
         res.status(500).send('deleteAddress :- '+er.message)
@@ -129,7 +129,7 @@ const setDefaultAddress=async(req,res)=>{
       { $set: { isDefault: false } }
     );
     await Address.findByIdAndUpdate(addressId, { isDefault: true });
-    return res.redirect('/profile/address')
+    return res.redirect('/address')
     }catch(er){
         console.log(er.message)
         res.status(500).send('setDefaultAddress :- '+er.message)
