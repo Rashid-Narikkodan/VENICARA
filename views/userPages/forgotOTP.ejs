@@ -40,7 +40,7 @@
       <%}%>
       <!-- Form -->
       <div class="row g-0 d-flex justify-content-center pt-md-3 pb-md-5">
-              <form action="/forgotOTP" method="post" class="">
+              <form action="/auth/forgotOTP" method="post" class="">
                 <input type="text" name="otp" placeholder="Enter OTP" class="p-3 mb-md-3 text-center w-100 form-control" maxlength="6">
                 <div class="mb-3 mt-3">
                   <span>Remaining Time <span id="timer" style="color:blueviolet" >00:50s</span></span>
@@ -51,7 +51,7 @@
               </form>
 
       <p class="mt-3 text-center text-muted">
-       <a href="/login" class="fw-semibold text-decoration-none text-secondary">Go back to Login page?</a>
+       <a href="/auth/login" class="fw-semibold text-decoration-none text-secondary">Go back to Login page?</a>
       </p>
      </div>
      

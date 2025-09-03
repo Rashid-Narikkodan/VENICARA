@@ -6,6 +6,7 @@ const connectDB = require('./config/db')
 const path = require('path')
 const userRoutes = require('./routes/userRoutes')
 const adminRoutes = require('./routes/adminRoutes')
+const userRoute = require('./routes/user')
 const sessionConfig = require('./middlewares/session')
 const flash = require('connect-flash')
 const flashMsg = require('./middlewares/flash')
@@ -35,6 +36,7 @@ app.use(express.urlencoded({ extended: true }))
 app.use(express.static(path.join(__dirname, 'public')))
 
 //routers
+app.use('/',userRoute)
 app.use('/admin', adminRoutes)
 app.use('/', userRoutes)
 //pagenotfound

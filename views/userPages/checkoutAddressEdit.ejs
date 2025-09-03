@@ -1,3 +1,4 @@
+
 <%- include('../partials/user/header.ejs') %>
 <%- include('../partials/user/sidebarProfile.ejs') %>
 
@@ -6,7 +7,7 @@
     <div class="card shadow-lg border-0 rounded-4 p-4">
       <h4 class="fw-bold text-center mb-4">Edit Address</h4>
 
-<form action="/address/edit/<%= address._id %>?_method=PUT" method="POST">
+<form action="/checkout/address/edit/<%= address._id %>?_method=PUT" method="POST">
   <div class="row g-3">
     <!-- Name -->
     <div class="col-md-6">
@@ -101,7 +102,7 @@
   <!-- Buttons -->
   <div class="d-flex justify-content-end gap-2 mt-4">
     <button type="submit" class="btn btn-dark px-4">Save</button>
-    <a href="/profile/address" class="btn btn-outline-secondary px-4">Cancel</a>
+    <a href="/checkout/address" class="btn btn-outline-secondary px-4">Cancel</a>
   </div>
 </form>
 

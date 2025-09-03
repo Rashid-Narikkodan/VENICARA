@@ -121,19 +121,27 @@
             </div>
             <div>
               <span id="variantStock" class="text-danger fs-4 fw-bold">
-                <%=!product.isAvailable?'Product not Available': product.variants.reduce((min, v)=> v.discount <
-                    min.discount ? v : min).stock <=0 ?'Out of Stock':''%>
+                <%=!product.isAvailable?'Product not Available': product.variants.reduce((min, v)=>
+                 v.discount<min.discount ? v : min).stock <=0 ?'Out of Stock':''%>
               </span>
             </div>
           </div>
 
+          <%const lowestVariant = product.variants.reduce((min, v) => v.discount < min.discount ? v : min, product.variants[0])%>
+
           <div class="d-flex flex-column mt-3 gap-2 align-items-start">
-            <a href="#" class="btn btn-dark p-3 rounded-5" style="width: 100%; max-width: 100%;">
+            <form action="/whishlist/addToWhishlist/<%=product._id%>" method="POST">
+              <input type="hidden" name="variantId" id="" value="<%= lowestVariant._id %>">
+            <button class="btn btn-dark p-3 rounded-5" style="width: 100%; max-width: 100%;">
               <span class="fw-bold">ADD TO WISHLIST</span>
-            </a>
-            <a href="#" class="btn btn-dark p-3 rounded-5" style="width: 100%; max-width: 100%;">
+            </button>
+          </form>
+            <form action="/cart/addToCart/<%=product._id%>" method="POST">
+                <input type="hidden" name="variantId" id="variantId" value="<%= lowestVariant._id %>">
+            <button class="btn btn-dark p-3 rounded-5" style="width: 100%; max-width: 100%;">
               <span class="fw-bold">ADD TO CART</span>
-            </a>
+            </button>
+            </form>
           </div>
 
           <!-- Variant buttons -->
@@ -142,7 +150,8 @@
               <button class="btn btn-outline-dark rounded-5 variant-btn <%= index === 0 ? 'active' : '' %>"
                 data-price="<%= variant.discount%>" data-volume="<%= variant.volume %>"
                 data-basePrice="<%= variant.basePrice%>" data-discountPerc="<%= variant.discountPercentage %>"
-                data-stock="<%=variant.stock%>" data-isAvailable="<%=product.isAvailable%>">
+                data-stock="<%=variant.stock%>" data-isAvailable="<%=product.isAvailable%>"
+                data-id="<%=variant._id%>">
                 <%= variant.volume %>ML
               </button>
               <% }) %>
@@ -246,6 +255,7 @@
     const variantBasePrice = document.getElementById("variantBasePrice");
     const variantPerc = document.getElementById("variantPerc");
     const variantStock = document.getElementById('variantStock')
+    const varientId = document.getElementById('variantId')
 
     variantButtons.forEach(btn => {
       btn.addEventListener("click", () => {
@@ -260,6 +270,8 @@
         variantBasePrice.textContent = `₹${basePrice - 1}.99`
         variantPerc.textContent = `${Math.round(percentage)}% off`
         variantStock.textContent = !isAvailable ? 'Product not Available' : stock <= 0 ? 'Out of Stock' : ''
+
+        variantId.value = btn.getAttribute('data-id')
       });
     });
 

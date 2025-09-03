@@ -151,6 +151,23 @@ const handleProfileChangePass = async (req, res) => {
   }
 };
 
+const showDeleteAc=(req,res)=>{
+  try{
+    res.render('userPages/deleteAc')
+
+  }catch(er){
+    console.error('error from showDelete :-', err.message);
+    res.status(500).send('error from showDelete :- ' + err.message);
+  }
+}
+const handleDeleteAc=async(req,res)=>{
+    try{
+      await User.findByIdAndUpdate(req.session.user.id, {isDeleted:true})
+    }catch(er){
+    console.error('error from handleDelete :-', err.message);
+    res.status(500).send('error from handleDelete :- ' + err.message);
+  }
+}
 module.exports = {
   showProfile,
   editProfile,
@@ -161,4 +178,6 @@ module.exports = {
   resendProfileOTP,
   showProfileChangePass,
   handleProfileChangePass,
+  showDeleteAc,
+  handleDeleteAc,
 };

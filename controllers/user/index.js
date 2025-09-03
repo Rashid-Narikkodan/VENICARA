@@ -3,5 +3,9 @@ module.exports={
   userController:require('./userControllers'),
   productController:require('./productControllers'),
   homeController:require('./homecontrollers'),
-  addressController:require('./addressController')
+  addressController:require('./addressController'),
+  cartController:require('./cartController'),
+  referController:require('./referController'),
+  walletController:require('./walletController'),
+  checkoutController:require('./checkoutController')
 }

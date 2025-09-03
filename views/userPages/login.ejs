@@ -39,7 +39,7 @@
           <div class="alert alert-danger p-2"><%=messages.error[0]%></div>  
           <%}%>
         <!-- Form -->
-        <form action="/login" method="post" id="form"> 
+        <form action="/auth/login" method="post" id="form"> 
           <div class="mb-2">
             <input type="email" id="email" name="email" class="form-control rounded-3 p-3" placeholder="Email">
           </div>
@@ -48,13 +48,13 @@
             <input type="password" id="pass" name="password" class="form-control rounded-3 p-3" placeholder="Password" >
           </div>
           <div class="text-danger" id="passError"></div>
-          <div class="text-end"><a href="/forgot" class="text-decoration-none text-black">Forgot password</a></div>
+          <div class="text-end"><a href="/auth/forgot" class="text-decoration-none text-black">Forgot password</a></div>
           <button type="submit" class="btn btn-dark w-100 rounded-3 p-2 fs-4 mt-2">LOGIN</button>
         </form>
 
         <p class="mt-3 text-center text-muted">
           Dont you have an account?
-          <a href="/signup" class="fw-semibold text-decoration-none">Signup now..!</a>
+          <a href="/auth/signup" class="fw-semibold text-decoration-none">Signup now..!</a>
         </p>
         <p><a href="/" class=" text-decoration-none text-black">Go back</a></p>
       </div>
