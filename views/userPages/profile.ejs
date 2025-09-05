@@ -1,23 +1,19 @@
 <%-include('../partials/user/header.ejs')%>
   <%-include('../partials/user/sidebarProfile.ejs')%>
-    <main class="flex-grow-1 bg-light w-100 justify-content-center d-flex">
+    <main class="w-100 justify-content-center d-flex">
 
-      <div style="width:50rem" class="mt-5 rounded-4 shadow h-auto px-5 pt-5">
+      <div style="background:rgb(241, 241, 241)" class="rounded-5 h-75 shadow px-5 pt-5">
         <div>
           <p class="fs-3 fw-bold text-black text-center">Profile</p>
         </div>
-        <form action="/profile/edit?_method=PATCH" method="POST" enctype="multipart/form-data">
           <div class="row">
             <div class="col-md-12 w-100 d-flex justify-content-center">
               <div class="position-relative d-inline-block">
                 <!-- Circle -->
-                <div id="addImg" class="bg-secondary rounded-circle overflow-hidden"
+                <div class="bg-secondary rounded-circle overflow-hidden"
                   style="width:6rem;height:6rem;cursor:pointer;">
-                  <input name="userProfile" id="userProfile" type="file" hidden>
-
                   <% if (user.photoUrl) { %>
-                    <!-- Show uploaded profile picture -->
-                    <img src="<%= user.photoUrl %>" alt="Profile" class="w-100 h-100 rounded-circle"
+                    <img src="<%= user.photoUrl %>" alt="Profile" loading="lazy" class="w-100 h-100 rounded-circle"
                       style="object-fit:cover;">
                     <% } else { %>
                       <!-- Show placeholder icon -->
@@ -25,109 +21,36 @@
                       <div class="rounded-circle bg-dark mt-1" style="width:80%;height:80%;margin-left:.6rem"></div>
                       <% } %>
                 </div>
-
-                <!-- Delete button sits OUTSIDE the circle -->
-                <button type="button" id="deleteBtn"
-                  class="btn btn-sm btn-light border position-absolute <%= user.photoUrl ? '' : 'd-none' %>"
-                  style="bottom:0px; right:0px; border-radius:50%; padding:0.2rem 0.4rem;">
-                  <i class="fa-solid fa-trash"></i>
-                </button>
               </div>
             </div>
 
-            <div class="col-md-6 mx-auto mt-5">
-              <div class="mb-3">
-                <label for="name" class="fw-bold">Name:</label>
-                <input type="text" id="name" name="name" class="form-control rounded-3" value="<%=user.name%>">
-              </div>
-              <div class="mb-3">
-                <label for="email" class="fw-bold">Email:</label>
-                <input type="email" id="email" name="email" class="form-control rounded-3" value="<%=user.email%>">
-              </div>
-              <div class="mb-3">
-                <label for="phone" class="fw-bold">Phone:</label>
-                <input type="tel" pattern="[0-9]{10}" id="phone" name="phone" class="form-control rounded-3"
-                  value="<%=user.mobile?user.mobile:''%>" placeholder="Enter your Mobile number">
-              </div>
+            <div class="col-md-8 mx-auto mt-5">
+             <div class="mb-3 row">
+                <div class="fw-bold col-3 d-flex align-items-center">Name:</div>
+                <div class="rounded-2 px-3 py-2 col-8" style="background:lightblue"><%=user.name%></div>
+                </div>
+              <div class="mb-3 row">
+                <span class="fw-bold col-3 d-flex align-items-center">Email:</span>
+                <span class="rounded-2 px-3 py-2 col-8" style="background:lightblue"><%=user.email%></span>
+                </div>
+              <div class="mb-3 row">
+                <span class="fw-bold col-3 d-flex align-items-center">Phone:</span>
+                <span class="rounded-2 px-3 py-2 col-8" style="background:lightblue"><%=user.mobile||'Mobile no. is not updated'%></span>
+                </div>
 
               <!-- Gender -->
-              <div class="mb-3">
-                <label class="fw-bold d-block">Gender:</label>
-                <div class="form-check form-check-inline">
-                  <input class="form-check-input" type="radio" name="gender" id="female" value="female"
-                    <%=user.gender&&user.gender==='female' ?'checked':''%> >
-                  <label class="form-check-label" for="female">Female</label>
+              <div class="mb-3 row">
+                <span class="fw-bold col-3 d-flex align-items-center">Gender :</span>
+                <span class="rounded-2 px-3 py-2 col-8" style="background:lightblue"><%=user.gender||'Gender is not specified'%></span>
                 </div>
-                <div class="form-check form-check-inline">
-                  <input class="form-check-input" type="radio" name="gender" id="male" value="male"
-                    <%=user.gender&&user.gender==='male' ?'checked':''%> >
-                  <label class="form-check-label" for="male">Male</label>
-                </div>
-              </div>
             </div>
-            <div class="col-md-12 d-flex justify-content-between px-5 pb-5">
-              <a href="/profile/verify" class="text-primary text-decoration-none">Change password</a>
-              <button type="submit" class="btn btn-dark px-4">Save changes</button>
+            <div class="col-md-12 d-flex justify-content-center px-5 pb-5">
+              <a href="/profile/edit" class="btn btn-dark px-4">Edit</a>
             </div>
           </div>
-        </form>
       </div>
     </main>
     </div>
-    <script>
-      const addImg = document.getElementById("addImg");
-      const userProfile = document.getElementById("userProfile");
-      const deleteBtn = document.getElementById("deleteBtn");
-
-      function restorePlaceholder() {
-        [...addImg.children].forEach((child) => {
-          if (child.tagName !== "INPUT") child.remove();
-        });
-
-        const iconSmall = document.createElement("div");
-        iconSmall.className = "rounded-circle bg-dark mt-3";
-        iconSmall.style.cssText = "width:40%;height:40%;margin-left:1.8rem";
-
-        const iconLarge = document.createElement("div");
-        iconLarge.className = "rounded-circle bg-dark mt-1";
-        iconLarge.style.cssText = "width:80%;height:80%;margin-left:.6rem";
-
-        addImg.appendChild(iconSmall);
-        addImg.appendChild(iconLarge);
-
-        userProfile.value = "";
-        deleteBtn.classList.add("d-none");
-      }
-
-      addImg.addEventListener("click", () => userProfile.click());
-
-      userProfile.addEventListener("change", (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-
-        const reader = new FileReader();
-        reader.onload = (event) => {
-          [...addImg.children].forEach((child) => {
-            if (child.tagName !== "INPUT") child.remove();
-          });
-
-          const img = document.createElement("img");
-          img.src = event.target.result;
-          img.className = "w-100 h-100 rounded-circle";
-          img.style.objectFit = "cover";
-          addImg.appendChild(img);
-
-          deleteBtn.classList.remove("d-none");
-        };
-        reader.readAsDataURL(file);
-      });
-
-      deleteBtn.addEventListener("click", (e) => {
-        e.stopPropagation();
-        restorePlaceholder();
-      });
-    </script>
     <script src="/js/userHeader.js"></script>
     </body>
-
     </html>

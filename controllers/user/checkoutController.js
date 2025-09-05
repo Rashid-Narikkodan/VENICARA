@@ -4,6 +4,7 @@ const PaymentMethod = require("../../models/PaymentMethod");
 const Order = require("../../models/Order");
 const Coupon = require("../../models/Coupon");
 const { nanoid } = require("nanoid");
+const generateOrderId = require('../../helpers/orderID')
 
 const showAddress = async (req, res) => {
   try {
@@ -17,9 +18,10 @@ const showAddress = async (req, res) => {
 
     const items = cartDocs.map((doc) => {
       const variant = doc.productId?.variants.find(
-        (v) => v._id.toString() === doc.variantId.toString()
+        (v) =>v._id.toString() === doc.variantId.toString()
+  
       );
-
+      console.log(variant)
       return {
         cartId: doc._id,
         quantity: doc.quantity,
@@ -188,7 +190,7 @@ const handlePlaceOrder = async (req, res) => {
       paymentMethod === "wallet"
         ? { method: "wallet", status: "paid", provider: "InAppWallet", transactionId: null, paidAt: new Date() }
         : paymentMethod === "online"
-        ? { method: "online", status: "pending", provider: null, transactionId: null }
+        ? { method: "online", status: "pending", provider: null, transactionId: null, paidAt:new Date() }
         : { method: "cod", status: "pending" };
 
     // Build products + total
@@ -198,7 +200,7 @@ const handlePlaceOrder = async (req, res) => {
         (v) => v._id.toString() === item.variantId.toString()
       );
       if (!variant) throw new Error(`Variant not found for product ${item.productId?._id}`);
-
+      const image=item.productId.images[0]
       const subtotal = Number(variant.discount-1) * item.quantity;
       totalAmount += subtotal;
 
@@ -210,28 +212,32 @@ const handlePlaceOrder = async (req, res) => {
         discountPrice: Number(variant.discount),
         quantity: item.quantity,
         subtotal,
+        volume:variant.volume,
+        image,
       };
     });
-
-    totalAmount = parseFloat(totalAmount.toFixed(2));
-
+    if(coupon){
+      totalAmount-=coupon?.discount
+    }
+      totalAmount = parseFloat(totalAmount.toFixed(2));
+    
+    const orderId = await generateOrderId()
     // Save order
-    const newOrder = await Order.create({
+    await Order.create({
       userId: user.id,
-      orderId: `ORD-${nanoid(6).toUpperCase()}`,
+      orderId,
       products,
       shippingAddress: address,
       payment,
       couponApplied: coupon?._id || null,
       totalAmount,
     });
-
     // Clear cart
     await Cart.deleteMany({ userId: user.id, status: "active" });
 
-    return res.json({ status: true, message: "Order placed successfully", orderId: newOrder.orderId });
+    return res.json({ status: true, message: "Order placed successfully", orderId,});
   } catch (error) {
-    console.error("handlePlaceOrder error:", error);
+    console.log("handlePlaceOrder error:", error);
     return res.status(500).json({ status: false, message: `handlePlaceOrder :- ${error.message}` });
   }
 };

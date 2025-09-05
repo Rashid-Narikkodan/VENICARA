@@ -13,31 +13,34 @@ router.get("/", auth.requireLogin, userController.showProfile);
 
 router
   .route("/delete")
-  .get(userController.showDeleteAc)
+  .get(auth.requireLogin,userController.showDeleteAc)
   .patch(userController.handleDeleteAc);
 
-router.patch(
-  "/edit",
+router.route("/edit")
+.get(userController.showEditProfile)
+.patch(
   upload.single("userProfile"),
-  userController.editProfile
+  auth.requireLogin,userController.editProfile
 );
+
+router.post('/edit/otp',userController.handleNewEmailOTP)
 
 router
   .route("/verify")
-  .get(userController.showProfileVerify)
+  .get(auth.requireLogin,userController.showProfileVerify)
   .post(userController.handleProfileVerify);
 
 router
   .route("/OTP")
-  .get(userController.showProfileOTP)
-  .post(userController.handleProfileOTP);
+  .get(auth.requireLogin,userController.showProfileOTP)
+  .post(auth.requireLogin,userController.handleProfileOTP);
 
 router.post("/resendProfileOTP", userController.resendProfileOTP);
 
 router
   .route("/changePassword")
-  .get(userController.showProfileChangePass)
-  .patch(userController.handleProfileChangePass);
+  .get(auth.requireLogin,userController.showProfileChangePass)
+  .patch(auth.requireLogin,userController.handleProfileChangePass);
 
 
 module.exports = router

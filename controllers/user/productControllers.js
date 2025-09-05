@@ -28,6 +28,7 @@ const showProductDetails = async (req, res) => {
     const product = await Product.findOne({
       _id: id,
       isDeleted: false,
+      isAvailable:true,
     }).populate('category').lean();
 
     if (!product) {

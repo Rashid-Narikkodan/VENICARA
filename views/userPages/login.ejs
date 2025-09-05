@@ -11,10 +11,15 @@
 <body class="vh-100 d-flex align-items-center">
 <div class="container text-center d-flex justify-content-center">
   <div class="card shadow-lg border-0 rounded-5 overflow-hidden mt-3" style="max-width: 800px; width:100%;">
-    <div class="row g-0 d-flex justify-content-center pt-md-5 pb-md-5">
+    <div class="row g-0 d-flex justify-content-center pb-md-5">
+            <div class="col-md-12 py-4">
+        <img src="/images/logo.avif" class="im-fluid" alt="" style="width:13rem">
+      </div>
+      
     <%if(messages.success.length>0){%>
       <div id="authMsgSuccess" class="alert alert-success w-75"><%=messages.success[0]%></div>
       <%}%>
+
        <!-- Left Image Section -->
       <div class="col-md-6 d-none d-md-flex align-items-center justify-content-center">
         <img src="/images/login.avif" alt="Signup" class="object-fit-cover img-fluid rounded-4 img-login">

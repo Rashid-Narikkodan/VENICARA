@@ -36,7 +36,7 @@ const showShop = async (req, res) => {
 
     if (Object.keys(req.query).length === 0) {
       const [products, categories] = await Promise.all([
-        Product.find({ isDeleted: false })
+        Product.find({ isDeleted: false, isAvailable:true })
           .populate('category')
           .skip((page - 1) * limit)
           .limit(limit)

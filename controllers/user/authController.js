@@ -348,7 +348,7 @@ const handleSignupOTP = async (req, res) => {
     res.status(500).send(err.message)
   }
 }
-
+                              
 const resendOTP = async (req, res) => {
   try {
     const user = await User.findOne({ _id: req.session.userId })

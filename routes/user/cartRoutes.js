@@ -12,7 +12,7 @@ const upload = require("../../middlewares/multer");
 
 router
   .route("/")
-  .get(cartController.showCart);
+  .get(auth.requireLogin, cartController.showCart);
 
 router
   .route("/addToCart/:id")
@@ -22,7 +22,6 @@ router
   .route("/remove/:id")
   .delete(cartController.removeFromCart);
 
-router.post("/applyCoupon", cartController.applyCoupon);
 
 router
   .route("/increase/:cartId")

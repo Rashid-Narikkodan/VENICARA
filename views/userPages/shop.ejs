@@ -28,7 +28,7 @@
     <div class="ps-3 mt-5">
       <div class="row">
         <!-- filtering sidebar -->
-        <div class="col-md-2 col-12 border-end px-5 py-3" style="min-height:100vh;">
+        <div class="col-md-2 col-2 border-end px-5 py-3" style="min-height:100vh;">
           <div class="d-flex justify-content-between align-items-center mb-3">
             <h6 class="mb-0 fw-bold">Filters & Sort</h6>
             <a id="clearAll" href="/shop" class="text-decoration-none small text-black">Clear All</a>
@@ -157,7 +157,7 @@
                       <a href="/products/<%=product._id%>"
                         class="card text-decoration-none shadow p-3 rounded-4 border-0"
                         style="max-width: 18rem;background:linear-gradient(to right, #e6cc6b, #c1a86e);">
-                        <img src="<%=product.images[0]%>" class="card-img-top rounded-4" alt="Product Image">
+                        <img src="<%=product.images[0]%>" loading="eager" class="card-img-top rounded-4" alt="Product Image">
                         <div class="card-body p-0 pt-3">
                           <h6 class="card-title mb-1">
                             <%=product.name%>

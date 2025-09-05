@@ -152,7 +152,7 @@
     </div>
   </div>
 </main>
-<script>
+<script defer>
   document.getElementById('continue').addEventListener('click', async (e) => {
     e.preventDefault();
 
@@ -175,9 +175,17 @@
       });
       const data = await response.json();
       if (data.status){
-        window.location.href = `/checkout/placeOrder/${data.id}`
-      };
-
+        window.location.href = `/checkout/placeOrder/${data.orderId}`
+      }else{
+        const errorBox = document.getElementById('errorBox')
+        if(errorBox){
+        errorBox.innerHTML = `<div class="alert alert-danger text-center w-md-25 w-75">
+      ${data.message}
+     </div>`
+        }else{
+          alert(data.message)
+        }
+      }
     } catch (err) {
       console.log(err.message)
       alert(`Server error ${err.message}`);

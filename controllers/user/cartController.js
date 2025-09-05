@@ -4,26 +4,38 @@ const Coupon = require('../../models/Coupon')
 
 const showCart = async (req, res) => {
   try {
+    // Fetch all active cart documents for the logged-in user
     const cartDocs = await Cart.find({
       userId: req.session.user.id,
       status: "active",
-    }).populate("productId")
-      .lean();
+    })
+      .populate("productId") // populate product details
+      .lean(); // convert to plain JS objects
 
+    // Map cart docs to include product and variant info safely
     const cartItems = cartDocs.map(doc => {
-      const variant = doc.productId?.variants.find(
-        v => v._id.toString() === doc.variantId.toString()
-      );
+      // Try to find the matching variant in product
+      const variant = doc.productId?.variants?.find(
+        v => v._id.toString() === (doc.variantId?.toString() || "")&&v.stock > 0
+      ) || {
+        _id: null,
+        name: "Default Variant",
+        discount: 1,
+        price: doc.productId?.price || 0
+      }; // fallback variant if not found
 
       return {
-        cartId: doc._id,
+        _id: doc._id,
         quantity: doc.quantity,
         product: doc.productId,
-        status:doc.status,
-        variant,
+        status: doc.status,
+        variant, // always safe to use in EJS
       };
     });
+
+    // Render the cart page
     res.render("userPages/cart", { items: cartItems });
+
   } catch (err) {
     console.error("Error in showCart:", err.message);
     res.status(500).send("from showCart :- " + err.message);
@@ -32,18 +44,22 @@ const showCart = async (req, res) => {
 
 const addToCart = async (req, res) => {
   try {
-    const variantId = req.body.variantId;
     const productId = req.params.id;
-    const userId = req.session.user.id;
+    const userId = req.session.user?.id
+        if(!userId){
+      req.flash('error','User should be Authenticated to Add to cart')
+      return res.redirect(`/products/${productId}`)
+    }
+    const variantId = req.body.variantId;
     const product = await Product.findById(productId);
     if (!product) {
       req.flash("error", "Product not found");
-      return res.redirect(`/products/${userId}`);
+      return res.redirect(`/products/${productId}`);
     }
     const variant = product.variants.id(variantId);
     if (!variant) {
       req.flash("error", "Variant not found");
-      return res.redirect(`/products/${userId}`);
+      return res.redirect(`/products/${productId}`);
     }
     if(variant.stock<=0){
     req.flash("error", "Product is Out of stock");

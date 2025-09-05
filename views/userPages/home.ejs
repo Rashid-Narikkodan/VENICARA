@@ -147,7 +147,7 @@
               <div class="col-md-4 col-sm-6">
                 <a href="/shop?category=<%=category._id%>" class="text-decoration-none text-black">
                   <div class="collection-card overflow-hidden rounded-5">
-                    <img src="<%=category.img%>" alt="<%=category.name%>" class="img-fluid rounded-5" />
+                    <img src="<%=category.img%>" loading="lazy" alt="<%=category.name%>" class="img-fluid rounded-5" />
                     <div class="collection-title">
                       <h3 class="mt-4">
                         <%=category.name%>
@@ -172,7 +172,7 @@
               <% products.forEach(product=> { %>
                 <a href="products/<%=product._id%>" class="col-md-4 text-decoration-none text-black col-sm-6">
                   <div class="product-card">
-                    <img src="<%=product.images[0]%>" alt="<%=product.name%>" class="img-fluid rounded-5" />
+                    <img src="<%=product.images[0]%>" loading="lazy" alt="<%=product.name%>" class="img-fluid rounded-5" />
                     <div class="product-name mt-4 fs-4">
                       <%=product.name%>
                     </div>

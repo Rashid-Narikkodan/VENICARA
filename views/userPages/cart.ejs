@@ -95,14 +95,14 @@
               <div class="d-flex align-items-center justify-content-end mb-3">
                 <button
                   class="btn btn-outline-secondary btn-sm me-2 decrease"
-                  data-cart-id="<%= item.cartId %>"
+                  data-cart-id="<%= item._id %>"
                 >
                   -
                 </button>
                 <span><%= item.quantity %></span>
                 <button
                   class="btn btn-outline-secondary btn-sm ms-2 increase"
-                  data-cart-id="<%= item.cartId %>"
+                  data-cart-id="<%= item._id %>"
                 >
                   +
                 </button>
@@ -110,15 +110,14 @@
               <p class="text-muted mb-1">Subtotal: Rs.<%= lineTotal %></p>
               <!-- Remove button -->
               <form
-                action="/cart/remove/<%= item.cartId %>?_method=DELETE"
+                action="/cart/remove/<%= item._id %>?_method=DELETE"
                 method="POST"
                 class="d-block"
               >
                 <button
                   type="submit"
                   class="btn btn-dark py-1 px-2 text-end"
-                  style="font-size: small"
-                >
+                  style="font-size: small">
                   Remove
                 </button>
               </form>
@@ -187,7 +186,7 @@
           lineTotalElem.textContent = `Subtotal: Rs.${data.lineTotal}.99`;
           document.querySelector(
             ".summary-line.fw-bold.fs-5 span:last-child"
-          ).textContent = `Rs.${data.total}.99`;
+          ).textContent = `Rs.${data.total}`;
         }
       } catch (err) {
         console.error(err);
@@ -214,50 +213,13 @@
           lineTotalElem.textContent = `Subtotal: Rs.${data.lineTotal}.99`;
           document.querySelector(
             ".summary-line.fw-bold.fs-5 span:last-child"
-          ).textContent = `Rs.${data.total}.99`;
+          ).textContent = `Rs.${data.total}`;
         }
       } catch (err) {
         console.error(err);
       }
     });
   });
-
-
-  //apply coupon
-  document.getElementById("apply").addEventListener("click", async (e) => {
-
-  const couponCode = document.getElementById("couponInput").value.trim();
-  if (!couponCode) return;
-
-  try {
-    const res = await fetch("/cart/applyCoupon", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ code: couponCode })
-    });
-
-    const data = await res.json();
-
-    const couponMessage=document.getElementById("couponMessage")
-    if (data.success) {
-      // Show success message
-      couponMessage.textContent = `Coupon applied: ${data.coupon.code} (${data.coupon.discount}% off)`;
-      couponMessage.classList.remove("text-danger");
-      couponMessage.classList.add("text-success");
-
-      // Update order summary total
-      const totalElem = document.querySelector(".summary-line.fw-bold.fs-5 span:last-child");
-      totalElem.textContent = `Rs.${data.newTotal}.99`;
-    } else {
-      couponMessage.textContent = data.message;
-      couponMessage.classList.remove("text-success");
-      couponMessage.classList.add("text-danger");
-    }
-  } catch (err) {
-    console.error(err);
-    couponMessage.textContent = "Something went wrong. Try again.";
-  }
-})
 </script>
 
 <%-include('../partials/user/footer.ejs')%>

@@ -7,5 +7,6 @@ module.exports={
   cartController:require('./cartController'),
   referController:require('./referController'),
   walletController:require('./walletController'),
-  checkoutController:require('./checkoutController')
+  checkoutController:require('./checkoutController'),
+  orderController:require('./orderController'),
 }

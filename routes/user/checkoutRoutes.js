@@ -9,25 +9,25 @@ const auth = require("../../middlewares/authUser");
 
 router
   .route("/address")
-  .get(checkoutController.showAddress);
+  .get(auth.requireLogin,checkoutController.showAddress);
 
 router
   .route("/address/new")
-  .get(checkoutController.showAddAddress)
-  .post(checkoutController.handleAddAddress);
+  .get(auth.requireLogin,checkoutController.showAddAddress)
+  .post(auth.requireLogin,checkoutController.handleAddAddress);
 
 router
   .route("/address/edit/:id")
-  .get(checkoutController.showEditAddress)
-  .put(checkoutController.handleEditAddress);
+  .get(auth.requireLogin,checkoutController.showEditAddress)
+  .put(auth.requireLogin,checkoutController.handleEditAddress);
 
-router.post("/address/selectAddress", checkoutController.handleSelectAddress);
+router.post("/address/selectAddress",auth.requireLogin, checkoutController.handleSelectAddress);
 
-router.get("/paymentMethod", checkoutController.showPaymentMethods);
+router.get("/paymentMethod",auth.requireLogin, checkoutController.showPaymentMethods);
 
-router.post("/api/placeOrder", checkoutController.handlePlaceOrder);
+router.post("/api/placeOrder",auth.requireLogin, checkoutController.handlePlaceOrder);
 
-router.get("/placeOrder/:id", checkoutController.showPlaceOrder);
+router.get("/placeOrder/:id",auth.requireLogin, checkoutController.showPlaceOrder);
 
 
 module.exports = router

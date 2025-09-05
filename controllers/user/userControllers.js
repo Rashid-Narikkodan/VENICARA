@@ -13,7 +13,15 @@ const showProfile = async (req, res) => {
     res.status(500).send('error from showProfile :- ' + err.message);
   }
 };
-
+const showEditProfile=async(req,res)=>{
+    try {
+    const user = await User.findById(req.session.user.id);
+    res.render('userPages/profileEdit', { user });
+  } catch (err) {
+    console.error('error from showProfile :-', err.message);
+    res.status(500).send('error from showProfile :- ' + err.message);
+  }
+}
 const editProfile = async (req, res) => {
   try {
     const { name, email, phone, gender } = req.body;
@@ -34,8 +42,17 @@ const editProfile = async (req, res) => {
     }
     
     const updateData = { name, email, mobile: phone, gender, photoUrl };
-    await User.findByIdAndUpdate(req.session.user.id, updateData, { new: true });
-
+    if(email!=req.user.email){
+      delete updateData['email']
+    }
+    await User.findByIdAndUpdate(req.user._id, updateData, { new: true });
+    if(email!=req.user.email){
+      const otp=generateOTP()
+      await User.findByIdAndUpdate(req.user._id,{otp,otpExpiry:new Date(Date.now()+1000*60*5)},{new: true})
+      sendEmail(email, otp)
+      req.flash('success',`new OTP send to your email :- ${email}`)
+      return res.render('userPages/newEmailOTP',{email})
+    }    
     req.flash('success', 'Profile updated successfully');
     return res.redirect('/profile');
   } catch (err) {
@@ -44,6 +61,27 @@ const editProfile = async (req, res) => {
     return res.redirect('/profile');
   }
 };
+
+const handleNewEmailOTP=async(req,res)=>{
+  try{
+        const { otp ,email} = req.body
+        const user = await User.findOne({ _id: req.user._id })
+     if (user.otp == otp && user.otpExpiry > Date.now()) {
+      user.isVerified = true
+      user.otp = null
+      user.otpExpiry = null
+      user.email = email
+      await user.save()
+      req.flash('success','new email updated')
+      return res.redirect('/profile')
+    } else {
+      req.flash('error', 'invalid or expired OTP')
+      return res.redirect('/profile/edit')
+    }
+  }catch(error){
+
+  }
+}
 
 const showProfileVerify = (req, res) => {
   try {
@@ -170,7 +208,9 @@ const handleDeleteAc=async(req,res)=>{
 }
 module.exports = {
   showProfile,
+  showEditProfile,
   editProfile,
+  handleNewEmailOTP,
   showProfileVerify,
   handleProfileVerify,
   showProfileOTP,

@@ -5,6 +5,7 @@ router.use("/profile", require("./profileRoutes"));
 router.use("/address", require("./addressRoutes"));
 router.use("/cart", require("./cartRoutes"));
 router.use("/checkout", require("./checkoutRoutes"));
+router.use("/orders", require("./orderRoutes"));
 router.use("/", require("./homeRoutes"));  // home, shop, search, etc.
 
 module.exports = router;

@@ -1,5 +1,5 @@
 const transporter=require('../config/mailer')
-const sendEmail=async(to,otp,name)=>{
+const sendEmail=async(to,otp,name='Customer')=>{
   await transporter.sendMail({
   from: `"VENICARA" <${process.env.EMAIL_USER}>`,
   to,

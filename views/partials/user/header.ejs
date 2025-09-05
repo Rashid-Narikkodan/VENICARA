@@ -12,14 +12,12 @@
   />
   <script defer src="/js/shop.js"></script>
  <script
- defer
    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"
    integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q"
    crossorigin="anonymous"
   ></script>
    <script defer src="/js/userHeader.js"></script>
   <script
-  defer
    src="https://kit.fontawesome.com/f45c5ea548.js"
    crossorigin="anonymous"
   ></script>
@@ -90,7 +88,7 @@
     </div>
     <div id="errorBox" class="errorBox w-100 d-flex justify-content-center">
      <%if(messages.error.length>0){%>
-     <div class="alert alert-danger text-center w-md-25 w-75">
+     <div id="headerError" class="alert alert-danger text-center w-md-25 w-75">
       <%=messages.error[0]%>
      </div>
      <%}%>

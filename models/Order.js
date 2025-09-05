@@ -25,6 +25,13 @@ const orderSchema = new mongoose.Schema(
         discountPrice: { type: Number, required: true },
         quantity: { type: Number, required: true, min: 1 },
         subtotal: { type: Number, required: true }, // discountPrice * quantity
+        volume:{type:Object,required:true},
+        status: {
+          type: String,
+          enum: ["pending", "confirmed", "shipped", "delivered", "cancelled", "returned"],
+          default: "pending",
+        },
+        image:String
       },
     ],
 
