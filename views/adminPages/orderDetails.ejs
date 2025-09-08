@@ -1,0 +1,188 @@
+<%- include('../partials/admin/header.ejs')%> <%-
+include('../partials/admin/sidebar.ejs')%>
+<main class="flex-grow-1 min-vh-100 p-3">
+  <div class="container">
+    <div class="row">
+      <div class="col-md-8 p-3 rounded-4" style="background-color: rgb(192, 192, 192);">
+        <div class="container">
+          <div class="row">
+            <p class="p-4 fw-bold fs-2">Order Details</p>
+            <div class="col-md-6 p-3">
+              <span class="fw-bold">OrderID : </span>
+              <span><%=order.orderId%></span>
+            </div>
+            <div class="col-md-6 p-3">
+              <span class="fw-bold">Customer : </span>
+              <span class="fw-semibold"><%=order.userId.name%></span>
+            </div>
+            <div class="col-md-6 p-3">
+              <span class="fw-bold">Ordered On : </span>
+              <span class="fw-semibold"><%=order.createdAt.toLocaleDateString()%></span>
+            </div>
+            <div class="col-md-6 p-3">
+              <span class="fw-bold">Updated On : </span>
+              <span class="fw-semibold"><%=order.updatedAt.toLocaleDateString()%></span>
+            </div>
+            <div class="col-md-6 p-3">
+              <span class="fw-bold">Payment method : </span>
+              <span class="fw-semibold"><%=order.payment.method%></span>
+            </div>
+            <div class="col-md-6 p-3">
+              <span class="fw-bold">Payment status : </span>
+              <span class="fw-semibold"><%=order.payment.status%></span>
+            </div>
+            <div class="col-md-6 p-3">
+              <span class="fw-bold">Coupon : </span>
+              <span class="fw-semibold">No coupons</span>
+            </div>
+            <div class="col-md-6 p-3">
+              <span class="fw-bold">Total Amount : </span>
+              <span class="fw-semibold"><%=order.totalAmount%></span>
+            </div>
+            <hr />
+            <div class="col-md-6 p-3 mb-3 p-2">
+              <form action="/admin/orders/<%= order._id %>/status?_method=PATCH" method="POST" class="d-inline order-status-form">
+                <select name="status" data-status ="<%=order.status%>" class="form-select form-select-sm d-inline w-auto status-select">
+                    <option value="pending" <%= order.status === "pending" ? "selected" : "" %>>Pending</option>
+                    <option value="shipped" <%= order.status === "shipped" ? "selected" : "" %>>Shipped</option>
+                    <option value="Out of delivery" <%= order.status === "Out of delivery" ? "selected" : "" %>>Out of Delivery</option>
+                    <option value="delivered" <%= order.status === "delivered" ? "selected" : "" %>>Delivered</option>
+                    <option value="cancelled" <%= order.status === "cancelled" ? "selected" : "" %>>Cancelled</option>
+                    <option value="returned" <%= order.status === "returned" ? "selected" : "" %>>Returned</option>
+                </select>
+                <button type="submit" class="btn btn-sm btn-primary ms-1 update-btn">Update</button>
+                </form>
+
+            </div>
+            <div class="col-md-6 p-3 mb-3 p-2">
+              <span class="fw-bold">Status : </span>
+              <span class="text-success fw-semibold"><%=order.status%></span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="d-flex flex-column gap-3">
+          <div style="background:rgb(192, 192, 192)" class="p-3 rounded-4 shadow-sm mb-3">
+  <p class="fw-bold fs-5 mb-2">Shipping Address</p>
+  <p class="mb-1"><strong>Name:</strong> <%=order.shippingAddress.fullName%></p>
+  <p class="mb-1"><strong>Street:</strong> <%=order.shippingAddress.street%></p>
+  <p class="mb-1"><strong>City:</strong> <%=order.shippingAddress.city%></p>
+  <p class="mb-1"><strong>State:</strong> <%=order.shippingAddress.state%></p>
+  <p class="mb-1"><strong>Pincode:</strong> <%=order.shippingAddress.pin%></p>
+  <p class="mb-0"><strong>Phone:</strong><%=order.shippingAddress.mobile%></p>
+</div>
+
+          <div class="p-5 rounded-4">
+
+          </div>
+        </div>
+      </div>
+      <div class="col-md-12 rounded-4">
+        <p class="p-4 fw-bold fs-2">Products</p>
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-dark">
+              <tr>
+                <th class="text-center p-3">No.</th>
+                <th class="text-center p-3">Product</th>
+                <th class="text-center p-3">Qty</th>
+                <th class="text-center p-3">Update</th>
+                <th class="text-center p-3">Status</th>
+                <th class="text-center p-3">Return</th>
+                <th class="text-center p-3">Return reason</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% order.products.forEach((product,index)=> { %>
+                <%count++%>
+                  <tr>
+                    <td class="text-center">
+                      <%= count %>
+                    </td>
+                    <td class="text-center">
+                      <%= product.productName %>
+                    </td>
+                    <td class="text-center">
+                        <%= product.quantity%>
+                    </td>
+                    <td class="text-center">
+                         <form action="/admin/orders/product/status/<%=order._id%>?_method=PATCH&index=<%=index%>" method="POST" class="d-inline order-status-form">
+                <select name="status" data-status="<%=product.status%>" class="form-select form-select-sm d-inline w-auto status-select">
+                    <option value="pending" <%= product.status === "pending" ? "selected" : "" %>>Pending</option>
+                    <option value="shipped" <%= product.status === "shipped" ? "selected" : "" %>>Shipped</option>
+                    <option value="Out of delivery" <%= product.status === "Out of delivery" ? "selected" : "" %>>Out of Delivery</option>
+                    <option value="delivered" <%= product.status === "delivered" ? "selected" : "" %>>Delivered</option>
+                    <option value="cancelled" <%= product.status === "cancelled" ? "selected" : "" %>>Cancelled</option>
+                    <option value="returned" <%= product.status === "returned" ? "selected" : "" %>>Returned</option>
+                </select>
+                <button type="submit" class="btn btn-sm btn-primary ms-1 update-btn">Update</button>
+                </form>
+
+                    </td>
+                    <td class="text-center text-success">
+                      <%=product.status%>
+                  </td>
+                  <td class="text-center">
+                    <span class="badge <%=product.isRequested?'bg-success':'bg-secondary'%>"><%=product.isRequested?'Requested':'No request'%></span>
+                  </td>
+                  <td class="text-center text-success">
+                    <%=product?.returnReason%>
+                </td>
+                  </tr>
+                  <% }) %>
+            </tbody>
+          </table>
+      </div>
+
+    </div>
+  </div>
+</main>
+</div>
+<script>
+  document.querySelectorAll('.order-status-form').forEach(form => {
+    const select = form.querySelector('.status-select');
+    const button = form.querySelector('.update-btn');
+    let currentStatus = select.getAttribute('data-status'); // from DB
+    console.log(currentStatus)
+    if(currentStatus == 'Out of delivery') currentStatus = 'out_of_delivery'
+
+    // Define allowed transitions
+    const transitions = {
+      pending: ["shipped", "Out of delivery", "cancelled"],
+      shipped: ["Out of delivery", "delivered", "cancelled"],
+      out_of_delivery: ["delivered", "cancelled"],
+      delivered: ['returned'],   // final
+      cancelled: [],   // final
+      returned: []     // final
+    };
+
+    function lockOptions() {
+      const allowed = transitions[currentStatus] || [];
+      // Disable everything by default
+      [...select.options].forEach(opt => {
+        opt.disabled = true;
+      });
+
+      // Keep current status selectable (to show properly)
+      [...select.options].forEach(opt => {
+        if (opt.value === currentStatus) {
+          opt.disabled = false;
+        }
+      });
+
+      // Enable only forward statuses
+      [...select.options].forEach(opt => {
+        if (allowed.includes(opt.value)) {
+          opt.disabled = false;
+        }
+      });
+
+      // Disable button if no valid moves left
+      button.disabled = allowed.length === 0;
+    }
+
+    lockOptions(); // Run on page load
+  });
+</script>
+
+<%- include('../partials/admin/footer.ejs')%>

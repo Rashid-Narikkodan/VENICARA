@@ -79,8 +79,8 @@
             <div class="col-md-6">
               <h6 class="mb-1"><%= item.product.name %></h6>
               <small><%= item.variant.volume %> ML</small>
-              <p class="mt-2 mb-0">
-                Shipping<br />
+              <p class="text-muted">Qty : <%=item.quantity%></p>
+              <p class="mt-0 mb-0">
                 <span class="text-muted">Arrives in 3–5 business days </span>
                 <% if(item.variant.stock > 0){ %>
                 <span class="in-stock">In stock</span>
@@ -115,9 +115,10 @@
                 class="d-block"
               >
                 <button
-                  type="submit"
-                  class="btn btn-dark py-1 px-2 text-end"
-                  style="font-size: small">
+                type="submit"
+                class="btn btn-dark py-1 px-2 text-end"
+                style="font-size: small"
+                >
                   Remove
                 </button>
               </form>
@@ -169,8 +170,17 @@
 <script>
   document.querySelectorAll(".increase").forEach((btn) => {
     btn.addEventListener("click", async () => {
-      const cartId = btn.dataset.cartId; // get cartId from button
+      const cartId = btn.dataset.cartId;
       const quantitySpan = btn.previousElementSibling;
+      const decBtn = btn.parentElement.querySelector(".decrease"); // find the - button
+
+      const currentQuantity = Number(quantitySpan.textContent);
+
+      // Block fetch if already max
+      if (currentQuantity >= 5) {
+        btn.disabled = true;
+        return;
+      }
 
       try {
         const res = await fetch(`/cart/increase/${cartId}`, {
@@ -180,10 +190,20 @@
 
         if (data.success) {
           quantitySpan.textContent = data.newQuantity;
+
+          // disable if hits 5
+          if (data.newQuantity >= 5) btn.disabled = true;
+
+          // re-enable decrease if >1
+          if (data.newQuantity > 1) decBtn.disabled = false;
+
+          // update subtotal
           const lineTotalElem = btn
             .closest(".col-md-4")
             .querySelector("p.text-muted.mb-1");
           lineTotalElem.textContent = `Subtotal: Rs.${data.lineTotal}.99`;
+
+          // update total
           document.querySelector(
             ".summary-line.fw-bold.fs-5 span:last-child"
           ).textContent = `Rs.${data.total}`;
@@ -198,6 +218,15 @@
     btn.addEventListener("click", async () => {
       const cartId = btn.dataset.cartId;
       const quantitySpan = btn.nextElementSibling;
+      const incBtn = btn.parentElement.querySelector(".increase"); // find the + button
+
+      const currentQuantity = Number(quantitySpan.textContent);
+
+      // Block fetch if already min
+      if (currentQuantity <= 1) {
+        btn.disabled = true;
+        return;
+      }
 
       try {
         const res = await fetch(`/cart/decrease/${cartId}`, {
@@ -207,10 +236,13 @@
 
         if (data.success) {
           quantitySpan.textContent = data.newQuantity;
+          if (data.newQuantity <= 1) btn.disabled = true;
+          if (data.newQuantity < 5) incBtn.disabled = false;
           const lineTotalElem = btn
             .closest(".col-md-4")
             .querySelector("p.text-muted.mb-1");
-          lineTotalElem.textContent = `Subtotal: Rs.${data.lineTotal}.99`;
+          lineTotalElem.textContent = `Subtotal: Rs.${data.lineTotal}.99`
+          
           document.querySelector(
             ".summary-line.fw-bold.fs-5 span:last-child"
           ).textContent = `Rs.${data.total}`;
@@ -221,5 +253,6 @@
     });
   });
 </script>
+
 
 <%-include('../partials/user/footer.ejs')%>

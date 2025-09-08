@@ -1,27 +1,33 @@
 const Address = require("../../models/Address");
 
+// Reusable error handler
+const handleError = require('../../helpers/handleError')
+
 const showAddress = async (req, res) => {
   try {
-    let addresses = await Address.find({ userId: req.session.user.id });
+    let addresses = await Address.find({
+      userId: req.session.user.id,
+      isDeleted: false,
+    });
     res.render("userPages/address", { addresses });
-  } catch (er) {
-    console.log(er.message);
-    res.status(500).send("showAddress :- " + er.message);
+  } catch (error) {
+    handleError(res, "showAddress", error);
   }
 };
+
 const showNewAddress = (req, res) => {
   try {
     res.render("userPages/newAddress");
-  } catch (er) {
-    console.log(er.message);
-    res.status(500).send("showNewAddress :- " + er.message);
+  } catch (error) {
+    handleError(res, "showNewAddress", error);
   }
 };
+
 const handleNewAddress = async (req, res) => {
   try {
     const {
       fullName,
-      mobile, // from form -> user mobile number
+      mobile,
       pin,
       street,
       address,
@@ -33,7 +39,7 @@ const handleNewAddress = async (req, res) => {
     } = req.body;
 
     const newAddress = new Address({
-      userId: req.session.user.id, // assuming logged-in user is available
+      userId: req.session.user.id,
       fullName,
       mobile,
       pin,
@@ -50,21 +56,19 @@ const handleNewAddress = async (req, res) => {
 
     req.flash("success", "New address added");
     res.redirect("/address");
-  } catch (er) {
-    console.log(er.message);
-    res.status(500).send("handleNewAddress :- " + er.message);
+  } catch (error) {
+    handleError(res, "handleNewAddress", error);
   }
 };
 
-const showEditAddress=async(req,res)=>{
-    try {
-        const address=await Address.findById(req.params.id)
-    res.render("userPages/editAddress",{address});
-  } catch (er) {
-    console.log(er.message);
-    res.status(500).send("showEditAddess :- " + er.message);
+const showEditAddress = async (req, res) => {
+  try {
+    const address = await Address.findById(req.params.id);
+    res.render("userPages/editAddress", { address });
+  } catch (error) {
+    handleError(res, "showEditAddress", error);
   }
-}
+};
 
 const handleEditAddress = async (req, res) => {
   try {
@@ -88,53 +92,56 @@ const handleEditAddress = async (req, res) => {
     }
 
     const update = {
-      fullName: fullName ? fullName : addressById.fullName,
-      mobile: mobile ? mobile : addressById.mobile,
-      pin: pin ? pin : addressById.pin,
-      street: street ? street : addressById.street,
-      address: address ? address : addressById.address,
-      city: city ? city : addressById.city,
-      state: state ? state : addressById.state,
-      landmark: landmark ? landmark : addressById.landmark,
-      alternateMobile: alternateMobile
-        ? alternateMobile
-        : addressById.alternateMobile,
-      type: type ? type : addressById.type,
+      fullName: fullName || addressById.fullName,
+      mobile: mobile || addressById.mobile,
+      pin: pin || addressById.pin,
+      street: street || addressById.street,
+      address: address || addressById.address,
+      city: city || addressById.city,
+      state: state || addressById.state,
+      landmark: landmark || addressById.landmark,
+      alternateMobile: alternateMobile || addressById.alternateMobile,
+      type: type || addressById.type,
     };
 
     await Address.findByIdAndUpdate(req.params.id, update, { new: true });
 
     req.flash("success", "Address updated successfully");
     res.redirect("/address");
-  } catch (err) {
-    console.error("handleEditAddress Error:", err.message);
-    res.status(500).send("handleEditAddress :- " + err.message);
+  } catch (error) {
+    handleError(res, "handleEditAddress", error);
   }
 };
-const deleteAddress=async(req,res)=>{
-    try{
-        await Address.findByIdAndDelete(req.params.id)
-        req.flash('success','One address removed')
-        res.redirect('/address')
-    }catch(er){
-        console.log(er.message)
-        res.status(500).send('deleteAddress :- '+er.message)
-    }
-}
-const setDefaultAddress=async(req,res)=>{
-    try{
-        const addressId=req.params.id
-           await Address.updateMany(
-      { userId: req.session.user.id }, 
+
+const deleteAddress = async (req, res) => {
+  try {
+    await Address.findByIdAndUpdate(req.params.id, { isDeleted: true });
+    req.flash("success", "One address removed");
+    res.redirect("/address");
+  } catch (error) {
+    handleError(res, "deleteAddress", error);
+  }
+};
+
+const setDefaultAddress = async (req, res) => {
+  try {
+    const addressId = req.params.id;
+
+    // First remove default from all
+    await Address.updateMany(
+      { userId: req.session.user.id },
       { $set: { isDefault: false } }
     );
+
+    // Then set the chosen one
     await Address.findByIdAndUpdate(addressId, { isDefault: true });
-    return res.redirect('/address')
-    }catch(er){
-        console.log(er.message)
-        res.status(500).send('setDefaultAddress :- '+er.message)
-    }
-}
+
+    return res.redirect("/address");
+  } catch (error) {
+    handleError(res, "setDefaultAddress", error);
+  }
+};
+
 module.exports = {
   showAddress,
   showNewAddress,

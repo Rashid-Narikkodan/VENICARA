@@ -34,6 +34,10 @@ router.patch('/customers/:id',customersController.deleteCustomer)
 router
   .route('/orders')
   .get(auth.requireLogin, ordersController.showOrders)
+router.get('/order/:id',ordersController.showOrderDetails)
+router.patch('/orders/product/status/:id',ordersController.handleProductStatus)
+router.patch('/orders/:id/status',ordersController.handleOrderStatus)
+
 
 router
   .route('/products')

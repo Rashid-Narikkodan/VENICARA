@@ -3,8 +3,9 @@ const Cart = require("../../models/Cart");
 const PaymentMethod = require("../../models/PaymentMethod");
 const Order = require("../../models/Order");
 const Coupon = require("../../models/Coupon");
-const { nanoid } = require("nanoid");
-const generateOrderId = require('../../helpers/orderID')
+const generateOrderId = require('../../helpers/orderID');
+
+const handleError =require('../../helpers/handleError')
 
 const showAddress = async (req, res) => {
   try {
@@ -12,16 +13,12 @@ const showAddress = async (req, res) => {
     const cartDocs = await Cart.find({
       userId: req.session.user.id,
       status: "active",
-    })
-      .populate("productId")
-      .lean();
+    }).populate("productId").lean();
 
     const items = cartDocs.map((doc) => {
       const variant = doc.productId?.variants.find(
-        (v) =>v._id.toString() === doc.variantId.toString()
-  
+        (v) => v._id.toString() === doc.variantId.toString()
       );
-      console.log(variant)
       return {
         cartId: doc._id,
         quantity: doc.quantity,
@@ -30,25 +27,26 @@ const showAddress = async (req, res) => {
         variant,
       };
     });
+
     res.render("userPages/selectAddress", { addresses, items });
   } catch (error) {
-    console.error("Error in showAddress:", error);
-    res.status(500).send(`from showAddress: ${error.message}`);
+    handleError(res, "showAddress", error);
   }
 };
+
 const showAddAddress = (req, res) => {
   try {
     res.render("userPages/checkoutAddressAdd");
-  } catch (er) {
-    console.log(er.message);
-    res.status(500).send("showNewAddress :- " + er.message);
+  } catch (error) {
+    handleError(res, "showAddAddress", error);
   }
 };
+
 const handleAddAddress = async (req, res) => {
   try {
     const {
       fullName,
-      mobile, // from form -> user mobile number
+      mobile,
       pin,
       street,
       address,
@@ -60,7 +58,7 @@ const handleAddAddress = async (req, res) => {
     } = req.body;
 
     const newAddress = new Address({
-      userId: req.session.user.id, // assuming logged-in user is available
+      userId: req.session.user.id,
       fullName,
       mobile,
       pin,
@@ -74,12 +72,10 @@ const handleAddAddress = async (req, res) => {
     });
 
     await newAddress.save();
-
     req.flash("success", "New address added");
     res.redirect("/checkout/address");
-  } catch (er) {
-    console.log(er.message);
-    res.status(500).send("handleNewAddress :- " + er.message);
+  } catch (error) {
+    handleError(res, "handleAddAddress", error);
   }
 };
 
@@ -87,9 +83,8 @@ const showEditAddress = async (req, res) => {
   try {
     const address = await Address.findById(req.params.id);
     res.render("userPages/checkoutAddressEdit", { address });
-  } catch (er) {
-    console.log(er.message);
-    res.status(500).send("showEditAddess :- " + er.message);
+  } catch (error) {
+    handleError(res, "showEditAddress", error);
   }
 };
 
@@ -115,44 +110,38 @@ const handleEditAddress = async (req, res) => {
     }
 
     const update = {
-      fullName: fullName ? fullName : addressById.fullName,
-      mobile: mobile ? mobile : addressById.mobile,
-      pin: pin ? pin : addressById.pin,
-      street: street ? street : addressById.street,
-      address: address ? address : addressById.address,
-      city: city ? city : addressById.city,
-      state: state ? state : addressById.state,
-      landmark: landmark ? landmark : addressById.landmark,
-      alternateMobile: alternateMobile
-        ? alternateMobile
-        : addressById.alternateMobile,
-      type: type ? type : addressById.type,
+      fullName: fullName || addressById.fullName,
+      mobile: mobile || addressById.mobile,
+      pin: pin || addressById.pin,
+      street: street || addressById.street,
+      address: address || addressById.address,
+      city: city || addressById.city,
+      state: state || addressById.state,
+      landmark: landmark || addressById.landmark,
+      alternateMobile: alternateMobile || addressById.alternateMobile,
+      type: type || addressById.type,
     };
 
     await Address.findByIdAndUpdate(req.params.id, update, { new: true });
-
     req.flash("success", "Address updated successfully");
     res.redirect("/checkout/address");
-  } catch (err) {
-    console.error("handleEditAddress Error:", err.message);
-    res.status(500).send("handleEditAddress :- " + err.message);
+  } catch (error) {
+    handleError(res, "handleEditAddress", error);
   }
 };
+
 const showPaymentMethods = async (req, res) => {
   try {
     const paymentMethods = await PaymentMethod.find({});
     const cartDocs = await Cart.find({
       userId: req.session.user.id,
       status: "active",
-    })
-      .populate("productId")
-      .lean();
+    }).populate("productId").lean();
 
     const items = cartDocs.map((doc) => {
       const variant = doc.productId?.variants.find(
         (v) => v._id.toString() === doc.variantId.toString()
       );
-
       return {
         cartId: doc._id,
         quantity: doc.quantity,
@@ -161,12 +150,13 @@ const showPaymentMethods = async (req, res) => {
         variant,
       };
     });
+
     res.render("userPages/payment", { paymentMethods, items });
-  } catch (er) {
-    console.log(er.message);
-    res.status(500).send("showEditAddess :- " + er.message);
+  } catch (error) {
+    handleError(res, "showPaymentMethods", error);
   }
 };
+
 const handlePlaceOrder = async (req, res) => {
   try {
     const { user, address } = req.session;
@@ -175,33 +165,30 @@ const handlePlaceOrder = async (req, res) => {
     if (!user?.id) return res.status(401).json({ status: false, message: "Unauthenticated" });
     if (!address) return res.status(400).json({ status: false, message: "Shipping address not selected" });
 
-    // Get cart items
     const cartItems = await Cart.find({ userId: user.id, status: "active" })
       .populate("productId")
       .lean();
     if (!cartItems.length) return res.status(400).json({ status: false, message: "No items in cart" });
 
-    // Check coupon
     const coupon = code ? await Coupon.findOne({ code }) : null;
     if (code && !coupon) return res.status(400).json({ status: false, message: "Invalid coupon code" });
 
-    // Payment object
     const payment =
       paymentMethod === "wallet"
         ? { method: "wallet", status: "paid", provider: "InAppWallet", transactionId: null, paidAt: new Date() }
         : paymentMethod === "online"
-        ? { method: "online", status: "pending", provider: null, transactionId: null, paidAt:new Date() }
+        ? { method: "online", status: "pending", provider: null, transactionId: null, paidAt: new Date() }
         : { method: "cod", status: "pending" };
 
-    // Build products + total
     let totalAmount = 0;
     const products = cartItems.map((item) => {
       const variant = item.productId?.variants?.find(
         (v) => v._id.toString() === item.variantId.toString()
       );
       if (!variant) throw new Error(`Variant not found for product ${item.productId?._id}`);
-      const image=item.productId.images[0]
-      const subtotal = Number(variant.discount-1) * item.quantity;
+
+      const image = item.productId.images[0];
+      const subtotal = Number(variant.discount - 1) * item.quantity;
       totalAmount += subtotal;
 
       return {
@@ -212,17 +199,16 @@ const handlePlaceOrder = async (req, res) => {
         discountPrice: Number(variant.discount),
         quantity: item.quantity,
         subtotal,
-        volume:variant.volume,
+        volume: variant.volume,
         image,
       };
     });
-    if(coupon){
-      totalAmount-=coupon?.discount
-    }
-      totalAmount = parseFloat(totalAmount.toFixed(2));
-    
-    const orderId = await generateOrderId()
-    // Save order
+
+    if (coupon) totalAmount -= coupon?.discount;
+    totalAmount = parseFloat(totalAmount.toFixed(2));
+
+    const orderId = await generateOrderId();
+
     await Order.create({
       userId: user.id,
       orderId,
@@ -232,13 +218,12 @@ const handlePlaceOrder = async (req, res) => {
       couponApplied: coupon?._id || null,
       totalAmount,
     });
-    // Clear cart
+
     await Cart.deleteMany({ userId: user.id, status: "active" });
 
-    return res.json({ status: true, message: "Order placed successfully", orderId,});
+    return res.json({ status: true, message: "Order placed successfully", orderId });
   } catch (error) {
-    console.log("handlePlaceOrder error:", error);
-    return res.status(500).json({ status: false, message: `handlePlaceOrder :- ${error.message}` });
+    handleError(res, "handlePlaceOrder", error);
   }
 };
 
@@ -247,19 +232,19 @@ const showPlaceOrder = async (req, res) => {
     const orderId = req.params.id;
     res.render("userPages/placeOrder", { orderId });
   } catch (error) {
-    res.status(500).send("showPlaceOrder :- " + error.message);
+    handleError(res, "showPlaceOrder", error);
   }
 };
 
 const handleSelectAddress = (req, res) => {
   try {
-    console.log(req.body.selectedAddress);
     req.session.address = req.body.selectedAddress;
     return res.status(200).json({ status: true });
   } catch (error) {
-    res.status(500).json({ status: false, message: error.message });
+    handleError(res, "handleSelectAddress", error);
   }
 };
+
 module.exports = {
   showAddress,
   showAddAddress,

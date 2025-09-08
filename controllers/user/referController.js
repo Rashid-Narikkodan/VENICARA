@@ -1,10 +1,13 @@
-const showReferEarn=async(req,res)=>{
-    try{
-        res.render('userPages/refer')
-    }catch(er){
-        res.status(500).send('from showRefer :-'+er.message)
-    }
-}
-module.exports={
-    showReferEarn
-}
+const handleError = require('../../helpers/handleError');
+
+const showReferEarn = async (req, res) => {
+  try {
+    res.render('userPages/refer');
+  } catch (err) {
+    handleError(res, "showReferEarn", err);
+  }
+};
+
+module.exports = {
+  showReferEarn,
+};

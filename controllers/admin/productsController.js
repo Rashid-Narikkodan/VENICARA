@@ -2,17 +2,17 @@ const Product = require("../../models/Product");
 const Category = require("../../models/Category");
 const processImages = require("../../helpers/imgProcess");
 const getDiscountPercent = require("../../helpers/discPercent");
+const handleError = require("../../helpers/handleError");
 
 const showProducts = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 5;
     const search = req.query.search || "";
-    // Filter object
+
     let filter = { isDeleted: false };
-    if (search) {
-      filter.name = { $regex: search, $options: "i" }; // case-insensitive search
-    }
+    if (search) filter.name = { $regex: search, $options: "i" };
+
     const totalProducts = await Product.countDocuments(filter);
 
     const products = await Product.find(filter)
@@ -21,15 +21,19 @@ const showProducts = async (req, res) => {
       .limit(limit)
       .sort({ createdAt: -1 })
       .lean();
+
     const productVariants = products.map((product) => {
       const totalStock = product.variants
         .filter((v) => v)
         .reduce((acc, v) => acc + (v.stock || 0), 0);
+
       const lowestVariant = product.variants
         .filter((v) => v)
         .reduce((min, v) => (Number(v.volume) < Number(min.volume) ? v : min));
+
       const basePrice = lowestVariant.basePrice;
       const image = product.images.length > 0 ? product.images[0] : null;
+
       return {
         _id: product._id,
         name: product.name,
@@ -41,9 +45,10 @@ const showProducts = async (req, res) => {
           : "N/A",
         variantLabel: `${product.variants.length}- volume`,
         isAvailable: product.isAvailable,
-        image, // first image
+        image,
       };
     });
+
     const totalPages = Math.ceil(totalProducts / limit);
 
     return res.render("adminPages/products", {
@@ -56,7 +61,7 @@ const showProducts = async (req, res) => {
       count: "0",
     });
   } catch (err) {
-    res.status(500).send("Error in product list page: " + err);
+    handleError(res, "showProducts", err);
   }
 };
 
@@ -79,21 +84,22 @@ const deleteProduct = async (req, res) => {
     req.flash("success", "product removed");
     return res.redirect("/admin/products");
   } catch (err) {
-    res.status(500).send(err.message);
+    handleError(res, "deleteProduct", err);
   }
 };
+
 const showAddProduct = async (req, res) => {
   try {
     const categories = await Category.find({
       isDeleted: false,
       isActive: true,
-    }); //to list existing categories in addProduct.js
+    });
     return res.render("adminPages/addProduct", {
       page: "products",
       categories,
     });
   } catch (err) {
-    res.status(500).send(err.message);
+    handleError(res, "showAddProduct", err);
   }
 };
 
@@ -112,7 +118,6 @@ const addProduct = async (req, res) => {
 
     const images = await processImages(req.files);
 
-    // Handle variants
     const variants = Array.isArray(volume)
       ? volume.map((vol, i) => {
           const bp = Number(basePrice?.[i] || 0);
@@ -159,8 +164,7 @@ const addProduct = async (req, res) => {
     req.flash("success", "Product added successfully");
     res.redirect("/admin/products");
   } catch (err) {
-    console.error("Error adding product:", err);
-    res.status(500).send("Internal Server Error :- " + err);
+    handleError(res, "addProduct", err);
   }
 };
 
@@ -179,8 +183,7 @@ const showEditProduct = async (req, res) => {
       variants,
     });
   } catch (err) {
-    console.error(err);
-    res.status(500).send(err.message);
+    handleError(res, "showEditProduct", err);
   }
 };
 
@@ -213,7 +216,6 @@ const editProduct = async (req, res) => {
       : [discountPrice];
     const stocks = Array.isArray(stock) ? stock : [stock];
 
-    // Build variants
     for (let i = 0; i < volumes.length; i++) {
       if (!volumes[i] && !basePrices[i] && !discountPrices[i] && !stocks[i])
         continue;
@@ -231,7 +233,6 @@ const editProduct = async (req, res) => {
       });
     }
 
-    // Check for duplicate volumes
     const isDuplicateVariant =
       new Set(variants.map((v) => v.volume)).size !== variants.length;
     if (isDuplicateVariant) {
@@ -239,11 +240,9 @@ const editProduct = async (req, res) => {
       return res.redirect(`/admin/products/edit/${productId}`);
     }
 
-    // Process images if uploaded
     if (req.files?.length) images = await processImages(req.files);
     if (images.length) update.images = product.images.concat(images);
 
-    // Add other updates if provided
     if (name) update.name = name;
     if (description) update.description = description;
     if (categoryId) update.category = categoryId;
@@ -254,8 +253,7 @@ const editProduct = async (req, res) => {
     req.flash("success", "Product updated successfully");
     res.redirect("/admin/products");
   } catch (err) {
-    console.error("Error in editProduct:", err);
-    res.status(500).send(err.message);
+    handleError(res, "editProduct", err);
   }
 };
 
@@ -271,9 +269,8 @@ const removeImage = async (req, res) => {
     product.images.splice(index, 1);
     await product.save();
     return res.json({ success: true });
-  } catch (er) {
-    console.log(er.message);
-    res.status(500).send(er.message);
+  } catch (err) {
+    handleError(res, "removeImage", err);
   }
 };
 
@@ -289,10 +286,11 @@ const toggleProductActive = async (req, res) => {
     await product.save();
     req.flash("success", "status updated successfully");
     return res.redirect(`/admin/products`);
-  } catch (er) {
-    res.status(500).send(er.message);
+  } catch (err) {
+    handleError(res, "toggleProductActive", err);
   }
 };
+
 module.exports = {
   showProducts,
   deleteProduct,

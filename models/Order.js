@@ -28,10 +28,11 @@ const orderSchema = new mongoose.Schema(
         volume:{type:Object,required:true},
         status: {
           type: String,
-          enum: ["pending", "confirmed", "shipped", "delivered", "cancelled", "returned"],
+          enum: ["pending", "shipped", 'Out of delivery', "delivered", "cancelled", "returned"],
           default: "pending",
         },
-        image:String
+        image:String,
+        isRequested:{type:Boolean,default:false}
       },
     ],
 
@@ -43,7 +44,7 @@ const orderSchema = new mongoose.Schema(
 
     status: {
       type: String,
-      enum: ["pending", "confirmed", "shipped", "delivered", "cancelled", "returned"],
+      enum: ["pending", "shipped", 'Out of delivery', "delivered", "cancelled", "returned"],
       default: "pending",
     },
 
@@ -69,7 +70,8 @@ const orderSchema = new mongoose.Schema(
     },
 
     totalAmount: { type: Number, required: true },
-    orderId:{type:String,required:true}
+    orderId:{type:String,required:true},
+    isRequested:{type:Boolean,default:false}
   },
   { timestamps: true } // handles createdAt & updatedAt automatically
 );

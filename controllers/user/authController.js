@@ -4,15 +4,14 @@ const generateOTP = require('../../helpers/generateOTP.js')
 const sendEmail = require('../../helpers/sendMail.js')
 const generateRefCode = require('../../helpers/referralCode.js')
 const { nanoid } = require('nanoid')
+const handleError = require('../../helpers/handleError.js')
 
-// ============================
-// Login
-// ============================
+
 const showLogin = (req, res) => {
   try {
     res.render('userPages/login')
   } catch (err) {
-    res.status(500).send('internal error in showLogin: ' + err.message)
+    handleError(res, 'showLogin', err)
   }
 }
 
@@ -64,13 +63,11 @@ const handleLogin = async (req, res) => {
     req.flash('success', 'Logged in successfully')
     return res.redirect('/home')
   } catch (err) {
-    res.send('from handleLogin: ' + err.message)
+    handleError(res, 'handleLogin', err)
   }
 }
 
-// ============================
 // Google OAuth
-// ============================
 const handleGoogleAuth = async (req, res) => {
   try {
     const user = await User.findById(req.user._id)
@@ -99,19 +96,16 @@ const handleGoogleAuth = async (req, res) => {
     }
     req.flash('success', 'Logged in successfully with Google')
     return res.redirect('/home')
-  } catch (er) {
-    res.status(500).send('Internal server issue in handleGoogleAuth - ' + er.message)
+  } catch (err) {
+    handleError(res, 'handleGoogleAuth', err)
   }
 }
 
-// ============================
-// Forgot Password
-// ============================
 const showForgot = (req, res) => {
   try {
     return res.render('userPages/forgot')
   } catch (err) {
-    res.status(500).send(err.message)
+    handleError(res, 'showForgot', err)
   }
 }
 
@@ -140,7 +134,7 @@ const handleForgot = async (req, res) => {
     req.session.userId = user._id
     return res.redirect('/auth/forgot/otp')
   } catch (err) {
-    res.status(500).send(err.message)
+    handleError(res, 'handleForgot', err)
   }
 }
 
@@ -148,7 +142,7 @@ const showForgotOTP = (req, res) => {
   try {
     return res.render('userPages/forgotOTP')
   } catch (err) {
-    res.status(500).send(err.message)
+    handleError(res, 'showForgotOTP', err)
   }
 }
 
@@ -167,7 +161,7 @@ const handleForgotOTP = async (req, res) => {
       return res.redirect('/auth/forgot/otp')
     }
   } catch (err) {
-    res.status(500).send(err.message)
+    handleError(res, 'handleForgotOTP', err)
   }
 }
 
@@ -183,8 +177,8 @@ const resendForgotOTP = async (req, res) => {
 
     sendEmail(user.email, otp, user.name)
     return res.json({ success: true })
-  } catch (er) {
-    res.status(500).send(er.message)
+  } catch (err) {
+    handleError(res, 'resendForgotOTP', err)
   }
 }
 
@@ -192,7 +186,7 @@ const showChangePass = (req, res) => {
   try {
     return res.render('userPages/changePass')
   } catch (err) {
-    res.status(500).send(err.message)
+    handleError(res, 'showChangePass', err)
   }
 }
 
@@ -214,18 +208,14 @@ const handleChangePass = async (req, res) => {
     req.flash('success', 'new password updated')
     return res.redirect('/auth/login')
   } catch (err) {
-    res.status(500).send(err.message)
+    handleError(res, 'handleChangePass', err)
   }
 }
-
-// ============================
-// Signup
-// ============================
 const showSignup = (req, res) => {
   try {
     res.render('userPages/signup')
   } catch (err) {
-    res.status(500).send('server side error')
+    handleError(res, 'showSignup', err)
   }
 }
 
@@ -310,7 +300,7 @@ const handleSignup = async (req, res) => {
     req.flash('success', `OTP sent to your email: ${email}`)
     return res.redirect('/auth/signup/verify-otp')
   } catch (err) {
-    res.status(500).send('internal server error - ' + err.message)
+    handleError(res, 'handleSignup', err)
   }
 }
 
@@ -318,7 +308,7 @@ const showSignupOTP = async (req, res) => {
   try {
     res.render('userPages/verify-otp')
   } catch (err) {
-    res.status(500).send('internal server error: ' + err.message)
+    handleError(res, 'showSignupOTP', err)
   }
 }
 
@@ -345,7 +335,7 @@ const handleSignupOTP = async (req, res) => {
       return res.redirect('/auth/signup/verify-otp')
     }
   } catch (err) {
-    res.status(500).send(err.message)
+    handleError(res, 'handleSignupOTP', err)
   }
 }
                               
@@ -363,21 +353,17 @@ const resendOTP = async (req, res) => {
     sendEmail(user.email, otp, user.name)
     return res.json({ success: true })
   } catch (err) {
-    res.status(500).json({ success: false })
+    handleError(res, 'resendOTP', err)
   }
 }
 
-// ============================
-// Logout
-// ============================
 const handleLogout = (req, res) => {
   req.session.destroy((err) => {
     if (err) {
-      console.log("Error destroying session:", err);
-      return res.status(500).send("Logout failed :- " + err);
+      return handleError(res, 'handleLogout', err)
     }
-    res.clearCookie("connect.sid");
-    res.redirect("/");
+    res.clearCookie("connect.sid")
+    res.redirect("/")
   })
 }
 

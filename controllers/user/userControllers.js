@@ -1,94 +1,114 @@
 const User = require('../../models/User');
 const sendEmail = require('../../helpers/sendMail');
 const generateOTP = require('../../helpers/generateOTP');
-const bcrypt=require('bcrypt')
-const processImages=require('../../helpers/imgProcess')
+const bcrypt = require('bcrypt');
+const processImages = require('../../helpers/imgProcess');
+const handleError = require('../../helpers/handleError');
 
 const showProfile = async (req, res) => {
   try {
     const user = await User.findById(req.session.user.id);
     res.render('userPages/profile', { user });
   } catch (err) {
-    console.error('error from showProfile :-', err.message);
-    res.status(500).send('error from showProfile :- ' + err.message);
+    handleError(res, "showProfile", err);
   }
 };
-const showEditProfile=async(req,res)=>{
-    try {
+
+const showEditProfile = async (req, res) => {
+  try {
     const user = await User.findById(req.session.user.id);
     res.render('userPages/profileEdit', { user });
   } catch (err) {
-    console.error('error from showProfile :-', err.message);
-    res.status(500).send('error from showProfile :- ' + err.message);
-  }
-}
-const editProfile = async (req, res) => {
-  try {
-    const { name, email, phone, gender } = req.body;
-    const user = await User.findOne({
-      $and: [
-        { _id: { $ne: req.session.user.id } },
-        { email: email },
-      ]
-    });
-
-    if (user) {
-      req.flash('error', 'Email already exists');
-      return res.redirect('/profile');
-    }
-    let photoUrl;
-    if(req.file){
-      photoUrl=await processImages(req.file,'public/upload/profiles')
-    }
-    
-    const updateData = { name, email, mobile: phone, gender, photoUrl };
-    if(email!=req.user.email){
-      delete updateData['email']
-    }
-    await User.findByIdAndUpdate(req.user._id, updateData, { new: true });
-    if(email!=req.user.email){
-      const otp=generateOTP()
-      await User.findByIdAndUpdate(req.user._id,{otp,otpExpiry:new Date(Date.now()+1000*60*5)},{new: true})
-      sendEmail(email, otp)
-      req.flash('success',`new OTP send to your email :- ${email}`)
-      return res.render('userPages/newEmailOTP',{email})
-    }    
-    req.flash('success', 'Profile updated successfully');
-    return res.redirect('/profile');
-  } catch (err) {
-    console.error('error from editProfile :-', err.message);
-    req.flash('error', 'Failed to update profile');
-    return res.redirect('/profile');
+    handleError(res, "showEditProfile", err);
   }
 };
 
-const handleNewEmailOTP=async(req,res)=>{
-  try{
-        const { otp ,email} = req.body
-        const user = await User.findOne({ _id: req.user._id })
-     if (user.otp == otp && user.otpExpiry > Date.now()) {
-      user.isVerified = true
-      user.otp = null
-      user.otpExpiry = null
-      user.email = email
-      await user.save()
-      req.flash('success','new email updated')
-      return res.redirect('/profile')
-    } else {
-      req.flash('error', 'invalid or expired OTP')
-      return res.redirect('/profile/edit')
-    }
-  }catch(error){
+const editProfile = async (req, res) => {
+  try {
+    const { name, email, phone, gender } = req.body;
+    const existingUser = await User.findOne({
+      $and: [{ _id: { $ne: req.session.user.id } }, { email }]
+    });
 
+    if (existingUser) {
+      req.flash('error', 'Email already exists');
+      return res.redirect('/profile');
+    }
+
+    let photoUrl;
+    if (req.file) {
+      photoUrl = await processImages(req.file, 'public/upload/profiles');
+    }
+
+    const updateData = { name, email, mobile: phone, gender, photoUrl };
+    if (email !== req.user.email) delete updateData.email;
+
+    await User.findByIdAndUpdate(req.user._id, updateData, { new: true });
+
+    if (email !== req.user.email) {
+      const otp = generateOTP();
+      await User.findByIdAndUpdate(req.user._id, {
+        otp,
+        otpExpiry: new Date(Date.now() + 5 * 60 * 1000)
+      });
+      sendEmail(email, otp);
+      req.flash('success', `New OTP sent to your email: ${email}`);
+      return res.render('userPages/newEmailOTP', { email });
+    }
+
+    req.flash('success', 'Profile updated successfully');
+    res.redirect('/profile');
+  } catch (err) {
+    handleError(res, "editProfile", err);
+    req.flash('error', 'Failed to update profile');
+    res.redirect('/profile');
   }
-}
+};
+
+const handleNewEmailOTP = async (req, res) => {
+  try {
+    const { otp, email } = req.body;
+    const user = await User.findById(req.user._id);
+
+    if (user.otp === otp && user.otpExpiry > Date.now()) {
+      user.isVerified = true;
+      user.otp = null;
+      user.otpExpiry = null;
+      user.email = email;
+      await user.save();
+      req.flash('success', 'New email updated');
+      return res.redirect('/profile');
+    }
+
+    req.flash('error', 'Invalid or expired OTP');
+    res.redirect('/profile/edit');
+  } catch (err) {
+    handleError(res, "handleNewEmailOTP", err);
+  }
+};
+
+const resendNewEmailOTP = async (req, res) => {
+  try {
+    const user = await User.findById(req.session.user.id);
+    const otp = generateOTP();
+    const otpExpiry = new Date(Date.now() + 5 * 60 * 1000);
+
+    user.otp = otp;
+    user.otpExpiry = otpExpiry;
+    await user.save();
+
+    sendEmail(req.body.email, otp, user.name);
+    res.json({ success: true });
+  } catch (err) {
+    handleError(res, "resendNewEmailOTP", err);
+  }
+};
 
 const showProfileVerify = (req, res) => {
   try {
-    return res.render('userPages/profileVerifyOTP');
+    res.render('userPages/profileVerifyOTP');
   } catch (err) {
-    console.error('error from showProfileVerify :-', err.message);
-    return res.status(500).send('error from showProfileVerify :- ' + err.message);
+    handleError(res, "showProfileVerify", err);
   }
 };
 
@@ -103,114 +123,111 @@ const handleProfileVerify = async (req, res) => {
     }
 
     const otp = generateOTP();
-    const otpExpiry = new Date(Date.now() + 5 * 60 * 1000);
     user.otp = otp;
-    user.otpExpiry = otpExpiry;
+    user.otpExpiry = new Date(Date.now() + 5 * 60 * 1000);
     await user.save();
 
     sendEmail(email, otp, user.name);
-    return res.redirect('/profile/OTP');
+    res.redirect('/profile/OTP');
   } catch (err) {
-    console.error('error from handleProfileVerify :-', err.message);
-    res.status(500).send('error from handleProfileVerify :- ' + err.message);
+    handleError(res, "handleProfileVerify", err);
   }
 };
 
-const showProfileOTP = async (req, res) => {
+const showProfileOTP = (req, res) => {
   try {
-    return res.render("userPages/profileOTP");
+    res.render("userPages/profileOTP");
   } catch (err) {
-    console.error('error from showProfileOTP :-', err.message);
-    res.status(500).send('error from showProfileOTP :- ' + err.message);
+    handleError(res, "showProfileOTP", err);
   }
 };
 
 const handleProfileOTP = async (req, res) => {
   try {
     const { otp } = req.body;
-    console.log("OTP submitted:", otp);
-    const user=await User.findOne({_id:req.session.user.id})
-    if(user.otp!=otp){
-      req.flash('error','OTP do not match')
-      res.redirect('/profile/OTP')
+    const user = await User.findById(req.session.user.id);
+
+    if (user.otp !== otp) {
+      req.flash('error', 'OTP does not match');
+      return res.redirect('/profile/OTP');
     }
-    if(user.otpExpiry<Date.now()){
-      req.flash('error','OTP expired')
-      res.redirect('/profile/OTP')
+    if (user.otpExpiry < Date.now()) {
+      req.flash('error', 'OTP expired');
+      return res.redirect('/profile/OTP');
     }
-    req.flash('success','OTP verified')
+
+    req.flash('success', 'OTP verified');
     res.redirect("/profile/changePassword");
   } catch (err) {
-    console.error('error from handleProfileOTP :-', err.message);
-    res.status(500).send('error from handleProfileOTP :- ' + err.message);
+    handleError(res, "handleProfileOTP", err);
   }
 };
 
 const resendProfileOTP = async (req, res) => {
   try {
-    const user = await User.findOne({ _id: req.session.user.id })
-    const otp = generateOTP()
-    const otpExpiry = new Date(Date.now() + 5 * 60 * 1000)
+    const user = await User.findById(req.session.user.id);
+    const otp = generateOTP();
+    user.otp = otp;
+    user.otpExpiry = new Date(Date.now() + 5 * 60 * 1000);
+    await user.save();
 
-    user.otp = otp
-    user.otpExpiry = otpExpiry
-    await user.save()
-
-    sendEmail(user.email, otp, user.name)
-    return res.json({ success: true })
-  } catch (er) {
-    res.status(500).send(er.message)
+    sendEmail(user.email, otp, user.name);
+    res.json({ success: true });
+  } catch (err) {
+    handleError(res, "resendProfileOTP", err);
   }
-}
+};
 
-const showProfileChangePass = async (req, res) => {
+const showProfileChangePass = (req, res) => {
   try {
     res.render("userPages/ProfileChangePass");
   } catch (err) {
-    console.error('error from showProfileChangePass :-', err.message);
-    res.status(500).send('error from showProfileChangePass :- ' + err.message);
+    handleError(res, "showProfileChangePass", err);
   }
 };
 
 const handleProfileChangePass = async (req, res) => {
   try {
-    const {password, confirmPassword } = req.body;
-    if(password!=confirmPassword){
-      req.flash('error','Confirm password did not match')
-      res.redirect('/profile/changePassword')
+    const { password, confirmPassword } = req.body;
+    if (password !== confirmPassword) {
+      req.flash('error', 'Confirm password did not match');
+      return res.redirect('/profile/changePassword');
     }
-    const passwordHash=await bcrypt.hash(password,10)
-    await User.findByIdAndUpdate(req.session.user.id,{password:passwordHash})
-    req.flash('success','Password updated')
-    return res.redirect("/profile");
+
+    const passwordHash = await bcrypt.hash(password, 10);
+    await User.findByIdAndUpdate(req.session.user.id, { password: passwordHash });
+
+    req.flash('success', 'Password updated');
+    res.redirect("/profile");
   } catch (err) {
-    console.error('error from handleProfileChangePass :-', err.message);
-    res.status(500).send('error from handleProfileChangePass :- ' + err.message);
+    handleError(res, "handleProfileChangePass", err);
   }
 };
 
-const showDeleteAc=(req,res)=>{
-  try{
-    res.render('userPages/deleteAc')
+const showDeleteAc = (req, res) => {
+  try {
+    res.render('userPages/deleteAc');
+  } catch (err) {
+    handleError(res, "showDeleteAc", err);
+  }
+};
 
-  }catch(er){
-    console.error('error from showDelete :-', err.message);
-    res.status(500).send('error from showDelete :- ' + err.message);
+const handleDeleteAc = async (req, res) => {
+  try {
+    await User.findByIdAndUpdate(req.session.user.id, { isDeleted: true });
+    req.flash('success', 'Account deleted');
+    res.redirect('/');
+  } catch (err) {
+    handleError(res, "handleDeleteAc", err);
   }
-}
-const handleDeleteAc=async(req,res)=>{
-    try{
-      await User.findByIdAndUpdate(req.session.user.id, {isDeleted:true})
-    }catch(er){
-    console.error('error from handleDelete :-', err.message);
-    res.status(500).send('error from handleDelete :- ' + err.message);
-  }
-}
+};
+
 module.exports = {
   showProfile,
   showEditProfile,
   editProfile,
   handleNewEmailOTP,
+  resendNewEmailOTP,
   showProfileVerify,
   handleProfileVerify,
   showProfileOTP,

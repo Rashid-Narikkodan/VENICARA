@@ -5,31 +5,31 @@ const addressSchema = new mongoose.Schema(
     userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      required: true, // FK → users._id
+      required: true,
     },
     fullName: {
       type: String,
-      required: true, // recipient name
+      required: true,
       trim: true,
     },
     mobile: {
       type: String,
       required: true,
-      match: /^[0-9]{10}$/, // 10-digit mobile number
+      match: /^[0-9]{10}$/, 
     },
     pin: {
       type: String,
       required: true,
-      match: /^[0-9]{6}$/, // if it's Indian PIN code (adjust if global)
+      match: /^[0-9]{6}$/,
     },
     street: {
       type: String,
-      trim: true, // locality
+      trim: true,
     },
     address: {
       type: String,
       required: true,
-      trim: true, // area + city
+      trim: true,
     },
     city: {
       type: String,
@@ -57,9 +57,10 @@ const addressSchema = new mongoose.Schema(
     isDefault:{
         type:Boolean,
         default:false
-    }
+    },
+    isDeleted:{type:Boolean,default:false}
   },
-  { timestamps: true } // includes createdAt, updatedAt
+  { timestamps: true }
 );
 
 module.exports = mongoose.model("Address", addressSchema);
