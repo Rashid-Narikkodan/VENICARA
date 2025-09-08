@@ -3,7 +3,16 @@ const path=require('path')
 const fs=require('fs')
 
 const processImages= async (files,folder='public/upload/products') => {
-  console.log(files)
+  if(!Array.isArray(files)){
+    const file=files
+  if(!fs.existsSync(folder)) fs.mkdirSync(folder,{recursive:true});
+    const filename=`User-${Date.now()}-${file.originalname}`
+    const filepath=path.join(folder,filename)
+    await sharp(file.buffer).resize(600,600,{fit:'cover'}).webp({quality:80}).toFile(filepath)
+    const imgPath=`/upload/profiles/${filename}`
+    console.log(imgPath)
+    return imgPath
+  }else{
   const imagePaths=[]
   if(!fs.existsSync(folder)) fs.mkdirSync(folder,{recursive:true});
   for(const file of files){
@@ -14,4 +23,5 @@ const processImages= async (files,folder='public/upload/products') => {
   }
   return imagePaths
 }
-module.exports = processImages
+}
+module.exports = processImages

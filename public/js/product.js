@@ -1,47 +1,3 @@
-// const addImgDiv = document.getElementById('addImgDiv');
-// const imgInput = document.getElementById('imgInput');
-// const previewContainer = document.getElementById('previewContainer');
-
-// // Click on container triggers file input
-// addImgDiv.addEventListener('click', () => imgInput.click());
-
-// // Preview selected images
-// imgInput.addEventListener('change', (e) => {
-//   const files = Array.from(e.target.files);
-
-//   files.forEach((file, index) => {
-//     if (!file.type.startsWith('image/')) return; // skip non-images
-
-//     const reader = new FileReader();
-//     reader.onload = () => {
-//       const imgWrapper = document.createElement('div');
-//       imgWrapper.classList.add('preview-wrapper', 'd-inline-block', 'me-2', 'mb-2');
-//       imgWrapper.style.position = 'relative';
-//       imgWrapper.id = `preview-${index}`;
-
-//       const img = document.createElement('img');
-//       img.src = reader.result;
-//       img.classList.add('img-thumbnail');
-//       img.style.width = '100px';
-//       img.style.height = '100px';
-//       img.style.objectFit = 'cover';
-
-//       const removeBtn = document.createElement('button');
-//       removeBtn.textContent = '×';
-//       removeBtn.classList.add('btn', 'btn-sm', 'btn-danger');
-//       removeBtn.style.position = 'absolute';
-//       removeBtn.style.top = '0';
-//       removeBtn.style.right = '0';
-//       removeBtn.onclick = () => imgWrapper.remove();
-
-//       imgWrapper.appendChild(img);
-//       imgWrapper.appendChild(removeBtn);
-//       previewContainer.appendChild(imgWrapper);
-//     };
-//     reader.readAsDataURL(file);
-//   });
-// });
-
 
 const addImgDiv = document.getElementById('addImgDiv');
 const imgInput = document.getElementById('imgInput');
@@ -49,23 +5,20 @@ const previewContainer = document.getElementById('previewContainer');
 
 let selectedFiles = [];
 
-// Click on container triggers file input
 addImgDiv.addEventListener('click', () => imgInput.click());
 
-// Preview selected images
 imgInput.addEventListener('change', (e) => {
   const files = Array.from(e.target.files);
 
   files.forEach((file) => {
     if (!file.type.startsWith('image/')) return;
-
     selectedFiles.push(file);
     const index = selectedFiles.length - 1;
     const reader = new FileReader();
     reader.onload = () => {
       // Wrapper
       const imgWrapper = document.createElement('div');
-      imgWrapper.id = `preview-${index}`;
+      // imgWrapper.id = `preview-${index}`;
       imgWrapper.classList.add('position-relative', 'rounded-3', 'overflow-hidden');
       imgWrapper.style.width = '10rem';
       imgWrapper.style.height = '10rem';
@@ -97,60 +50,14 @@ imgInput.addEventListener('change', (e) => {
     };
     reader.readAsDataURL(file);
   });
-  imgInput.value = ''; // reset so same file can be reselected
+  imgInput.value = '';
 });
 
-// Get clean files when needed (e.g. for FormData)
 function getFinalFiles() {
   return selectedFiles.filter(f => f !== null);
 }
 
 
-
-
-
-
-
-
-
-
-
-//old
-
-// const addImgDiv=document.getElementById('addImgDiv')
-// const imgInput=document.getElementById('imgInput')
-// const previewContainer = document.getElementById('previewContainer');
-// addImgDiv.addEventListener('click',()=>imgInput.click())
-// imgInput.addEventListener('change', (e) => {
-//   const files = Array.from(e.target.files);
-
-//   files.forEach(file => {
-
-//     if(!file.type.startsWith('image/')) return; // skip non-images
-//     const reader = new FileReader();
-//     reader.onload = () => {
-//       const img = document.createElement('img');
-//       img.src = reader.result;
-//       img.classList.add('img-thumbnail'); // Bootstrap styling
-//       img.style.width = '100px'; // adjust size
-//       img.style.height = '100px';
-//       img.style.objectFit = 'cover';
-//       previewContainer.appendChild(img);
-//     };
-//     reader.readAsDataURL(file);
-//   });
-// });
-
-
-//form validation
-// document.addEventListener('DOMContentLoaded', () => {
-  
-// });
-
-
-
-
-// Generic function to add variant
 function addVariant(container) {
   const variantHTML = `
     <li><div class="variantSection mb-3">

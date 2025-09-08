@@ -16,13 +16,19 @@
       -webkit-appearance: none;
       margin: 0;
     }
+
+    .card {
+      transition: transform 0.2s ease-in-out;
+    }
+    .card:hover {
+      transform: scale(1.05);
+    }
   </style>
   <main class="flex-grow-1 bg-light w-100">
     <div class="ps-3 mt-5">
       <div class="row">
-
         <!-- filtering sidebar -->
-        <div class="col-md-2 col-12 border-end px-5 py-3" style="min-height:100vh;">
+        <div class="col-md-2 col-2 border-end px-5 py-3" style="min-height:100vh;">
           <div class="d-flex justify-content-between align-items-center mb-3">
             <h6 class="mb-0 fw-bold">Filters & Sort</h6>
             <a id="clearAll" href="/shop" class="text-decoration-none small text-black">Clear All</a>
@@ -32,7 +38,8 @@
             <!-- Categories -->
             <div class="mb-3">
               <div class="mb-3">
-                <button type="button" class="btn w-100 d-flex justify-content-between align-items-center p-2 border-0 bg-transparent"
+                <button type="button"
+                  class="btn w-100 d-flex justify-content-between align-items-center p-2 border-0 bg-transparent"
                   data-bs-toggle="collapse" data-bs-target="#categoryCollapse" aria-expanded="true">
                   <span class="fw-bold">Categories</span>
                   <i class="fa-solid fa-caret-down"></i>
@@ -48,7 +55,8 @@
 
                       <div class="form-check mb-2">
                         <input class="form-check-input" value="<%=category._id%>" type="radio" name="category"
-                          id="cat-<%=category.name%>" <%=selectedCategory&&selectedCategory.toString()===category._id.toString()?'checked':''%>>
+                          id="cat-<%=category.name%>"
+                          <%=selectedCategory&&selectedCategory.toString()===category._id.toString()?'checked':''%>>
                         <label class="form-check-label small fw-semibold ms-2" for="cat-<%=category.name%>">
                           <%=category.name%>
                         </label>
@@ -62,7 +70,8 @@
             <!-- Price -->
             <div class="mb-3">
               <div class="mb-3">
-                <button type="button" class="btn w-100 d-flex justify-content-between align-items-center p-2 border-0 bg-transparent"
+                <button type="button"
+                  class="btn w-100 d-flex justify-content-between align-items-center p-2 border-0 bg-transparent"
                   data-bs-toggle="collapse" data-bs-target="#priceCollapse" aria-expanded="true">
                   <span class="fw-bold">Price</span>
                   <i class="fa-solid fa-caret-down"></i>
@@ -70,11 +79,13 @@
                 <div class="collapse row justify-content-between" id="priceCollapse">
                   <div class="mb-3 col-5 p-0">
                     <label for="minPrice" class="form-label">Min Price</label>
-                    <input type="number" class="form-control no-arrows p-1" value="<%=minPrice%>" name="minPrice" id="minPrice" placeholder="0">
+                    <input type="number" class="form-control no-arrows p-1" value="<%=minPrice%>" name="minPrice"
+                      id="minPrice" placeholder="0">
                   </div>
                   <div class="mb-3 col-5 p-0">
                     <label for="maxPrice" class="form-label">Max Price</label>
-                    <input type="number" class="form-control no-arrows p-1" name="maxPrice" value="<%=maxPrice%>" id="maxPrice" placeholder="20000">
+                    <input type="number" class="form-control no-arrows p-1" name="maxPrice" value="<%=maxPrice%>"
+                      id="maxPrice" placeholder="20000">
                   </div>
                 </div>
               </div>
@@ -83,7 +94,8 @@
             <!-- Sort By -->
             <div class="mb-3">
               <div class="mb-3">
-                <button type="button" class="btn w-100 d-flex justify-content-between align-items-center p-2 border-0 bg-transparent"
+                <button type="button"
+                  class="btn w-100 d-flex justify-content-between align-items-center p-2 border-0 bg-transparent"
                   data-bs-toggle="collapse" data-bs-target="#sortCollapse" aria-expanded="true">
                   <span class="fw-bold">Sort by</span>
                   <i class="fa-solid fa-caret-down"></i>
@@ -91,25 +103,30 @@
                 <div class="collapse " id="sortCollapse">
                   <div class="pt-2">
                     <div class="form-check mb-2">
-                      <input class="form-check-input" type="radio" name="sort" value="newest" id="sortNewest" <%= sort === 'newest' ? 'checked' : 'checked' %> >
+                      <input class="form-check-input" type="radio" name="sort" value="newest" id="sortNewest"
+                        <%=sort==='newest' ? 'checked' : 'checked' %> >
                       <label class="form-check-label small fw-semibold ms-2" for="sortNewest">Newest</label>
                     </div>
                     <div class="form-check mb-2">
-                      <input class="form-check-input" type="radio" name="sort" value="asc" id="sortPriceAsc" <%= sort === 'asc' ? 'checked' : '' %>>
+                      <input class="form-check-input" type="radio" name="sort" value="asc" id="sortPriceAsc"
+                        <%=sort==='asc' ? 'checked' : '' %>>
                       <label class="form-check-label small fw-semibold ms-2" for="sortPriceAsc">Price: Low To
                         High</label>
                     </div>
                     <div class="form-check mb-2">
-                      <input class="form-check-input" type="radio" name="sort" value="desc" id="sortPriceDesc" <%= sort === 'desc' ? 'checked' : '' %>>
+                      <input class="form-check-input" type="radio" name="sort" value="desc" id="sortPriceDesc"
+                        <%=sort==='desc' ? 'checked' : '' %>>
                       <label class="form-check-label small fw-semibold ms-2" for="sortPriceDesc">Price: High To
                         Low</label>
                     </div>
                     <div class="form-check mb-2">
-                      <input class="form-check-input" type="radio" name="sort" value="az" id="sortAZ" <%= sort === 'az' ? 'checked' : '' %>>
+                      <input class="form-check-input" type="radio" name="sort" value="az" id="sortAZ" <%=sort==='az'
+                        ? 'checked' : '' %>>
                       <label class="form-check-label small fw-semibold ms-2" for="sortAZ">Alphabetic: A-Z</label>
                     </div>
                     <div class="form-check mb-2">
-                      <input class="form-check-input" type="radio" name="sort" value="za" id="sortZA" <%= sort === 'za' ? 'checked' : '' %>>
+                      <input class="form-check-input" type="radio" name="sort" value="za" id="sortZA" <%=sort==='za'
+                        ? 'checked' : '' %>>
                       <label class="form-check-label small fw-semibold ms-2" for="sortZA">Alphabetic: Z-A</label>
                     </div>
                   </div>
@@ -130,103 +147,128 @@
           <div class="container">
             <div class="row gap-5 justify-content-center">
               <!-- open -->
-              <% products.forEach(product=> { %>
-                <div class="col-md-3">
-                <a href="/products/<%=product._id%>" class="card text-decoration-none shadow-sm p-3 rounded-4 border-0"
-                  style="max-width: 18rem;background:linear-gradient(to right, #fff5d1, #fde3a7);">
-                  <img src="<%=product.images[0]%>" class="card-img-top rounded-4" alt="Product Image">
-                  <div class="card-body p-0 pt-3">
-                    <h6 class="card-title mb-1">
-                      <%=product.name%>
-                    </h6>
-                    <p class="text-muted mb-2" style="font-size:0.85rem;">Category: <%=product.category.name%></p>
-                    <p class="text-muted mb-2 justify-content-between d-flex align-items-center" style="font-size:0.85rem;">
-                      Quantity: <%=Math.min(...product.variants.map(v=>v.volume))  %>
-                      <!-- change to dynamic - rating average -->
-                      <span class="mb-2 text-end" style="font-size:0.85rem;">
-                        <span class="text-warning">★★★★☆</span>
-                        <span class="text-muted">(200)</span>
-                      </span>
-                    </p>
-                    <p class="mb-0 justify-content-between d-flex align-items-center">
-                      <span>
-                        <span class="text-success fw-bold">₹<%=Math.min(...product.variants.map(v=>v.discount-1))%></span> <!-- 80% off -->
-                        <span class="text-muted text-decoration-line-through">₹<%=Math.min(...product.variants.map(v=>v.basePrice-1))%></span>
-                        <span class="text-success fw-bold"><%=Math.min(...product.variants.map(v=>v.discountPercentage&&Math.round(v.discountPercentage)))%>% off</span>
-                      </span>
-                    </p>
-                  </div>
-                </a>
+              <%if(products.length===0){%>
+                <div class="text-black text-center mt-5">
+                  <span class="fs-3 text-danger fw-bold">Products not found</span>
                 </div>
-                <% }) %>
-                  <!-- close -->
+                <%}%>
+                  <% products.forEach(product=> { %>
+                    <div class="col-md-3">
+                      <a href="/products/<%=product._id%>"
+                        class="card text-decoration-none shadow p-3 rounded-4 border-0"
+                        style="max-width: 18rem;background:linear-gradient(to right, #e6cc6b, #c1a86e);">
+                        <img src="<%=product.images[0]%>" loading="eager" class="card-img-top rounded-4" alt="Product Image">
+                        <div class="card-body p-0 pt-3">
+                          <h6 class="card-title mb-1">
+                            <%=product.name%>
+                          </h6>
+                          <p class="text-muted mb-2" style="font-size:0.85rem;">Category: <%=product.category.name%>
+                          </p>
+                          <p class="text-muted mb-2 justify-content-between d-flex align-items-center"
+                            style="font-size:0.85rem;">
+                            Quantity: <%=Math.min(...product.variants.map(v=>v.volume)) %>
+                              <!-- change to dynamic - rating average -->
+                              <span class="mb-2 text-end" style="font-size:0.85rem;">
+                                <span class="text-warning">★★★★☆</span>
+                                <span class="text-muted">(200)</span>
+                              </span>
+                          </p>
+                          <p class="mb-0 justify-content-between d-flex align-items-center">
+                            <span>
+                              <span class="text-success fw-bold">₹<%=Math.min(...product.variants.map(v=>
+                                  v.discount-1))%></span> <!-- 80% off -->
+                              <span class="text-muted text-decoration-line-through">₹
+                                <%=Math.min(...product.variants.map(v=>v.basePrice-1))%></span>
+                              <span class="text-success fw-bold">
+                                <%=Math.min(...product.variants.map(v=>
+                                  v.discountPercentage&&Math.round(v.discountPercentage)))%>% off
+                              </span>
+                            </span>
+                          </p>
+                        </div>
+                      </a>
+                    </div>
+                    <% }) %>
+                      <!-- close -->
             </div>
           </div>
         </div>
 
         <!-- pagination -->
-          <div class="d-flex justify-content-end mt-4">
-        <nav aria-label="Page navigation">
-          <ul class="pagination justify-content-end flex-wrap p-3">
+        <div class="d-flex justify-content-end mt-4">
+          <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-end flex-wrap p-3">
 
-            <!-- Previous Button -->
-            <% if (currentPage> 1) { %>
-              <li class="page-item">
-                <a class="page-link bg-dark" href="?page=<%= currentPage - 1 %>&limit=<%= limit %>">
-                  <i class="fa-solid fa-caret-left text-white"></i>
-                </a>
-              </li>
-              <% } else { %>
-                <li class="page-item disabled">
-                  <span class="page-link bg-dark">
+              <!-- Previous Button -->
+              <% if (currentPage> 1) { %>
+                <li class="page-item">
+                  <a class="page-link bg-dark" href="?page=<%= currentPage - 1 %>&limit=<%= limit %>
+                  <%for(const key in query){if(key!='page'&&key!='limit'){%>
+                                  &<%= key %>=<%= query[key] %>
+                                  <% } } %>">
                     <i class="fa-solid fa-caret-left text-white"></i>
-                  </span>
+                  </a>
                 </li>
-                <% } %>
+                <% } else { %>
+                  <li class="page-item disabled">
+                    <span class="page-link bg-dark">
+                      <i class="fa-solid fa-caret-left text-white"></i>
+                    </span>
+                  </li>
+                  <% } %>
 
-                  <!-- Left Page (if exists) -->
-                  <% if (currentPage - 1>= 1) { %>
-                    <li class="page-item">
-                      <a class="page-link" href="?page=<%= currentPage - 1 %>&limit=<%= limit %>">
-                        <%= currentPage - 1 %>
-                      </a>
-                    </li>
-                    <% } %>
-
-                      <!-- Current Page -->
-                      <li class="page-item active">
-                        <span class="page-link bg-white text-dark border-0">
-                          <%= currentPage %>
-                        </span>
+                    <!-- Left Page (if exists) -->
+                    <% if (currentPage - 1>= 1) { %>
+                      <li class="page-item">
+                        <a class="page-link" href="?page=<%= currentPage - 1 %>&limit=<%= limit %>
+                         <%for(const key in query){if(key!='page'&&key!='limit'){%>
+                                  &<%= key %>=<%= query[key] %>
+                                  <% } } %>">
+                          <%= currentPage - 1 %>
+                        </a>
                       </li>
+                      <% } %>
 
-                      <!-- Right Page (if exists) -->
-                      <% if (currentPage + 1 <=totalPages) { %>
-                        <li class="page-item">
-                          <a class="page-link" href="?page=<%= currentPage + 1 %>&limit=<%= limit %>">
-                            <%= currentPage + 1 %>
-                          </a>
+                        <!-- Current Page -->
+                        <li class="page-item active">
+                          <span class="page-link bg-white text-dark border-0">
+                            <%= currentPage %>
+                          </span>
                         </li>
-                        <% } %>
 
-                          <!-- Next Button -->
-                          <% if (currentPage < totalPages) { %>
-                            <li class="page-item">
-                              <a class="page-link bg-dark" href="?page=<%= currentPage + 1 %>&limit=<%= limit %>">
-                                <i class="fa-solid fa-caret-right text-white"></i>
-                              </a>
-                            </li>
-                            <% } else { %>
-                              <li class="page-item disabled">
-                                <span class="page-link bg-dark">
+                        <!-- Right Page (if exists) -->
+                        <% if (currentPage + 1 <=totalPages) { %>
+                          <li class="page-item">
+                            <a class="page-link" href="?page=<%= currentPage + 1 %>&limit=<%= limit %>
+                            <%for(const key in query){if(key!='page'&&key!='limit'){%>
+                                  &<%= key %>=<%= query[key] %>
+                                  <% } } %>">
+                              <%= currentPage + 1 %>
+                            </a>
+                          </li>
+                          <% } %>
+
+                            <!-- Next Button -->
+                            <% if (currentPage < totalPages) { %>
+                              <li class="page-item">
+                                <a class="page-link bg-dark" href="?page=<%= currentPage + 1 %>&limit=<%= limit %>
+                                 <%for(const key in query){if(key!='page'&&key!='limit'){%>
+                                  &<%= key %>=<%= query[key] %>
+                                  <% } } %>">
                                   <i class="fa-solid fa-caret-right text-white"></i>
-                                </span>
+                                </a>
                               </li>
-                              <% } %>
+                              <% } else { %>
+                                <li class="page-item disabled">
+                                  <span class="page-link bg-dark">
+                                    <i class="fa-solid fa-caret-right text-white"></i>
+                                  </span>
+                                </li>
+                                <% } %>
 
-          </ul>
-        </nav>
-      </div>
+            </ul>
+          </nav>
+        </div>
   </main>
   <script>
   </script>

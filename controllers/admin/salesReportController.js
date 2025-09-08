@@ -1,10 +1,13 @@
+const handleError = require("../../helpers/handleError");
+
 const showSalesReport = async (req, res) => {
   try {
-    return res.render('adminPages/salesReport', { page: 'salesReport' })
-  } catch (er) {
-    res.status(500).send(er.message)
+    return res.render("adminPages/salesReport", { page: "salesReport" });
+  } catch (err) {
+    handleError(res, "showSalesReport", err);
   }
-}
-module.exports={
+};
+
+module.exports = {
   showSalesReport,
-}
+};

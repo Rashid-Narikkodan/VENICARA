@@ -2,5 +2,11 @@ module.exports={
   authController:require('./authController'),
   userController:require('./userControllers'),
   productController:require('./productControllers'),
-  homeController:require('./homecontrollers')
+  homeController:require('./homecontrollers'),
+  addressController:require('./addressController'),
+  cartController:require('./cartController'),
+  referController:require('./referController'),
+  walletController:require('./walletController'),
+  checkoutController:require('./checkoutController'),
+  orderController:require('./orderController'),
 }

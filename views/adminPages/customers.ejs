@@ -8,8 +8,8 @@
           </div>
           <div class="col-md-6 d-flex justify-content-end gap-2">
             <form action="/admin/customers" method="GET" class="d-flex gap-2 w-100">
-            <input type="text" name="search" class="form-control w-50" placeholder="Search..." value="<%= search %>" >
-            <button class="btn btn-dark">Search</button>
+              <input type="text" name="search" class="form-control w-50" placeholder="Search..." value="<%= search %>">
+              <button class="btn btn-dark">Search</button>
             </form>
           </div>
         </div>
@@ -29,22 +29,35 @@
             <tbody>
               <% users.forEach(user=> { %>
                 <%count++%>
-                <tr>
-                  <td class="text-center"><%= count %></td>
-                  <td class="text-center"><%= user.name %></td>
-                  <td class="text-center"><%= user.userId%></td>
-                  <td class="text-center"><span class="badge <%=  user.isVerified?'bg-success':'bg-danger'%>"><%= user.isVerified? 'Verified' : 'Not verified' %></span></td>
-                  <td class="text-center"><%= user.createdAt.toLocaleDateString()%></td>
-                  <td class="text-center">
-                  <button type="button" onclick="toggleUserStatus('<%=user._id%>')" class="badge <%=  user.isBlocked?'bg-danger':'bg-success'%>">
-                    <%=  user.isBlocked? 'Blocked' : 'Active' %>
-                  </button>
-                </td>
-                  <td class="text-center">
-                    <form action="/admin/customers/<%=user._id%>?_method=PATCH" method="POST" class="d-inline">
-                      <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Are you sure you want to remove this user?')"><i class="fa fa-trash"></i></button>
-                    </form>
-                  </td>
+                  <tr>
+                    <td class="text-center">
+                      <%= count %>
+                    </td>
+                    <td class="text-center">
+                      <%= user.name %>
+                    </td>
+                    <td class="text-center">
+                      <%= user.userId%>
+                    </td>
+                    <td class="text-center"><span class="badge <%=  user.isVerified?'bg-success':'bg-danger'%>">
+                        <%= user.isVerified? 'Verified' : 'Not verified' %>
+                      </span></td>
+                    <td class="text-center">
+                      <%= user.createdAt.toLocaleDateString()%>
+                    </td>
+                    <td class="text-center">
+                      <button type="button" onclick="toggleUserStatus('<%=user._id%>')"
+                        class="badge <%=  user.isBlocked?'bg-danger':'bg-success'%>">
+                        <%= user.isBlocked? 'Blocked' : 'Active' %>
+                      </button>
+                    </td>
+                    <td class="text-center">
+                      <form action="/admin/customers/<%=user._id%>?_method=PATCH" method="POST" class="d-inline">
+                        <button type="submit" class="btn btn-sm btn-outline-danger"
+                          onclick="return confirm('Are you sure you want to remove this user?')"><i
+                            class="fa fa-trash"></i></button>
+                      </form>
+                    </td>
                   </tr>
                   <% }) %>
             </tbody>
@@ -98,19 +111,19 @@
                         <% } %>
 
                           <!-- Next Button -->
-                          <% if (currentPage < totalPages) { %>
-                            <li class="page-item">
-                              <a class="page-link bg-dark" href="?page=<%= currentPage + 1 %>&limit=<%= limit %>">
-                                <i class="fa-solid fa-caret-right text-white"></i>
-                              </a>
-                            </li>
-                            <% } else { %>
-                              <li class="page-item disabled">
-                                <span class="page-link bg-dark">
-                                  <i class="fa-solid fa-caret-right text-white"></i>
-                                </span>
-                              </li>
-                              <% } %>
+                    <% if (currentPage < totalPages) { %>
+                      <li class="page-item">
+                        <a class="page-link bg-dark" href="?page=<%= currentPage + 1 %>&limit=<%= limit %>">
+                          <i class="fa-solid fa-caret-right text-white"></i>
+                        </a>
+                      </li>
+                      <% } else { %>
+                        <li class="page-item disabled">
+                          <span class="page-link bg-dark">
+                            <i class="fa-solid fa-caret-right text-white"></i>
+                          </span>
+                        </li>
+                        <% } %>
 
           </ul>
         </nav>

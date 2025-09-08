@@ -4,15 +4,20 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>VENICARA</title>
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <link
    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css"
    rel="stylesheet"
    integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr"
    crossorigin="anonymous"
   />
+  <script defer src="/js/shop.js"></script>
+ <script
+   src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"
+   integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q"
+   crossorigin="anonymous"
+  ></script>
+   <script defer src="/js/userHeader.js"></script>
   <script
-  defer
    src="https://kit.fontawesome.com/f45c5ea548.js"
    crossorigin="anonymous"
   ></script>
@@ -60,7 +65,7 @@
        >
         <i class="fs-5 text-white fa-solid fa-magnifying-glass"></i>
        </button>
-       <div id="searchResults" class="position-absolute rounded-4" style="top:5rem;right:-4rem;left:-4rem">
+       <div id="searchResults" class="position-absolute d-none rounded-4" style="top:5rem;right:-4rem;left:-4rem;height:50vh;overflow-y: scroll;overflow-x: hidden;scrollbar-width: 2px;">
         
        </div>
       </form>
@@ -83,7 +88,7 @@
     </div>
     <div id="errorBox" class="errorBox w-100 d-flex justify-content-center">
      <%if(messages.error.length>0){%>
-     <div class="alert alert-danger text-center w-md-25 w-75">
+     <div id="headerError" class="alert alert-danger text-center w-md-25 w-75">
       <%=messages.error[0]%>
      </div>
      <%}%>
@@ -96,9 +101,12 @@
   const cancel=document.getElementById('cancel')
     document.addEventListener("click", (e) => {
   if (!searchInput.contains(e.target) && !resultBox.contains(e.target)) {
+    resultBox.classList.add('d-none')
     searchInput.value = "";   // clear input
     resultBox.innerHTML = ""; // clear results
     cancel.innerHTML='<i class="fs-5 text-white fa-solid fa-magnifying-glass"></i>'
+  }else if(searchInput.contains(e.target)){
+    searchBox.classList.remove('d-none')
   }
 });
 
@@ -106,7 +114,7 @@
     searchForm.addEventListener("input", (e) => {
       const query = searchForm.search.value.trim();
       if (!query) return; // don’t call API on empty input
-      
+      resultBox.classList.remove('d-none')
       const input=document.getElementById('inputSearch')
       if(searchForm.value!="") cancel.innerHTML='<i class="fa-solid fa-xmark"></i>'
     fetch(`/search?search=${encodeURIComponent(query)}`, {
@@ -114,11 +122,9 @@
     })
      .then((res) => res.json())
      .then((data) => {
-      console.log(data);
       const searchResults = document.getElementById("searchResults");
       searchResults.innerHTML = "";
       data.products.forEach((product) => {
-        console.log(product.name);
        const a = document.createElement("a");
        a.href = `/products/${product._id}`;
         a.classList.add("text-decoration-none", "text-white", 'd-block', 'mb-2', 'bg-secondary','rounded-4');

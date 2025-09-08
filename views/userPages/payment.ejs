@@ -1,0 +1,196 @@
+<%-include('../partials/user/header.ejs')%>
+
+<style>
+  body {
+    background-color: #fff;
+    font-family: Arial, sans-serif;
+  }
+  .shopping-bag-title {
+    font-weight: bold;
+    text-align: center;
+    margin: 30px 0;
+    font-size: 1.8rem;
+    letter-spacing: 2px;
+  }
+  .card {
+    border: none;
+  }
+  .item-img {
+    max-width: 100px;
+  }
+  .order-summary {
+    background: #f5f5f5;
+    padding: 20px;
+    border-radius: 6px;
+  }
+  .order-summary h5 {
+    font-weight: bold;
+    margin-bottom: 20px;
+  }
+  .order-summary .summary-line {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: .5rem;
+    font-size: x-small;
+  }
+  .apply-btn {
+    background: black;
+    color: white;
+    border: none;
+  }
+  .in-stock {
+    color: green;
+    font-size: 0.9rem;
+  }
+  .remove-btn {
+    font-size: 0.85rem;
+    color: red;
+    background: none;
+    border: none;
+    padding: 0;
+    text-decoration: underline;
+    cursor: pointer;
+  }
+</style>
+
+<main>
+  <div class="container">
+    <div class="shopping-bag-title">PAYMENT METHOD</div>
+    <div class="row">
+      <!-- Left Side: Shopping Items -->
+      <div class="col-lg-9">
+  <% if (paymentMethods && paymentMethods.length > 0) { %>
+    <div class="p-3 bg-light rounded-3">
+      <% paymentMethods.forEach((method, i) => { %>
+        <div class="card mb-2 border-0 shadow-sm">
+          <div class="card-body d-flex align-items-center">
+            <!-- Radio -->
+            <div class="form-check me-3">
+              <input class="form-check-input" type="radio" name="paymentMethod" 
+                     id="pay_<%= method.key %>" 
+                     value="<%= method.key %>"
+                     <%= i === 0 ? "checked" : "" %>>
+            </div>
+
+            <!-- Method icon + title -->
+            <div class="flex-grow-1">
+              <h6 class="mb-0 fw-semibold">
+                <% if(method.icon){ %>
+                  <img src="<%= method.icon %>" alt="<%= method.name %>" style="height:20px;" class="me-2">
+                <% } %>
+                <%= method.name %>
+              </h6>
+              <% if(method.description){ %>
+                <small class="text-muted"><%= method.description %></small>
+              <% } %>
+            </div>
+          </div>
+        </div>
+      <% }) %>
+    </div>
+  <% } else { %>
+    <!-- Only COD fallback -->
+    <div class="p-3 bg-light rounded-3">
+      <div class="card border-0 shadow-sm">
+        <div class="card-body d-flex align-items-center p-4">
+          <div class="form-check me-3">
+            <input class="form-check-input" type="radio" name="paymentMethod" id="cod" value="cod" checked>
+          </div>
+          <div class="flex-grow-1">
+            <h6 class="mb-0 fw-semibold">Cash on Delivery</h6>
+          </div>
+        </div>
+      </div>
+    </div>
+  <% } %>
+</div>
+
+
+
+
+      <!-- Right Side: Order Summary -->
+      <div class="col-md-3">
+        <div class="order-summary shadow-sm">
+          <h5>Order Summary</h5>
+
+        <% let total = 0;
+        items.forEach((item,index) => { 
+        let lineTotal = (item.variant.discount-1)* item.quantity;
+        total += lineTotal; %> 
+          <div class="summary-line">
+            <span
+              ><%= item.quantity %> × <%= item.product.name %> (<%=
+              item.variant.volume %>ml)</span
+            >
+            <span
+              >Rs.<%= ((item.variant.discount-1) *
+              item.quantity).toLocaleString() %></span
+            >
+          </div>
+          <% }) %>
+
+          <div class="summary-line text-success">
+            <span>Delivery Charges</span><span>Free</span>
+          </div>
+          <div class="summary-line fw-bold fs-5">
+            <span>Total</span><span>Rs.<%=total%></span>
+          </div>
+          <div class="input-group mt-3 mb-3">
+              <input
+                type="text"
+                class="form-control"
+                name="coupon"
+                id="coupon"
+                placeholder="Discount code"
+              />
+           </div>
+          <div id="couponMessage" class="text-danger small mt-2"></div>
+
+          <button id='continue' class="btn btn-dark text-decoration-none fw-bold">Place Order</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+<script defer>
+  document.getElementById('continue').addEventListener('click', async (e) => {
+    e.preventDefault();
+
+    // 1. Get selected radio value
+    const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked')?.value;
+    const code=document.getElementById('coupon').value||null
+    if (!paymentMethod) {
+      alert("Please select an payment method.");
+      return;
+    }
+
+    // 2. Send fetch request
+    try {
+      const response = await fetch('/checkout/api/placeOrder', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'  
+        },
+        body: JSON.stringify({ paymentMethod,code })
+      });
+      const data = await response.json();
+      if (data.status){
+        window.location.href = `/checkout/placeOrder/${data.orderId}`
+      }else{
+        const errorBox = document.getElementById('errorBox')
+        if(errorBox){
+        errorBox.innerHTML = `<div class="alert alert-danger text-center w-md-25 w-75">
+      ${data.message}
+     </div>`
+        }else{
+          alert(data.message)
+        }
+      }
+    } catch (err) {
+      console.log(err.message)
+      alert(`Server error ${err.message}`);
+    }
+  });
+</script>
+
+<%-include('../partials/user/footer.ejs')%>

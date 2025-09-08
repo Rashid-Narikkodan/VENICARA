@@ -1,10 +1,13 @@
+const handleError = require("../../helpers/handleError");
+
 const showReferrals = async (req, res) => {
   try {
-    return res.render('adminPages/referrals', { page: 'referrals' })
-  } catch (er) {
-    res.status(500).send(er.message)
+    return res.render("adminPages/referrals", { page: "referrals" });
+  } catch (err) {
+    handleError(res, "showReferrals", err);
   }
-}
-module.exports={
+};
+
+module.exports = {
   showReferrals,
-}
+};

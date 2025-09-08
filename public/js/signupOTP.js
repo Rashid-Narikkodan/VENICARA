@@ -7,7 +7,7 @@ resend.addEventListener('click', async (e) => {
   resend.style.pointerEvents = 'none';
 
   try {
-    const response = await fetch('/signup/resend-otp', {
+    const response = await fetch('/auth/signup/resend-otp', {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ resend: true })

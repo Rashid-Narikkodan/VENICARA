@@ -17,7 +17,10 @@
     class="card shadow-lg border-0 rounded-5 overflow-hidden mt-3"
     style="max-width: 800px; width: 100%"
    >
-    <div class="row g-0 d-flex justify-content-center pt-md-5 pb-md-5">
+    <div class="row g-0 d-flex justify-content-center pb-md-5">
+    <div class="col-md-12 py-4">
+        <img src="/images/logo.avif" class="im-fluid" alt="" style="width:13rem">
+      </div>
      <!-- Right Form Section -->
      <div class="col-md-5 p-5">
       <h3 class="fw-bolder mb-4 fs-2">Forgot password?</h3>
@@ -26,7 +29,7 @@
       <div class="alert alert-danger p-2"><%=messages.error[0]%></div>
       <%}%>
       <!-- Form -->
-      <form action="/forgot" method="post" id="form">
+      <form action="/auth/forgot" method="post" id="form">
        <div class="mb-2">
         <input
          type="email"
@@ -43,7 +46,7 @@
       </form>
 
       <p class="mt-3 text-center text-muted">
-       <a href="/login" class="fw-semibold text-decoration-none text-secondary">Go back to Login page?</a>
+       <a href="/auth/login" class="fw-semibold text-decoration-none text-secondary">Go back to Login page?</a>
       </p>
      </div>
      <!-- Left Image Section -->

@@ -26,9 +26,7 @@ passport.use(new GoogleStrategy({
     return done(null,user)
   }catch(err){
     return done(err,null)
-  }
-
-  }
+  }}
 ));
 
 // Serialize user into session-----decides what info to store in session (we store user ID).
