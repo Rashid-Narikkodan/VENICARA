@@ -1,7 +1,7 @@
-const Order = require('../../models/Order');
-
-// Reusable error handler
-const handleError = require('../../helpers/handleError')
+const Order = require("../../models/Order");
+const User = require("../../models/User");
+const Product = require("../../models/Product");  // ✅ Need this for stock update
+const handleError = require("../../helpers/handleError");
 
 // SHOW ALL ORDERS (with pagination + search)
 const showOrders = async (req, res) => {
@@ -9,21 +9,53 @@ const showOrders = async (req, res) => {
     const page = parseInt(req.query.page, 10) || 1;
     const limit = parseInt(req.query.limit, 10) || 5;
     const search = req.query.search?.trim() || "";
+    const status = req.query.status?.trim() || "";
+    const sortOption = req.query.sort?.trim() || "";
 
     const filter = {};
+
+    // Search by orderId or email
     if (search) {
-      // safer regex escape
       const escaped = search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-      filter["userId.email"] = { $regex: escaped, $options: "i" };
+      filter.$or = [{ orderId: { $regex: escaped, $options: "i" } }];
+
+      const users = await User.find(
+        { email: { $regex: escaped, $options: "i" } },
+        { _id: 1 }
+      ).lean();
+
+      if (users.length) {
+        filter.$or.push({ userId: { $in: users.map((u) => u._id) } });
+      }
+    }
+
+    if (status) {
+      filter.status = status;
+    }
+
+    let sortQuery = { createdAt: -1 };
+    switch (sortOption) {
+      case "date_asc":
+        sortQuery = { createdAt: 1 };
+        break;
+      case "date_desc":
+        sortQuery = { createdAt: -1 };
+        break;
+      case "amount_asc":
+        sortQuery = { totalAmount: 1 };
+        break;
+      case "amount_desc":
+        sortQuery = { totalAmount: -1 };
+        break;
     }
 
     const totalOrders = await Order.countDocuments(filter);
 
     const orders = await Order.find(filter)
       .populate("userId", "email")
+      .sort(sortQuery)
       .skip((page - 1) * limit)
       .limit(limit)
-      .sort({ createdAt: -1 })
       .lean();
 
     const totalPages = Math.ceil(totalOrders / limit);
@@ -35,7 +67,9 @@ const showOrders = async (req, res) => {
       totalPages,
       limit,
       search,
-      count: totalOrders, // use real count
+      status,
+      sort: sortOption,
+      count: (page - 1) * limit,
     });
   } catch (error) {
     handleError(res, "showOrders", error);
@@ -78,16 +112,23 @@ const handleProductStatus = async (req, res) => {
       return res.redirect("/admin/orders");
     }
 
-    if (!order.products[index]) {
+    const product = order.products[index];
+    if (!product) {
       req.flash("error", "Invalid product index");
       return res.redirect(`/admin/order/${id}`);
     }
 
+    // ✅ Handle stock restoration when return is approved
     if (status === "returned") {
-      order.products[index].isRequested = false;
+      product.isRequested = false;
+
+      await Product.findOneAndUpdate(
+        { _id: product.productId, "variants._id": product.variantId },
+        { $inc: { "variants.$.stock": product.quantity } }
+      );
     }
 
-    order.products[index].status = status;
+    product.status = status;
     await order.save();
 
     return res.redirect(`/admin/order/${id}`);
@@ -96,7 +137,7 @@ const handleProductStatus = async (req, res) => {
   }
 };
 
-// HANDLE WHOLE ORDER STATUS
+//  WHANDLEHOLE ORDER STATUS
 const handleOrderStatus = async (req, res) => {
   try {
     const { id } = req.params;
@@ -110,17 +151,11 @@ const handleOrderStatus = async (req, res) => {
 
     order.status = status;
 
-    if (status === "cancelled") {
-      order.products.forEach((p) => (p.status = "cancelled"));
-    }
-
-    if (status === "delivered") {
-      order.products.forEach((p) => {
-        if (p.status !== "cancelled" && p.status !== "returned") {
-          p.status = "delivered";
-        }
-      });
-    }
+    order.products.forEach((p) => {
+      if (p.status !== "cancelled") {
+        p.status = status;
+      }
+    });
 
     await order.save();
 
@@ -129,6 +164,7 @@ const handleOrderStatus = async (req, res) => {
     handleError(res, "handleOrderStatus", error);
   }
 };
+
 
 module.exports = {
   showOrders,

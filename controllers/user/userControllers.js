@@ -41,13 +41,13 @@ const editProfile = async (req, res) => {
     }
 
     const updateData = { name, email, mobile: phone, gender, photoUrl };
-    if (email !== req.user.email) delete updateData.email;
+    if (email !== req.session.user.email) delete updateData.email;
 
-    await User.findByIdAndUpdate(req.user._id, updateData, { new: true });
+    await User.findByIdAndUpdate(req.session.user.id, updateData, { new: true });
 
-    if (email !== req.user.email) {
+    if (email !== req.session.user.email) {
       const otp = generateOTP();
-      await User.findByIdAndUpdate(req.user._id, {
+      await User.findByIdAndUpdate(req.session.user.id, {
         otp,
         otpExpiry: new Date(Date.now() + 5 * 60 * 1000)
       });
@@ -59,8 +59,7 @@ const editProfile = async (req, res) => {
     req.flash('success', 'Profile updated successfully');
     res.redirect('/profile');
   } catch (err) {
-    handleError(res, "editProfile", err);
-    req.flash('error', 'Failed to update profile');
+    req.flash('error', 'Failed to update profile'+err);
     res.redirect('/profile');
   }
 };
@@ -68,7 +67,7 @@ const editProfile = async (req, res) => {
 const handleNewEmailOTP = async (req, res) => {
   try {
     const { otp, email } = req.body;
-    const user = await User.findById(req.user._id);
+    const user = await User.findById(req.session.user.id);
 
     if (user.otp === otp && user.otpExpiry > Date.now()) {
       user.isVerified = true;

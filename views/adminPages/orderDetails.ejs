@@ -40,7 +40,7 @@ include('../partials/admin/sidebar.ejs')%>
               <span class="fw-semibold"><%=order.totalAmount%></span>
             </div>
             <hr />
-            <div class="col-md-6 p-3 mb-3 p-2">
+            <div class="col-md-6 p-3 p-2">
               <form action="/admin/orders/<%= order._id %>/status?_method=PATCH" method="POST" class="d-inline order-status-form">
                 <select name="status" data-status ="<%=order.status%>" class="form-select form-select-sm d-inline w-auto status-select">
                     <option value="pending" <%= order.status === "pending" ? "selected" : "" %>>Pending</option>
@@ -54,10 +54,17 @@ include('../partials/admin/sidebar.ejs')%>
                 </form>
 
             </div>
-            <div class="col-md-6 p-3 mb-3 p-2">
+            <div class="col-md-6 p-3 p-2">
               <span class="fw-bold">Status : </span>
               <span class="text-success fw-semibold"><%=order.status%></span>
             </div>
+            <%if(order.reqReason){%>
+              <div class="col-md-6 p-3 mb-3"></div>
+              <div class="col-md-6 px-3 mb-3">
+                <span class="fw-bold">Reason : </span>
+                <span class="fw-semibold"><%=order.reqReason%></span>
+              </div>
+              <%}%>
           </div>
         </div>
       </div>
@@ -123,10 +130,10 @@ include('../partials/admin/sidebar.ejs')%>
                       <%=product.status%>
                   </td>
                   <td class="text-center">
-                    <span class="badge <%=product.isRequested?'bg-success':'bg-secondary'%>"><%=product.isRequested?'Requested':'No request'%></span>
+                    <span class="badge <%=product.isRequested?'bg-primary':product.status == "returned"?'bg-success':'bg-secondary'%>"><%=product.isRequested?'Requested':product.status == "returned"?'Approved':'No request'%></span>
                   </td>
-                  <td class="text-center text-success">
-                    <%=product?.returnReason%>
+                  <td class="text-center text-black">
+                    <%=product?.reqReason%>
                 </td>
                   </tr>
                   <% }) %>

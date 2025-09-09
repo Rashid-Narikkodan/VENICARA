@@ -134,7 +134,7 @@
           <h5>Order Summary</h5>
 
           <% items.forEach((item)=>{ %>
-          <div class="summary-line">
+          <div class="summary-line" data-cart-id="<%= item._id %>" data-name="<%= item.product.name %>" data-volume="<%= item.variant.volume %>">
             <span
               ><%= item.quantity %> × <%= item.product.name %> (<%=
               item.variant.volume %>ml)</span
@@ -176,8 +176,10 @@
 
       const currentQuantity = Number(quantitySpan.textContent);
 
-      // Block fetch if already max
-      if (currentQuantity >= 5) {
+      // Block fetch if already max or stock is 0 or less
+      const stockElem = btn.closest(".card").querySelector(".in-stock, .text-danger");
+      const isOutOfStock = stockElem && stockElem.classList.contains("text-danger");
+      if (currentQuantity >= 5 || isOutOfStock) {
         btn.disabled = true;
         return;
       }
@@ -191,22 +193,32 @@
         if (data.success) {
           quantitySpan.textContent = data.newQuantity;
 
-          // disable if hits 5
           if (data.newQuantity >= 5) btn.disabled = true;
-
-          // re-enable decrease if >1
           if (data.newQuantity > 1) decBtn.disabled = false;
+
+          const qtyPElem = btn.closest(".card").querySelector("p.text-muted");
+          qtyPElem.textContent = `Qty : ${data.newQuantity}`;
 
           // update subtotal
           const lineTotalElem = btn
             .closest(".col-md-4")
             .querySelector("p.text-muted.mb-1");
-          lineTotalElem.textContent = `Subtotal: Rs.${data.lineTotal}.99`;
+          lineTotalElem.textContent = `Subtotal: Rs.${data.lineTotal}`;
+
+          // update summary line
+          const summaryLine = document.querySelector(`.summary-line[data-cart-id="${cartId}"]`);
+          if (summaryLine) {
+            const spans = summaryLine.querySelectorAll("span");
+            spans[0].textContent = `${data.newQuantity} × ${summaryLine.dataset.name} (${summaryLine.dataset.volume}ml)`;
+            spans[1].textContent = `Rs.${data.lineTotal.toLocaleString()}`;
+          }
 
           // update total
           document.querySelector(
             ".summary-line.fw-bold.fs-5 span:last-child"
-          ).textContent = `Rs.${data.total}`;
+          ).textContent = `Rs.${data.total.toLocaleString()}`;
+        }else{
+          alert(data.message)
         }
       } catch (err) {
         console.error(err);
@@ -238,14 +250,27 @@
           quantitySpan.textContent = data.newQuantity;
           if (data.newQuantity <= 1) btn.disabled = true;
           if (data.newQuantity < 5) incBtn.disabled = false;
+
+          // update Qty in item card
+          const qtyPElem = btn.closest(".card").querySelector("p.text-muted");
+          qtyPElem.textContent = `Qty : ${data.newQuantity}`;
+
           const lineTotalElem = btn
             .closest(".col-md-4")
             .querySelector("p.text-muted.mb-1");
-          lineTotalElem.textContent = `Subtotal: Rs.${data.lineTotal}.99`
-          
+          lineTotalElem.textContent = `Subtotal: Rs.${data.lineTotal}`;
+
+          // update summary line
+          const summaryLine = document.querySelector(`.summary-line[data-cart-id="${cartId}"]`);
+          if (summaryLine) {
+            const spans = summaryLine.querySelectorAll("span");
+            spans[0].textContent = `${data.newQuantity} × ${summaryLine.dataset.name} (${summaryLine.dataset.volume}ml)`;
+            spans[1].textContent = `Rs.${data.lineTotal.toLocaleString()}`;
+          }
+
           document.querySelector(
             ".summary-line.fw-bold.fs-5 span:last-child"
-          ).textContent = `Rs.${data.total}`;
+          ).textContent = `Rs.${data.total.toLocaleString()}`;
         }
       } catch (err) {
         console.error(err);

@@ -10,11 +10,12 @@ const showCart = async (req, res) => {
       status: "active",
     })
       .populate("productId")
+      .sort({ createdAt: -1 })
       .lean();
 
     const cartItems = cartDocs.map(doc => {
       const variant = doc.productId?.variants?.find(
-        v => v._id.toString() === (doc.variantId?.toString() || "") && v.stock > 0
+        v => v._id.toString() === (doc.variantId?.toString() || "")
       ) || {
         _id: null,
         name: "Default Variant",
@@ -42,27 +43,28 @@ const addToCart = async (req, res) => {
     const productId = req.params.id;
     const variantId = req.body.variantId;
     const userId = req.session.user?.id;
-    const product = await Product.findById(productId);
-    const variant = product.variants.id(variantId);
 
     if (!userId) {
-      req.flash('error', 'User should be Authenticated to Add to cart');
+      req.flash("error", "User should be Authenticated to Add to cart");
       return res.redirect(`/products/${productId}`);
     }
 
+    const product = await Product.findById(productId);
     if (!product) {
       req.flash("error", "Product not found");
       return res.redirect(`/products/${productId}`);
     }
 
+    const variant = product.variants.id(variantId);
     if (!variant) {
       req.flash("error", "Variant not found");
       return res.redirect(`/products/${productId}`);
     }
 
+    // 🚨 stock check
     if (variant.stock <= 0) {
-      req.flash("error", "Product is Out of stock");
-      return res.redirect(`/products/${req.params.id}`);
+      req.flash("error", "Out of stock");
+      return res.redirect(`/products/${productId}`);
     }
 
     let existingCartItem = await Cart.findOne({
@@ -72,22 +74,22 @@ const addToCart = async (req, res) => {
       status: "active",
     });
 
-    if (existingCartItem?.quantity >= 5) {
-      req.flash("error", "Quantity limit exceeded");
-      return res.redirect(`/products/${req.params.id}`);
-    }
-
-    let newItem;
     if (existingCartItem) {
-      if (existingCartItem.quantity < variant.stock) {
-        existingCartItem.quantity += 1;
-        await existingCartItem.save();
-      } else {
-        req.flash('error', 'Stock limit is reached');
-        return res.redirect(`/products/${req.params.id}`);
+      // 🚨 stock check for increment
+      if (existingCartItem.quantity >= variant.stock) {
+        req.flash("error", "Not enough stock available");
+        return res.redirect(`/products/${productId}`);
       }
+
+      if (existingCartItem.quantity >= 5) {
+        req.flash("error", "Quantity limit exceeded");
+        return res.redirect(`/products/${productId}`);
+      }
+
+      existingCartItem.quantity += 1;
+      await existingCartItem.save();
     } else {
-      newItem = new Cart({
+      const newItem = new Cart({
         userId,
         productId,
         variantId,
@@ -97,15 +99,13 @@ const addToCart = async (req, res) => {
       await newItem.save();
     }
 
-    product.variants.id(variantId).stock -= 1;
-    await product.save();
-
     req.flash("success", "Product added to cart list");
-    res.redirect(`/products/${req.params.id}`);
+    res.redirect(`/products/${productId}`);
   } catch (err) {
     handleError(res, "addToCart", err);
   }
 };
+
 
 const removeFromCart = async (req, res) => {
   try {
@@ -116,21 +116,6 @@ const removeFromCart = async (req, res) => {
       return res.redirect("/cart");
     }
 
-    const product = await Product.findById(cart.productId);
-    if (!product) {
-      req.flash("error", "Product not found");
-      return res.redirect("/cart");
-    }
-
-    const variant = product.variants.id(cart.variantId);
-    if (!variant) {
-      req.flash("error", "Product variant not found");
-      return res.redirect("/cart");
-    }
-
-    variant.stock += cart.quantity;
-    await product.save();
-
     await Cart.findByIdAndDelete(id);
 
     req.flash("success", "Item removed from cart");
@@ -140,38 +125,70 @@ const removeFromCart = async (req, res) => {
   }
 };
 
-
 const increaseQuantity = async (req, res) => {
   try {
     const { cartId } = req.params;
     const cartItem = await Cart.findById(cartId).populate("productId");
-    if (!cartItem) return res.status(404).json({ success: false, message: "Item not found" });
-
-    const variant = cartItem.productId.variants.find(v => v._id.toString() === cartItem.variantId.toString());
-    if (!variant) return res.status(400).json({ success: false, message: "Variant not found" });
-
-    if (cartItem.quantity < variant.stock) {
-      cartItem.quantity += 1;
-      await cartItem.save();
+    if (!cartItem) {
+      return res.status(404).json({ success: false, message: "Item not found" });
     }
 
-    const lineTotal = (variant.discount - 1) * cartItem.quantity;
+    const variant = cartItem.productId.variants.find(
+      (v) => v._id.toString() === cartItem.variantId.toString()
+    );
 
+    if (!variant) {
+      return res.status(404).json({ success: false, message: "Variant not found" });
+    }
+
+    // 🚨 stock check
+    if (variant.stock <= cartItem.quantity) {
+      return res.json({
+        success: false,
+        message: "Not enough stock available",
+        newQuantity: cartItem.quantity,
+      });
+    }
+
+    // 🚨 max 5 limit check
+    if (cartItem.quantity >= 5) {
+      return res.json({
+        success: false,
+        message: "Quantity limit reached",
+        newQuantity: cartItem.quantity,
+      });
+    }
+
+    // increment
+    cartItem.quantity += 1;
+    await cartItem.save();
+
+    // calculate line total
+    const price = variant.discount || variant.price; // safer: fallback to price
+    const lineTotal = price * cartItem.quantity;
+
+    // calculate cart total
     const cartItems = await Cart.find({ userId: cartItem.userId }).populate("productId");
     const total = cartItems.reduce((sum, item) => {
-      const itemVariant = item.productId.variants.find(v => v._id.toString() === item.variantId.toString());
-      return sum + ((itemVariant?.discount || 0) - 1) * item.quantity;
+      const itemVariant = item.productId.variants.find(
+        (v) => v._id.toString() === item.variantId.toString()
+      );
+      const itemPrice = itemVariant?.discount || itemVariant?.price || 0;
+      return sum + itemPrice * item.quantity;
     }, 0);
 
-    const product = await Product.findById(cartItem.productId);
-    product.variants.id(cartItem.variantId).stock -= 1;
-    await product.save();
-
-    res.json({ success: true, newQuantity: cartItem.quantity, lineTotal, total });
+    res.json({
+      success: true,
+      newQuantity: cartItem.quantity,
+      lineTotal,
+      total,
+      increased: true,
+    });
   } catch (err) {
     handleError(res, "increaseQuantity", err);
   }
 };
+
 
 const decreaseQuantity = async (req, res) => {
   try {
@@ -179,15 +196,13 @@ const decreaseQuantity = async (req, res) => {
     const cartItem = await Cart.findById(cartId).populate("productId");
     if (!cartItem) return res.status(404).json({ success: false, message: "Item not found" });
 
-    const variant = cartItem.productId.variants.find(v => v._id.toString() === cartItem.variantId.toString());
-    if (!variant) return res.status(400).json({ success: false, message: "Variant not found" });
-
     if (cartItem.quantity > 1) {
       cartItem.quantity -= 1;
       await cartItem.save();
     }
 
-    const lineTotal = (variant.discount - 1) * cartItem.quantity;
+    const variant = cartItem.productId.variants.find(v => v._id.toString() === cartItem.variantId.toString());
+    const lineTotal = (variant?.discount - 1) * cartItem.quantity;
 
     const cartItems = await Cart.find({ userId: cartItem.userId }).populate("productId");
     const total = cartItems.reduce((sum, item) => {
@@ -195,11 +210,7 @@ const decreaseQuantity = async (req, res) => {
       return sum + ((itemVariant?.discount || 0) - 1) * item.quantity;
     }, 0);
 
-    const product = await Product.findById(cartItem.productId);
-    product.variants.id(cartItem.variantId).stock += 1;
-    await product.save();
-
-    res.json({ success: true, newQuantity: cartItem.quantity, lineTotal, total });
+    res.json({ success: true, newQuantity: cartItem.quantity, lineTotal, total, decreased: cartItem.quantity > 0 });
   } catch (err) {
     handleError(res, "decreaseQuantity", err);
   }

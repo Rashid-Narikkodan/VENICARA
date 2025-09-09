@@ -2,6 +2,7 @@ const Address = require("../../models/Address");
 const Cart = require("../../models/Cart");
 const PaymentMethod = require("../../models/PaymentMethod");
 const Order = require("../../models/Order");
+const Product = require("../../models/Product");
 const Coupon = require("../../models/Coupon");
 const generateOrderId = require('../../helpers/orderID');
 
@@ -181,17 +182,22 @@ const handlePlaceOrder = async (req, res) => {
         : { method: "cod", status: "pending" };
 
     let totalAmount = 0;
-    const products = cartItems.map((item) => {
+    const products = [];
+    for (const item of cartItems) {
       const variant = item.productId?.variants?.find(
         (v) => v._id.toString() === item.variantId.toString()
       );
       if (!variant) throw new Error(`Variant not found for product ${item.productId?._id}`);
 
+      if (variant.stock < item.quantity) {
+        throw new Error(`Insufficient stock for ${item.productId.name} (${variant.volume}ml)`);
+      }
+
       const image = item.productId.images[0];
       const subtotal = Number(variant.discount - 1) * item.quantity;
       totalAmount += subtotal;
 
-      return {
+      products.push({
         productId: item.productId._id,
         variantId: item.variantId,
         productName: item.productId.name,
@@ -201,8 +207,8 @@ const handlePlaceOrder = async (req, res) => {
         subtotal,
         volume: variant.volume,
         image,
-      };
-    });
+      });
+    }
 
     if (coupon) totalAmount -= coupon?.discount;
     totalAmount = parseFloat(totalAmount.toFixed(2));
@@ -218,6 +224,18 @@ const handlePlaceOrder = async (req, res) => {
       couponApplied: coupon?._id || null,
       totalAmount,
     });
+
+    // Update stock for each product
+    for (const prod of products) {
+      const product = await Product.findById(prod.productId);
+      if (product) {
+        const variant = product.variants.id(prod.variantId);
+        if (variant) {
+          variant.stock -= prod.quantity;
+          await product.save();
+        }
+      }
+    }
 
     await Cart.deleteMany({ userId: user.id, status: "active" });
 

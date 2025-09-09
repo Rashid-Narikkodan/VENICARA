@@ -1,0 +1,101 @@
+<%- include('../partials/user/header.ejs') %>
+
+<div class="container my-5">
+    <h1 class="text-center mb-4">Order Details</h1>
+
+    <div class="row g-4">
+        <!-- Main Content -->
+        <div class="col-lg-8">
+            <div class="card p-4 shadow-sm">
+                <div class="d-flex flex-wrap align-items-center mb-4">
+                    <div class="me-4">
+                        <img src="<%= product.image %>" class="img-fluid rounded" style="width:120px; height:150px;" alt="Product Image">
+                    </div>
+                    <div>
+                        <h3 class="h5 mb-1"><%=product.productName%></h3>
+                        <p class="mb-1"><%=product.volume%></p>
+                        <p class="h6 text-danger mb-3">₹<%=product.subtotal%></p>
+
+                        <div class="d-flex flex-wrap gap-2">
+                            <button class="btn btn-dark">Rate Product</button>
+                            <a href="#" class="btn btn-outline-dark">Buy Again</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mt-4">
+                    <div class="col-md-6 mb-3">
+                        <h5>Order Details</h5>
+                        <ul class="list-unstyled">
+                            <li><strong>Order ID:</strong> <%=order.orderId%></li>
+                            <li><strong>Order Date:</strong> <%=order.createdAt.toLocaleDateString()%></li>
+                            <li><strong>Delivery Date:</strong> <%=new Date(Date.now(order.createdAt)+5000*60*60*24).toLocaleDateString()%></li>
+                            <li><strong>Payment Method:</strong> <%=payment.method%></li>
+                        </ul>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <h5>Shipping Address</h5>
+                        <ul class="list-unstyled">
+                            <li><strong>Name:</strong> John Doe</li>
+                            <li><strong>Address:</strong> <%=shippedAddress.address%></li>
+                            <li><strong>City:</strong>  <%=shippedAddress.city%></li>
+                            <li><strong>Pincode:</strong>  <%=shippedAddress.pin%></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar / Order Status -->
+        <div class="col-lg-4">
+            <div class="card p-4 shadow-sm">
+                <h5 class="mb-3">Order Status</h5>
+                <ul class="list-unstyled">
+                    <li class="d-flex align-items-start mb-3">
+                        <span class="badge rounded-circle bg-success me-3">&nbsp;</span>
+                        <div>
+                            <div>Order Confirmed</div>
+                            <small class="text-muted">March 15, 2024</small>
+                        </div>
+                    </li>
+                    <li class="d-flex align-items-start mb-3">
+                        <span class="badge rounded-circle bg-success me-3">&nbsp;</span>
+                        <div>
+                            <div>Shipped</div>
+                            <small class="text-muted">March 17, 2024</small>
+                        </div>
+                    </li>
+                    <li class="d-flex align-items-start mb-3">
+                        <span class="badge rounded-circle bg-success me-3">&nbsp;</span>
+                        <div>
+                            <div>Out For Delivery</div>
+                            <small class="text-muted">March 21, 2024</small>
+                        </div>
+                    </li>
+                    <li class="d-flex align-items-start">
+                        <span class="badge rounded-circle bg-success me-3">&nbsp;</span>
+                        <div>
+                            <div>Delivered</div>
+                            <small class="text-muted">March 22, 2024</small>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelector('.btn-dark').addEventListener('click', function() {
+            alert('Rating functionality would open here');
+        });
+        document.querySelector('.btn-outline-dark').addEventListener('click', function(e) {
+            e.preventDefault();
+            alert('Add to cart functionality would trigger here');
+        });
+    });
+</script>
+
+<%- include('../partials/user/footer.ejs') %>

@@ -58,7 +58,7 @@ const showProducts = async (req, res) => {
       totalPages,
       limit,
       search,
-      count: "0",
+      count: (page - 1) * limit,
     });
   } catch (err) {
     handleError(res, "showProducts", err);

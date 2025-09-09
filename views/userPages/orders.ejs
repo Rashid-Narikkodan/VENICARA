@@ -1,168 +1,186 @@
 <%- include('../partials/user/header.ejs') %>
 
 <main class="container my-4">
-  <% if (orders && orders.length > 0) { %> <% orders.forEach(order => { %>
-  <div class="card row rounded-3 p-3 mb-4 shadow">
-    <div class="col-md-12 d-flex justify-content-between">
-      <span>Order ID : <%=order.orderId%></span>
-      <span class="badge bg-primary"><%=order.status%></span>
-    </div>
-    <div
-      style="background-color: rgb(193, 193, 193)"
-      class="col-md-12 px-3 py-1 rounded-2 my-2"
-    >
-    <!-- product based start -->
-      <%order.products.forEach((product,index)=>{%>
-      <div class="row p-1 rounded-3 <%=product.status === 'cancelled'?'text-secondary':''%>">
-        <!-- Product Image -->
-        <div class="col-md-2 text-center p-1 align-items-center d-flex justify-content-center">
-          <img
-            src="<%=product?.image%>"
-            alt="Product Image"
-            class="img-fluid rounded"
-            style="max-height: 70px"
-          />
+  <% if (orders && orders.length > 0) { %> 
+    <% orders.forEach(order => { %>
+      <div class="card row rounded-3 p-3 mb-4 shadow">
+        <div class="col-md-12 d-flex justify-content-between">
+          <span>Order ID : <%=order.orderId%></span>
+          <span class="badge bg-primary"><%=order.status%></span>
         </div>
 
-        <!-- Product Info -->
-        <div class="col-md-4 p-3">
-          <h5 class="fw-semibold mb-1"><%=product?.productName%></h5>
-          <p class=" <%=product.status === 'cancelled'?'text-secondary':'text-muted'%> mb-1 fw-semibold">
-            Volume: <%=product?.volume%>ML
-          </p>
-          <p class=" <%=product.status === 'cancelled'?'text-secondary':'text-muted'%> mb-1 fw-semibold">Qty: <%=product.quantity%></p>
-          <p class=" <%=product.status === 'cancelled'?'text-secondary':'text-muted'%> mb-1 fw-bold">Total : <%=product.subtotal%></p>
+        <div class="col-md-12 px-3 py-1 rounded-2 my-2" style="background-color: rgb(193, 193, 193)">
+          <!-- product based start -->
+          <% order.products.forEach((product,index)=>{ %>
+          <div class="row p-1 rounded-3 <%=product.status === 'cancelled'?'text-secondary':''%>">
+            
+            <!-- Product Image -->
+            <div class="col-md-2 text-center p-1 d-flex align-items-center justify-content-center">
+              <img src="<%=product?.image%>" alt="Product Image" class="img-fluid rounded" style="max-height: 70px" />
+            </div>
+
+            <!-- Product Info -->
+            <div class="col-md-4 p-3">
+              <h5 class="fw-semibold mb-1"><%=product?.productName%></h5>
+              <p class="<%=product.status === 'cancelled'?'text-secondary':'text-muted'%> mb-1 fw-semibold">Volume: <%=product?.volume%>ML</p>
+              <p class="<%=product.status === 'cancelled'?'text-secondary':'text-muted'%> mb-1 fw-semibold">Qty: <%=product.quantity%></p>
+              <p class="<%=product.status === 'cancelled'?'text-secondary':'text-muted'%> mb-1 fw-bold">Total : <%=product.subtotal%></p>
+            </div>
+
+            <!-- Status -->
+            <div class="col-md-3 d-flex flex-column justify-content-center align-items-start">
+              <p class="small mb-0"><strong>Ordered On :</strong> <%= order.createdAt.toLocaleString('en-IN', { dateStyle: 'medium' }) %></p>
+              <p class="small mb-0"><strong>Expected :</strong> <%= new Date(order.createdAt.getTime() + 1000*60*60*24*3).toLocaleString('en-IN', { dateStyle: 'medium' }) %></p>
+              <p class="small mb-0"><strong>Status : </strong>
+                <span class="<%=product.status === 'cancelled'?'text-secondary':'text-success'%> fw-bold fs-6">
+                  <%=product.status.charAt(0).toUpperCase()+product.status.slice(1)%>
+                </span>
+              </p>
+            </div>
+
+            <!-- Actions -->
+            <div class="col-md-3 p-3 d-flex flex-column gap-2 justify-content-center align-items-end text-center">
+              <% if(!["shipped","Out of delivery","delivered","cancelled","returned"].includes(product.status)) { %>
+                <button class="btn btn-danger" onclick="cancelOrderProduct('<%=order._id%>','<%=index%>')">Cancel</button>
+              <% } %>
+
+              <% if(product.status === 'delivered') { %>
+                <button class="btn btn-secondary"
+                  data-bs-toggle="modal"
+                  data-bs-target="#returnModal"
+                  onclick="openReturnModal('<%= order._id %>', '<%= index %>')">
+                  <%= product.isRequested ? "Requested" : "Return" %>
+                </button>
+              <% } %>
+
+              <a href="/orders/details/<%=order._id%>?index=<%=index%>" class="btn btn-dark">Details</a>
+            </div>
+          </div>
+          <hr class="p-0 m-0" />
+          <% }) %>
         </div>
 
-        <!-- Status -->
-        <div
-          class="col-md-3 justify-content-center align-items-start d-flex flex-column"
-        >
-          <p class="small mb-0">
-            <strong>Ordered On :</strong>
-            <%= order.createdAt.toLocaleString('en-IN', {dateStyle: 'medium',
-            }) %>
-          </p>
-          <p class="small mb-0">
-            <strong>Expected :</strong>
-            <%= new Date(order.createdAt.getTime() + 1000 * 60 * 60 * 24 * 3)
-            .toLocaleString('en-IN', { dateStyle: 'medium' }) %>
-          </p>
+        <!-- Order-level actions -->
+        <div class="col-md-12 d-flex justify-content-between align-items-center">
+          <% if(!["delivered","cancelled","returned"].includes(order.status)) { %>
+            <button class="btn btn-outline-dark fw-semibold" onclick="cancelOrder('<%=order._id%>')">Cancel order</button>
+          <% } %>
 
-          <p class="small mb-0">
-            <strong>Status : </strong
-            ><span class=" <%=product.status === 'cancelled'?'text-secondary':'text-success'%> fw-bold fs-6"
-              ><%=product.status.charAt(0).toUpperCase()+product.status.slice(1)%></span
-            >
-          </p>
-        </div>
-
-        <!-- Actions + Dates -->
-        <div
-          class="col-md-3 p-3 text-center justify-content-center align-items-end d-flex flex-column gap-2"
-        >
-      <%if(!["delivered", "cancelled", "returned"].includes(product.status)){%>
-          <button class="btn btn-danger" onclick="cancelOrderProduct('<%=order._id%>','<%=index%>')">
-            Cancel
-          </button>      
-        <%}%>
-        <%if(product.status === 'delivered'){%>
-          <button class="btn btn-secondary" id="returnProduct" onclick="returnOrderProduct('<%=order._id%>','<%=index%>')">
-            <%=product.isRequested?"Requested":'Return'%>
-          </button>      
-        <%}%>
-          <button class="btn btn-dark">Details</button>
+          <% if(order.status === 'delivered') { %>
+            <button class="btn btn-secondary"
+              data-bs-toggle="modal"
+              data-bs-target="#returnModal"
+              onclick="openReturnModal('<%= order._id %>')"
+              <%= order.isRequested ? "disabled" : "" %>>
+              <%= order.isRequested ? "Return Requested" : "Return Order" %>
+            </button>
+          <% } %>
+<div>
+  <span class="fw-bold me-3">Total: <%=order.totalAmount%></span>
+  <a href="/orders/<%=order._id%>/invoice" class="btn btn-outline-primary fw-bold">Invoice</a>
+</div>
         </div>
       </div>
-      <hr class="p-0 m-0"/>
-      <!-- product based end -->
-      <%})%>
+    <% }) %> 
+  <% } else { %>
+    <div class="text-center py-5">
+      <img src="/images" alt="No Orders" class="img-fluid mb-3" style="max-width: 200px" />
+      <h5 class="text-muted">You have no orders yet.</h5>
+      <a href="/shop" class="btn btn-primary mt-2">Shop Now</a>
     </div>
-
-    <div class="col-md-12 d-flex justify-content-between align-items-center">
-
-      <%if(!["delivered", "cancelled", "returned"].includes(order.status)){%>
-          <button class="btn btn-outline-dark fw-semibold" onclick="cancelOrder('<%=order._id%>')">
-            Cancel order
-          </button>      
-        <%}%>
-        <%if(order.status === 'delivered'){%>
-          <button <%=order.isRequested?"disabled":''%> class="btn btn-outline-dark fw-semibold" onclick="returnOrder('<%=order._id%>')">
-            <%=order.isRequested?"Return Requested":'Return order'%>
-          </button>      
-        <%}%>
-      <span class="fw-bold ">Total: <%=order.totalAmount%></span>
-    </div>
-  </div>
-  <% }) %> <% } else { %>
-  <div class="text-center py-5">
-    <img
-      src="/images"
-      alt="No Orders"
-      class="img-fluid mb-3"
-      style="max-width: 200px"
-    />
-    <h5 class="text-muted">You have no orders yet.</h5>
-    <a href="/shop" class="btn btn-primary mt-2">Shop Now</a>
-  </div>
   <% } %>
+
+  <!-- Return Reason Modal -->
+  <div class="modal fade" id="returnModal" tabindex="-1" aria-labelledby="returnModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <form id="returnForm">
+          <div class="modal-header">
+            <h5 class="modal-title" id="returnModalLabel">Return Product</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div class="mb-3">
+              <label for="returnReason" class="form-label">Reason for Return</label>
+              <textarea id="returnReason" name="reason" class="form-control" rows="3" placeholder="Enter reason..." required></textarea>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-danger">Submit Return</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
 </main>
+
 <script>
-  async function cancelOrderProduct(id,index){
+  let currentReturnId = null;
+  let currentReturnIndex = null;
+
+  function openReturnModal(id, index = null) {
+    currentReturnId = id;
+    currentReturnIndex = index;
+    document.getElementById("returnReason").value = "";
+    const modal = new bootstrap.Modal(document.getElementById("returnModal"));
+    modal.show();
+  }
+
+  // Return form submit
+  document.getElementById("returnForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
     try {
-      const res=await fetch(`/orders/product/cancel/${id}?index=${index}`,{
-        method:'PATCH'
-      })
-      const data= await res.json()
-      if(data.status){
-        location.reload()
+      const reason = document.getElementById("returnReason").value.trim();
+      if (!reason) {
+        alert("Please provide a return reason.");
+        return;
+      }
+      let url = currentReturnIndex !== null
+        ? `/orders/product/return/${currentReturnId}?index=${currentReturnIndex}`
+        : `/orders/return/${currentReturnId}`;
+
+      const res = await fetch(url, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reason }),
+      });
+
+      const data = await res.json();
+      if (data.status) {
+        location.reload();
+      } else {
+        alert(data.message || "Return request failed");
       }
     } catch (error) {
-      console.log(error)
-      alert('unable to cancel')
+      console.error(error);
+      alert("Unable to return");
     }
-  }
-  async function returnOrderProduct(id,index){
+  });
+
+  // Cancel product
+  async function cancelOrderProduct(id, index) {
     try {
-      const res=await fetch(`/orders/product/return/${id}?index=${index}`,{
-        method:'PATCH'
-      })
-      const data= await res.json()
-      if(data.status){
-        location.reload()
-      }
+      const res = await fetch(`/orders/product/cancel/${id}?index=${index}`, { method: "PATCH" });
+      const data = await res.json();
+      if (data.status) location.reload();
     } catch (error) {
-      console.log(error)
-      alert('unable to cancel')
+      console.error(error);
+      alert("Unable to cancel product");
     }
   }
+
+  // Cancel order
   async function cancelOrder(id) {
-     try {
-      const res=await fetch(`/orders/cancel/${id}`,{
-        method:'PATCH'
-      })
-      const data= await res.json()
-      if(data.status){
-        location.reload()
-      }
+    try {
+      const res = await fetch(`/orders/cancel/${id}`, { method: "PATCH" });
+      const data = await res.json();
+      if (data.status) location.reload();
     } catch (error) {
-      console.log(error)
-      alert('unable to cancel')
-    }
-  }
-  async function returnOrder(id) {
-     try {
-      const res=await fetch(`/orders/return/${id}`,{
-        method:'PATCH'
-      })
-      const data= await res.json()
-      if(data.status){
-        location.reload()
-      }
-    } catch (error) {
-      console.log(error)
-      alert('unable to return')
+      console.error(error);
+      alert("Unable to cancel order");
     }
   }
 </script>
+
 <%- include('../partials/user/footer.ejs') %>

@@ -32,7 +32,8 @@ const orderSchema = new mongoose.Schema(
           default: "pending",
         },
         image:String,
-        isRequested:{type:Boolean,default:false}
+        isRequested:{type:Boolean,default:false},
+        reqReason:String
       },
     ],
 
@@ -71,7 +72,8 @@ const orderSchema = new mongoose.Schema(
 
     totalAmount: { type: Number, required: true },
     orderId:{type:String,required:true},
-    isRequested:{type:Boolean,default:false}
+    isRequested:{type:Boolean,default:false},
+    reqReason:String
   },
   { timestamps: true } // handles createdAt & updatedAt automatically
 );
