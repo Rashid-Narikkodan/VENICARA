@@ -57,14 +57,13 @@
 </style>
 
 <main>
-  <div class="container">
-    <div class="shopping-bag-title">SHOPPING BAG</div>
-    <div class="row">
+  <div class="shopping-bag-title">SHOPPING BAG</div>
+  <div class="px-5">
+  <div class="row">
       <!-- Left Side: Shopping Items -->
        <%if(items.length>0) {%>
       <div class="col-lg-9">
-        <% let total = 0; %> <% items.forEach((item,index) => { let lineTotal =
-        (item.variant.discount-1)* item.quantity; total += lineTotal; %>
+     <% items.forEach((item,index) => {%>
         <div class="card mb-4 p-3 shadow-sm">
           <div class="row align-items-center">
             <div class="col-md-2">
@@ -91,7 +90,7 @@
               <small class="text-muted">Free Delivery</small><br />
             </div>
             <div class="col-md-4 text-end">
-              <p class="fw-bold">Rs.<%= item.variant.discount-1 %></p>
+              <p class="fw-bold">Rs.<%= item.variant.finalDiscount%></p>
               <div class="d-flex align-items-center justify-content-end mb-3">
                 <button
                   class="btn btn-outline-secondary btn-sm me-2 decrease"
@@ -107,7 +106,7 @@
                   +
                 </button>
               </div>
-              <p class="text-muted mb-1">Subtotal: Rs.<%= lineTotal %></p>
+              <p class="text-muted mb-1">Subtotal: Rs.<%= item?.lineTotal %></p>
               <!-- Remove button -->
               <form
                 action="/cart/remove/<%= item._id %>?_method=DELETE"
@@ -140,7 +139,7 @@
               item.variant.volume %>ml)</span
             >
             <span
-              >Rs.<%= ((item.variant.discount-1) *
+              >Rs.<%= ((item.variant.finalDiscount) *
               item.quantity).toLocaleString() %></span
             >
           </div>
@@ -153,10 +152,12 @@
           <div class="summary-line fw-bold fs-5">
             <span>Total</span><span>Rs.<%= total.toLocaleString() %></span>
           </div>
-          <a href="/checkout/address" class="btn btn-dark text-decoration-none">CONTINUE TO CHECKOUT</a>
+          <div class="d-flex justify-content-center">
+            <a href="/checkout/address" class="btn fw-bold btn-dark text-decoration-none w-100">CONTINUE</a>
+          </div>
         </div>
-      </div>
-      <%}else{%>
+        </div>
+          <%}else{%>
         <div class="col-12 text-center my-5">
     <img src="/images/f76be7b5-3b78-43fb-a0a6-b0543c1f2b5a.png" alt="Empty Cart" class="img-fluid mb-4" style="max-width:300px;">
     <h4 class="mb-3">Your cart is empty</h4>

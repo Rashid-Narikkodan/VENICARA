@@ -1,101 +1,103 @@
 <%- include('../partials/user/header.ejs') %>
 
 <div class="container my-5">
-    <h1 class="text-center mb-4">Order Details</h1>
+  <h2 class="text-center fw-bold mb-4">Order Details</h2>
 
-    <div class="row g-4">
-        <!-- Main Content -->
-        <div class="col-lg-8">
-            <div class="card p-4 shadow-sm">
-                <div class="d-flex flex-wrap align-items-center mb-4">
-                    <div class="me-4">
-                        <img src="<%= product.image %>" class="img-fluid rounded" style="width:120px; height:150px;" alt="Product Image">
-                    </div>
-                    <div>
-                        <h3 class="h5 mb-1"><%=product.productName%></h3>
-                        <p class="mb-1"><%=product.volume%></p>
-                        <p class="h6 text-danger mb-3">₹<%=product.subtotal%></p>
+  <div class="row g-4">
+    <!-- LEFT SIDE -->
+    <div class="col-lg-8">
+      <div class="d-flex flex-wrap align-items-start mb-4">
+        <!-- Product Image -->
+        <a href="/products/<%=product.productId%>"><img src="<%= product.image %>" 
+             class="rounded me-4" 
+             style="width: 10rem; height: 10rem; object-fit: cover;" 
+             alt="Product Image"></a>
 
-                        <div class="d-flex flex-wrap gap-2">
-                            <button class="btn btn-dark">Rate Product</button>
-                            <a href="#" class="btn btn-outline-dark">Buy Again</a>
-                        </div>
-                    </div>
-                </div>
+        <!-- Product Info -->
+        <div>
+          <h5 class="fw-bold"><%= product.productName %></h5>
+          <p class="mb-1"><%= product.volume %>ML</p>
+          <p class="fw-semibold m-0">Rs.<%= product.subtotal %></p>
+          <p class="fw-semibold m-0 p-0">QTY : <%= product.quantity %></p>
+          <!-- Rating & Actions -->
+          <div class="d-flex align-items-center gap-2 mt-2">
+            <button class="btn btn-dark">Add review</button>
+            <button class="btn btn-outline-dark">Edit</button>
+          </div>
+        </div>
+      </div>
 
-                <div class="row mt-4">
-                    <div class="col-md-6 mb-3">
-                        <h5>Order Details</h5>
-                        <ul class="list-unstyled">
-                            <li><strong>Order ID:</strong> <%=order.orderId%></li>
-                            <li><strong>Order Date:</strong> <%=order.createdAt.toLocaleDateString()%></li>
-                            <li><strong>Delivery Date:</strong> <%=new Date(Date.now(order.createdAt)+5000*60*60*24).toLocaleDateString()%></li>
-                            <li><strong>Payment Method:</strong> <%=payment.method%></li>
-                        </ul>
-                    </div>
-
-                    <div class="col-md-6 mb-3">
-                        <h5>Shipping Address</h5>
-                        <ul class="list-unstyled">
-                            <li><strong>Name:</strong> John Doe</li>
-                            <li><strong>Address:</strong> <%=shippedAddress.address%></li>
-                            <li><strong>City:</strong>  <%=shippedAddress.city%></li>
-                            <li><strong>Pincode:</strong>  <%=shippedAddress.pin%></li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
+      <!-- Price Details -->
+      <div class="row">
+        <div class="col-md-6">
+          <div class="border p-3 rounded-3">
+            <h6 class="fw-bold mb-3">Price details</h6>
+            <ul class="list-unstyled small">
+              <li>MRP : <span class="float-end">₹<%=product.basePrice%></span></li>
+              <li>Selling Price : <span class="float-end">₹<%=product.finalDiscount%></span></li>
+              <li>Total MRP : <span class="float-end"><%=product.quantity%> × ₹<%=product.basePrice%> - ₹<%=product.quantity*product.basePrice%></span></li>
+              <li>Total Selling Price : <span class="float-end"><%=product.quantity%> × ₹<%=product.finalDiscount%> - ₹<%=product.quantity*product.finalDiscount%></span></li>
+              <li>Discount percentage : <span class="float-end text-success fw-semibold">₹<%=product.finalDiscountPerc%>%</span></li>
+              <hr>
+              <li class="fw-bold">Total Amount <span class="float-end">₹<%=product.quantity*product.finalDiscount%></span></li>
+            </ul>
+          </div>
         </div>
 
-        <!-- Sidebar / Order Status -->
-        <div class="col-lg-4">
-            <div class="card p-4 shadow-sm">
-                <h5 class="mb-3">Order Status</h5>
-                <ul class="list-unstyled">
-                    <li class="d-flex align-items-start mb-3">
-                        <span class="badge rounded-circle bg-success me-3">&nbsp;</span>
-                        <div>
-                            <div>Order Confirmed</div>
-                            <small class="text-muted">March 15, 2024</small>
-                        </div>
-                    </li>
-                    <li class="d-flex align-items-start mb-3">
-                        <span class="badge rounded-circle bg-success me-3">&nbsp;</span>
-                        <div>
-                            <div>Shipped</div>
-                            <small class="text-muted">March 17, 2024</small>
-                        </div>
-                    </li>
-                    <li class="d-flex align-items-start mb-3">
-                        <span class="badge rounded-circle bg-success me-3">&nbsp;</span>
-                        <div>
-                            <div>Out For Delivery</div>
-                            <small class="text-muted">March 21, 2024</small>
-                        </div>
-                    </li>
-                    <li class="d-flex align-items-start">
-                        <span class="badge rounded-circle bg-success me-3">&nbsp;</span>
-                        <div>
-                            <div>Delivered</div>
-                            <small class="text-muted">March 22, 2024</small>
-                        </div>
-                    </li>
-                </ul>
-            </div>
+        <!-- Shipping -->
+        <div class="col-md-6">
+          <div class="border p-3 rounded-3">
+            <h6 class="fw-bold mb-3">Shipping details</h6>
+            <p class="small mb-1"><strong><%= shippedAddress.fullName %></strong></p>
+            <p class="small mb-1"><%= shippedAddress.address %></p>
+            <p class="small mb-1"><%= shippedAddress.city %></p>
+            <p class="small mb-0"><%= shippedAddress.pin %></p>
+            <p class="small mb-0"><%= shippedAddress.state %></p>
+          </div>
         </div>
+      </div>
     </div>
-</div>
 
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        document.querySelector('.btn-dark').addEventListener('click', function() {
-            alert('Rating functionality would open here');
-        });
-        document.querySelector('.btn-outline-dark').addEventListener('click', function(e) {
-            e.preventDefault();
-            alert('Add to cart functionality would trigger here');
-        });
-    });
-</script>
+    <!-- RIGHT SIDE (Order Timeline) -->
+    <div class="col-lg-4">
+      <div class="border p-4 rounded-3">
+        <ul class="list-unstyled">
+          <li class="d-flex mb-4">
+            <span class="rounded-circle bg-success me-3" style="width:14px; height:14px;"></span>
+            <div>
+              <strong>Order Confirmed</strong>
+              <p class="small text-muted mb-0">Sun, 4th May 2025</p>
+              <p class="small text-muted">Your Order Has Been Placed</p>
+            </div>
+          </li>
+          <li class="d-flex mb-4">
+            <span class="rounded-circle bg-success me-3" style="width:14px; height:14px;"></span>
+            <div>
+              <strong>Shipped</strong>
+              <p class="small text-muted mb-0">Tue, 6th May 2025</p>
+              <p class="small text-muted">Your Item Has Been Shipped</p>
+            </div>
+          </li>
+          <li class="d-flex mb-4">
+            <span class="rounded-circle bg-success me-3" style="width:14px; height:14px;"></span>
+            <div>
+              <strong>Out For Delivery</strong>
+              <p class="small text-muted mb-0">Tue, 8th May 2025</p>
+              <p class="small text-muted">Your Item Is Out For Delivery</p>
+            </div>
+          </li>
+          <li class="d-flex">
+            <span class="rounded-circle bg-success me-3" style="width:14px; height:14px;"></span>
+            <div>
+              <strong>Delivered</strong>
+              <p class="small text-muted mb-0">Tue, 8th May 2025</p>
+              <p class="small text-muted">Your Item Has Been Delivered</p>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
 
 <%- include('../partials/user/footer.ejs') %>

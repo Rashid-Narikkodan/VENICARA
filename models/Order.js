@@ -21,8 +21,9 @@ const orderSchema = new mongoose.Schema(
         },
         productName: { type: String, required: true }, // snapshot
         variantName: { type: String }, // e.g. "500ml"
-        originalPrice: { type: Number, required: true },
-        discountPrice: { type: Number, required: true },
+        basePrice: { type: Number, required: true },
+        finalDiscount: { type: Number, required: true },
+        finalDiscountPerc:{type:Number,required:true},
         quantity: { type: Number, required: true, min: 1 },
         subtotal: { type: Number, required: true }, // discountPrice * quantity
         volume:{type:Object,required:true},

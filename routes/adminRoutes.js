@@ -7,7 +7,7 @@ ordersController,
 productsController,
 salesReportController,
 customersController,
-coupensController,
+couponsController,
 categoriesController,
 returnRefundController,
 bannersController,
@@ -60,7 +60,10 @@ router
 
 router
   .route('/coupons')
-  .get(auth.requireLogin, coupensController.showCoupons)
+  .get(auth.requireLogin, couponsController.showCoupons)
+router
+  .route('/coupons/add')
+  .post(auth.requireLogin, couponsController.showCouponsAdd)
 
 router.route('/categories')
   .get(auth.requireLogin, categoriesController.showCategory)

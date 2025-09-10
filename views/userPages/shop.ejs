@@ -176,13 +176,15 @@
                           <p class="mb-0 justify-content-between d-flex align-items-center">
                             <span>
                               <span class="text-success fw-bold">₹<%=Math.min(...product.variants.map(v=>
-                                  v.discount-1))%></span> <!-- 80% off -->
+                                 v.finalDiscount))%></span>
                               <span class="text-muted text-decoration-line-through">₹
-                                <%=Math.min(...product.variants.map(v=>v.basePrice-1))%></span>
+                                <%=Math.min(...product.variants.map(v=>v.basePrice))%></span>
                               <span class="text-success fw-bold">
-                                <%=Math.min(...product.variants.map(v=>
-                                  v.discountPercentage&&Math.round(v.discountPercentage)))%>% off
+                                <%= product.variants.reduce((min, v) => {
+                                      return parseInt(v.volume) < parseInt(min.volume) ? v : min
+                                  }, product.variants[0]).finalDiscountPerc %>%
                               </span>
+
                             </span>
                           </p>
                         </div>

@@ -1,4 +1,5 @@
 const Product = require('../../models/Product');
+const Coupon = require('../../models/Coupon');
 const handleError = require('../../helpers/handleError');
 
 const searchProducts = async (req, res) => {
@@ -39,11 +40,6 @@ const showProductDetails = async (req, res) => {
       return res.redirect("/shop");
     }
 
-    if (product.discountPrice && product.price) {
-      product.discountPercent = Math.round(
-        ((product.price - product.discountPrice) / product.price) * 100
-      );
-    }
 
     const relatedProducts = await Product.find({
       category: product.category._id,

@@ -21,6 +21,7 @@
                 <th class="text-center p-3">No.</th>
                 <th class="text-center p-3">Category</th>
                 <th class="text-center p-3">Description</th>
+                <th class="text-center p-3">Discount</th>
                 <th class="text-center p-3">Created On</th>
                 <th class="text-center p-3">status</th>
                 <th class="text-center p-3">Action</th>
@@ -38,6 +39,9 @@
                     </td>
                     <td class="text-center">
                       <%= category.description%>
+                    </td>
+                    <td class="text-center">
+                      <%= category.discount%>%
                     </td>
                     <td class="text-center">
                       <%= category.createdAt.toLocaleDateString()%>

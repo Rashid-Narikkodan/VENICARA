@@ -110,24 +110,24 @@
               </span>
             </div>
             <div>
-              <span id="variantPrice" class="fw-bold fs-4">RS. <%= Math.min(...product.variants.map(v=>v.discount))-1
-                  %>.99</span>
+              <span id="variantPrice" class="fw-bold fs-4">RS. <%= Math.min(...product.variants.map(v=>v.finalDiscount))%></span>
               <span id="variantBasePrice" class="ms-2 me-2 fw-semibold fs-5 text-muted text-decoration-line-through">₹
-                <%=Math.min(...product.variants.map(v=>v.basePrice-1))%>.99
+                <%=Math.min(...product.variants.map(v=>v.basePrice))%>
               </span>
               <span id="variantPerc" class="rounded text-success fw-bold p-1">
-                <%=Math.min(...product.variants.map(v=>Math.round(v.discountPercentage)))%>% off
-              </span>
+            <%= product.variants.reduce((min, v) => {
+           return  parseInt(v.volume) < parseInt(min.volume) ? v : min}, product.variants[0]).finalDiscountPerc %>% off
+          </span>
             </div>
             <div>
               <span id="variantStock" class="text-danger fs-4 fw-bold">
                 <%=!product.isAvailable?'Product not Available': product.variants.reduce((min, v)=>
-                 v.discount < min.discount ? v : min).stock <= 0 ? 'Out of Stock':''%>
+                 v.finalDiscount < min.finalDiscount ? v : min).stock <= 0 ? 'Out of Stock':''%>
               </span>
             </div>
           </div>
 
-          <%const lowestVariant = product.variants.reduce((min, v) => v.discount < min.discount ? v : min, product.variants[0])%>
+          <%const lowestVariant = product.variants.reduce((min, v) => v.finalDiscount < min.finalDiscount ? v : min, product.variants[0])%>
 
           <div class="d-flex flex-column mt-3 gap-2 align-items-start">
             <form action="/whishlist/addToWhishlist/<%=product._id%>" method="POST">
@@ -148,8 +148,8 @@
           <div class="mt-4">
             <% product.variants.forEach((variant, index)=> { %>
               <button class="btn btn-outline-dark rounded-5 variant-btn <%= index === 0 ? 'active' : '' %>"
-                data-price="<%= variant.discount%>" data-volume="<%= variant.volume %>"
-                data-basePrice="<%= variant.basePrice%>" data-discountPerc="<%= variant.discountPercentage %>"
+                data-price="<%= variant.finalDiscount%>" data-volume="<%= variant.volume %>"
+                data-basePrice="<%= variant.basePrice%>" data-discountPerc="<%= variant.finalDiscountPerc %>"
                 data-stock="<%=variant.stock%>" data-isAvailable="<%=product.isAvailable%>"
                 data-id="<%=variant._id%>">
                 <%= variant.volume %>ML
@@ -157,20 +157,6 @@
               <% }) %>
           </div>
 
-          <!-- Coupons Section -->
-          <div class="mt-4">
-            <h5 class="fw-bold mb-2"><i class="fa-solid fa-tags"></i> Available Coupons</h5>
-            <div id="couponList" class="list-group w-md-75">
-              <!-- Example coupon -->
-              <div class="list-group-item d-flex justify-content-between align-items-center rounded-4 mb-2 shadow-sm">
-                <div>
-                  <span class="fw-bold">SAVE10</span>
-                  <small class="d-block text-muted">Get 10% off on orders above ₹500</small>
-                </div>
-                <button class="btn btn-outline-dark btn-sm rounded-4 copy-coupon" data-code="SAVE10">Copy</button>
-              </div>
-            </div>
-          </div>
           <!-- description and reviews -->
           <div>
             <p class="mb-1 mt-4 fs-5">
@@ -219,14 +205,14 @@
                       <p class="mb-0 justify-content-between d-flex align-items-center">
                         <span>
                           <span class="text-success fw-bold">₹<%=Math.min(...product.variants.map(v=>
-                              v.discount-1))%></span> <!-- 80% off -->
+                              v.finalDiscount))%></span> <!-- 80% off -->
                           <span class="text-muted text-decoration-line-through">₹
                             <%=Math.min(...product.variants.map(v=>
-                              v.basePrice-1))%>
+                              v.basePrice))%>
                           </span>
                           <span class="text-success fw-bold">
-                            <%=Math.min(...product.variants.map(v=>
-                              v.discountPercentage&&Math.round(v.discountPercentage)))%>% off
+            <%= product.variants.reduce((min, v) => {
+           return  parseInt(v.volume) < parseInt(min.volume) ? v : min}, product.variants[0]).finalDiscountPerc %>% off
                           </span>
                         </span>
                       </p>
@@ -266,8 +252,8 @@
         const percentage = btn.getAttribute("data-discountPerc");
         const stock = btn.getAttribute('data-stock')
         const isAvailable = btn.getAttribute('data-isAvailable') === 'true'
-        variantPrice.textContent = `RS. ${price - 1}.99`;
-        variantBasePrice.textContent = `₹${basePrice - 1}.99`
+        variantPrice.textContent = `RS. ${price}`;
+        variantBasePrice.textContent = `₹${basePrice}`
         variantPerc.textContent = `${Math.round(percentage)}% off`
         variantStock.textContent = !isAvailable ? 'Product not Available' : stock <= 0 ? 'Out of Stock' : ''
 
@@ -380,19 +366,5 @@
       zoomBox.style.backgroundPosition =
         `-${x * 3 - zoomBox.offsetWidth / 2}px -${y * 3 - zoomBox.offsetHeight / 2}px`;
     });
-
-    //coupen copy
-    document.getElementById('couponList').addEventListener('click', (e) => {
-      console.log('clicked')
-      if (e.target.classList.contains('copy-coupon')) {
-        const code = e.target.getAttribute('data-code');
-        navigator.clipboard.writeText(code).then(() => {
-          e.target.textContent = "Copied!";
-          setTimeout(() => e.target.textContent = "Copy", 1500);
-        });
-      }
-    });
-
-
   </script>
   <%- include("../partials/user/footer.ejs") %>

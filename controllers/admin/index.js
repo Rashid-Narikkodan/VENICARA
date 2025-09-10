@@ -5,7 +5,7 @@ module.exports={
   productsController:require('./productsController'),
   salesReportController:require('./salesReportController'),
   customersController:require('./customersController'),
-  coupensController:require('./coupensController'),
+  couponsController:require('./couponsController.js'),
   categoriesController:require('./categoriesController'),
   returnRefundController:require('./returnRefundController'),
   bannersController:require('./bannersController'),

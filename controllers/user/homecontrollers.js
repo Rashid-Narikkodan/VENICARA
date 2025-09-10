@@ -105,30 +105,53 @@ const showShop = async (req, res) => {
     };
     const selectedSort = sortOptions[sort] || sortOptions.newest;
 
-    const pipeline = [
-      {
-        $match: {
-          isDeleted: false,
-          ...(selectedCategory && { category: selectedCategory }),
-        },
-      },
-      { $addFields: { lowestPrice: { $min: '$variants.discount' } } },
-      {
-        $match: {
-          lowestPrice: { $gte: selectedMinPrice, $lte: selectedMaxPrice },
-        },
-      },
-      {
-        $facet: {
-          data: [
-            { $sort: selectedSort },
-            { $skip: (page - 1) * limit },
-            { $limit: limit },
-          ],
-          totalCount: [{ $count: 'total' }],
-        },
-      },
-    ];
+const pipeline = [
+  {
+    $match: {
+      isDeleted: false,
+      ...(selectedCategory && { category: selectedCategory }),
+    },
+  },
+  {
+
+    $addFields: {
+      variantPrices: {
+        $map: {
+          input: '$variants',
+          as: 'v',
+          in: {
+            $subtract: [
+              '$$v.basePrice',
+              { $multiply: ['$$v.basePrice', { $divide: ['$$v.productDiscountPerc', 100] }] }
+            ]
+          }
+        }
+      }
+    }
+  },
+  {
+    $addFields: {
+      lowestPrice: { $min: '$variantPrices' }
+    }
+  },
+  {
+    $match: {
+      lowestPrice: { $gte: selectedMinPrice, $lte: selectedMaxPrice }
+    }
+  },
+  {
+    $facet: {
+      data: [
+        { $sort: selectedSort },
+        { $skip: (page - 1) * limit },
+        { $limit: limit },
+      ],
+      totalCount: [{ $count: 'total' }],
+    },
+  },
+];
+
+
 
     const result = await Product.aggregate(pipeline);
     let products = result[0].data;

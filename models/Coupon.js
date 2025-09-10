@@ -10,51 +10,42 @@ const couponSchema = new mongoose.Schema({
     type: String,
     required: true,
     unique: true,
-    uppercase: true, // ensures consistency
+    uppercase: true, 
     trim: true
   },
   discount: {
     type: Number,
     required: true,
-    min: 0 // can be % or flat depending on your business logic
+    min: 0 
   },
   limit: {
     type: Number,
-    default: 0 // global maximum usage count (0 = unlimited)
+    default: 0 
   },
   used: {
     type: Number,
-    default: 0 // how many times used globally
+    default: 0 
   },
   minPrice: {
     type: Number,
-    default: 0 // minimum order/cart value to apply coupon
+    default: 0 
   },
-  activeDate: {
+  expireAt: {
     type: Date,
     required: true
   },
-  expireDate: {
-    type: Date,
-    required: true
+  isDeleted:{
+    type:Boolean,
+    default:false
   },
-
-  // Per-user usage tracking
-  usersUsed: [
-    {
-      userId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
-        required: true
-      },
-      count: {
-        type: Number,
-        default: 1 // how many times this user has applied the coupon
-      }
-    }
-  ]
+usedBy: [
+  {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User"
+  }
+]
 }, { 
-  timestamps: true // auto adds createdAt and updatedAt
+  timestamps: true 
 });
 
 module.exports = mongoose.model('Coupon', couponSchema);

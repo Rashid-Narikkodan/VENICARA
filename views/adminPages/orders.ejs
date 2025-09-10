@@ -86,6 +86,7 @@
                   </td>
                     <td class="text-center">
                         <a href="/admin/order/<%=order._id%>" type="submit" class="btn btn-sm btn-outline-primary">View</a>
+                        <span class="btn btn-info p-1 <%=!order.isRequested?'d-none':''%>"></span>
                     </td>
                   </tr>
                   <% }) %>

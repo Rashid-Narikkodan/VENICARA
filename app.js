@@ -38,7 +38,7 @@ app.use(express.static(path.join(__dirname, 'public')))
 //routers
 app.use('/admin', adminRoutes)
 app.use('/',userRoute)
-app.use('/', userRoutes)
+// app.use('/', userRoutes)
 //pagenotfound
 app.use((req, res, next) => {
   res.status(404).render('userPages/404', { url: req.originalUrl })

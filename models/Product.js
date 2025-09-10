@@ -9,10 +9,12 @@ const productSchema = new mongoose.Schema({
   variants: [
     {
       volume: { type: String, required: true },
-      basePrice: { type: Number, required: true },
-      discount: { type: Number, required: true },
-      discountPercentage:{type:Number,required:true},
       stock: { type: Number, default: 0 },
+      basePrice: { type: Number, required: true },
+      productDiscount:{ type: Number,  },
+      productDiscountPerc:{type:Number,},
+      finalDiscount:{type:Number},
+      finalDiscountPerc:{type:Number}
     }
   ],
   isAvailable: { type: Boolean, default: true },

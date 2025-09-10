@@ -77,10 +77,10 @@ const generateInvoice = (order, res) => {
 
   // Table Header with Background
   doc
-    .fillColor("#fff")
+    .fillColor("#b4b4b4ff")
     .rect(itemX, tableTop, 530, 25)
-    .fill("#1E90FF") // Dodger Blue background
-    .fillColor("#fff");
+    .fill("#000000ff") // Dodger Blue background
+    .fillColor("#c8c8c8ff");
 
   doc
     .font("Helvetica-Bold")
@@ -98,7 +98,7 @@ const generateInvoice = (order, res) => {
     const y = doc.y;
     doc
       .text(p.productName, itemX, y, { width: 200 })
-      .text(p.variantName || "-", variantX, y, { width: 150 })
+      .text(p.volume || "-", variantX, y, { width: 150 })
       .text(p.quantity.toString(), qtyX, y, { width: 50 })
       .text(`${p.discountPrice.toFixed(2)}`, priceX, y, { width: 70 })
       .text(`${p.subtotal.toFixed(2)}`, subtotalX, y, { width: 80 });

@@ -24,7 +24,7 @@
               <h5 class="fw-semibold mb-1"><%=product?.productName%></h5>
               <p class="<%=product.status === 'cancelled'?'text-secondary':'text-muted'%> mb-1 fw-semibold">Volume: <%=product?.volume%>ML</p>
               <p class="<%=product.status === 'cancelled'?'text-secondary':'text-muted'%> mb-1 fw-semibold">Qty: <%=product.quantity%></p>
-              <p class="<%=product.status === 'cancelled'?'text-secondary':'text-muted'%> mb-1 fw-bold">Total : <%=product.subtotal%></p>
+              <p class="<%=product.status === 'cancelled'?'text-secondary':'text-muted'%> mb-1 fw-bold">Total : ₹<%=product.subtotal%></p>
             </div>
 
             <!-- Status -->
@@ -76,7 +76,7 @@
             </button>
           <% } %>
 <div>
-  <span class="fw-bold me-3">Total: <%=order.totalAmount%></span>
+  <span class="fw-bold me-3">Total: ₹<%=order.totalAmount%></span>
   <a href="/orders/<%=order._id%>/invoice" class="btn btn-outline-primary fw-bold">Invoice</a>
 </div>
         </div>

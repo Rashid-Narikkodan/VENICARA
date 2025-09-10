@@ -3,6 +3,8 @@ const Category = require("../../models/Category");
 const processImages = require("../../helpers/imgProcess");
 const getDiscountPercent = require("../../helpers/discPercent");
 const handleError = require("../../helpers/handleError");
+const finalAmount = require('../../helpers/finalPrice')
+const finalPercentage = require('../../helpers/finalPercentage')
 
 const showProducts = async (req, res) => {
   try {
@@ -118,6 +120,8 @@ const addProduct = async (req, res) => {
 
     const images = await processImages(req.files);
 
+    const category=await Category.findById(categoryId)
+
     const variants = Array.isArray(volume)
       ? volume.map((vol, i) => {
           const bp = Number(basePrice?.[i] || 0);
@@ -127,23 +131,22 @@ const addProduct = async (req, res) => {
             req.flash("error", `Variant ${i + 1}: Volume is required`);
             return res.redirect("/admin/products/add");
           }
-
+          let percentage = getDiscountPercent(bp, dp)
           return {
             volume: vol,
-            basePrice: bp,
-            discount: dp,
-            discountPercentage: bp > 0 ? getDiscountPercent(bp, dp) : 0,
             stock: Number(stock?.[i] || 0),
+            basePrice: bp,
+            productDiscountPerc: bp > 0 ? percentage : 0,
+            finalDiscountPerc:percentage<category.discount?category.discount:percentage
           };
         })
       : [
           {
             volume,
-            basePrice: Number(basePrice || 0),
-            discount: Number(discountPrice || 0),
-            discountPercentage:
-              basePrice > 0 ? getDiscountPercent(basePrice, discountPrice) : 0,
             stock: Number(stock || 0),
+            basePrice: Number(basePrice || 0),
+            productDiscountPerc:basePrice > 0 ? getDiscountPercent(basePrice, discountPrice) : 0,
+            finalDiscountPerc:getDiscountPercent(basePrice, discountPrice)<category.discount?category.discount:getDiscountPercent(basePrice, discountPrice)
           },
         ];
 
@@ -210,26 +213,21 @@ const editProduct = async (req, res) => {
     let variants = [];
     let images = [];
     const volumes = Array.isArray(volume) ? volume : [volume];
-    const basePrices = Array.isArray(basePrice) ? basePrice : [basePrice];
-    const discountPrices = Array.isArray(discountPrice)
-      ? discountPrice
-      : [discountPrice];
     const stocks = Array.isArray(stock) ? stock : [stock];
+    const basePrices = Array.isArray(basePrice) ? basePrice : [basePrice];
+    const discountPrices = Array.isArray(discountPrice)? discountPrice : [discountPrice];
 
     for (let i = 0; i < volumes.length; i++) {
       if (!volumes[i] && !basePrices[i] && !discountPrices[i] && !stocks[i])
         continue;
       variants.push({
         volume: volumes[i] || product.variants[i]?.volume || "",
-        basePrice: Number(basePrices[i] || product.variants[i]?.basePrice || 0),
-        discount: Number(
-          discountPrices[i] || product.variants[i]?.discount || 0
-        ),
-        discountPercentage: getDiscountPercent(
-          basePrice?.[i],
-          discountPrice?.[i]
-        ),
         stock: Number(stocks[i] || product.variants[i]?.stock || 0),
+        basePrice: Number(basePrices[i] || product.variants[i]?.basePrice || 0),
+        productDiscount:Number(discountPrice[i] || product.variants[i]?.productDiscount || 0),
+        productDiscountPerc: getDiscountPercent(basePrice?.[i],discountPrice?.[i]),
+        finalDiscount:await finalAmount(basePrice[i],discountPrice[i],categoryId),
+        finalDiscountPerc:await finalPercentage(basePrice[i],discountPrice[i],categoryId),
       });
     }
 

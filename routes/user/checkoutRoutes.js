@@ -25,6 +25,8 @@ router.post("/address/selectAddress",auth.requireLogin, checkoutController.handl
 
 router.get("/paymentMethod",auth.requireLogin, checkoutController.showPaymentMethods);
 
+router.patch('/api/coupon/apply',checkoutController.applyCoupon)
+
 router.post("/api/placeOrder",auth.requireLogin, checkoutController.handlePlaceOrder);
 
 router.get("/placeOrder/:id",auth.requireLogin, checkoutController.showPlaceOrder);

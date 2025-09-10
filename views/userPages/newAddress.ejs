@@ -6,24 +6,28 @@
     <div class="card shadow-lg border-0 rounded-4 p-4">
       <h4 class="fw-bold text-center mb-4">Add New Address</h4>
 
-      <form action="/address/new" method="POST">
+      <form id="addressForm" action="/address/new" method="POST" novalidate>
         <div class="row g-3">
+
           <!-- Name -->
           <div class="col-md-6">
             <label for="fullName" class="form-label fw-semibold">Name</label>
             <input type="text" class="form-control rounded-3" id="fullName" name="fullName" placeholder="Enter your name" required>
+            <div class="text-danger small mt-1" id="error-fullName"></div>
           </div>
 
           <!-- Mobile -->
           <div class="col-md-6">
             <label for="mobile" class="form-label fw-semibold">Mobile Number</label>
-            <input type="tel" pattern="[0-9]{10}" class="form-control rounded-3" id="mobile" name="mobile" placeholder="Enter your mobile number" required>
+            <input type="tel" class="form-control rounded-3" id="mobile" name="mobile" placeholder="Enter your mobile number" required>
+            <div class="text-danger small mt-1" id="error-mobile"></div>
           </div>
 
           <!-- Pincode -->
           <div class="col-md-6">
             <label for="pin" class="form-label fw-semibold">Pincode</label>
             <input type="text" class="form-control rounded-3" id="pin" name="pin" placeholder="Enter your pincode" required>
+            <div class="text-danger small mt-1" id="error-pin"></div>
           </div>
 
           <!-- Locality -->
@@ -36,12 +40,14 @@
           <div class="col-12">
             <label for="address" class="form-label fw-semibold">Address</label>
             <textarea class="form-control rounded-3" id="address" name="address" rows="2" placeholder="Address (area, city)" required></textarea>
+            <div class="text-danger small mt-1" id="error-address"></div>
           </div>
 
           <!-- City -->
           <div class="col-md-6">
             <label for="city" class="form-label fw-semibold">City/District/Town</label>
             <input type="text" class="form-control rounded-3" id="city" name="city" placeholder="Enter city/district/town" required>
+            <div class="text-danger small mt-1" id="error-city"></div>
           </div>
 
           <!-- State -->
@@ -54,8 +60,8 @@
               <option value="Karnataka">Karnataka</option>
               <option value="Maharashtra">Maharashtra</option>
               <option value="Delhi">Delhi</option>
-              <!-- add more states -->
             </select>
+            <div class="text-danger small mt-1" id="error-state"></div>
           </div>
 
           <!-- Landmark -->
@@ -67,7 +73,8 @@
           <!-- Alternate Mobile -->
           <div class="col-md-6">
             <label for="alternateMobile" class="form-label fw-semibold">Alternate Mobile Number</label>
-            <input type="tel" pattern="[0-9]{10}" class="form-control rounded-3" id="alternateMobile" name="alternateMobile" placeholder="Alternate number (optional)">
+            <input type="tel" class="form-control rounded-3" id="alternateMobile" name="alternateMobile" placeholder="Alternate number (optional)">
+            <div class="text-danger small mt-1" id="error-altMobile"></div>
           </div>
 
           <!-- Address Type -->
@@ -99,5 +106,57 @@
 </main>
 
 <script src="/js/userHeader.js"></script>
+<script>
+  document.getElementById("addressForm").addEventListener("submit", function (e) {
+    let isValid = true;
+
+    // reset errors
+    document.querySelectorAll(".text-danger").forEach(div => div.textContent = "");
+
+    const name = document.getElementById("fullName").value.trim();
+    if (!/^[a-zA-Z ]{3,}$/.test(name)) {
+      document.getElementById("error-fullName").textContent = "Enter a valid name (min 3 letters).";
+      isValid = false;
+    }
+
+    const mobile = document.getElementById("mobile").value.trim();
+    if (!/^[0-9]{10}$/.test(mobile)) {
+      document.getElementById("error-mobile").textContent = "Enter a valid 10-digit mobile number.";
+      isValid = false;
+    }
+
+    const pin = document.getElementById("pin").value.trim();
+    if (!/^[0-9]{6}$/.test(pin)) {
+      document.getElementById("error-pin").textContent = "Enter a valid 6-digit pincode.";
+      isValid = false;
+    }
+
+    const address = document.getElementById("address").value.trim();
+    if (address.length < 5) {
+      document.getElementById("error-address").textContent = "Address must be at least 5 characters.";
+      isValid = false;
+    }
+
+    const city = document.getElementById("city").value.trim();
+    if (!/^[a-zA-Z ]{2,}$/.test(city)) {
+      document.getElementById("error-city").textContent = "Enter a valid city name.";
+      isValid = false;
+    }
+
+    const state = document.getElementById("state").value;
+    if (!state) {
+      document.getElementById("error-state").textContent = "Please select a state.";
+      isValid = false;
+    }
+
+    const altMobile = document.getElementById("alternateMobile").value.trim();
+    if (altMobile && !/^[0-9]{10}$/.test(altMobile)) {
+      document.getElementById("error-altMobile").textContent = "Enter a valid 10-digit number.";
+      isValid = false;
+    }
+
+    if (!isValid) e.preventDefault();
+  });
+</script>
 </body>
 </html>
