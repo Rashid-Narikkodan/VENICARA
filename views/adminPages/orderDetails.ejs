@@ -43,7 +43,7 @@ include('../partials/admin/sidebar.ejs')%>
             <div class="col-md-6 p-3 p-2">
               <form action="/admin/orders/<%= order._id %>/status?_method=PATCH" method="POST" class="d-inline order-status-form">
                 <select name="status" data-status ="<%=order.status%>" class="form-select form-select-sm d-inline w-auto status-select">
-                    <option value="pending" <%= order.status === "pending" ? "selected" : "" %>>Pending</option>
+                    <option value="confirmed" <%= order.status === "pending"||order.status === "confirmed" ? "selected" : "" %>>Confirmed</option>                    
                     <option value="shipped" <%= order.status === "shipped" ? "selected" : "" %>>Shipped</option>
                     <option value="Out of delivery" <%= order.status === "Out of delivery" ? "selected" : "" %>>Out of Delivery</option>
                     <option value="delivered" <%= order.status === "delivered" ? "selected" : "" %>>Delivered</option>
@@ -115,7 +115,7 @@ include('../partials/admin/sidebar.ejs')%>
                     <td class="text-center">
                          <form action="/admin/orders/product/status/<%=order._id%>?_method=PATCH&index=<%=index%>" method="POST" class="d-inline order-status-form">
                 <select name="status" data-status="<%=product.status%>" class="form-select form-select-sm d-inline w-auto status-select">
-                    <option value="pending" <%= product.status === "pending" ? "selected" : "" %>>Pending</option>
+                    <option value="confirmed" <%= product.status === "pending"||product.status === "confirmed" ? "selected" : "" %>>Confirmed</option>
                     <option value="shipped" <%= product.status === "shipped" ? "selected" : "" %>>Shipped</option>
                     <option value="Out of delivery" <%= product.status === "Out of delivery" ? "selected" : "" %>>Out of Delivery</option>
                     <option value="delivered" <%= product.status === "delivered" ? "selected" : "" %>>Delivered</option>
@@ -155,7 +155,8 @@ include('../partials/admin/sidebar.ejs')%>
 
     // Define allowed transitions
     const transitions = {
-      pending: ["shipped", "Out of delivery", "cancelled"],
+      pending: ["confirmed"],
+      confirmed:["shipped", "Out of delivery","cancelled"],
       shipped: ["Out of delivery", "delivered", "cancelled"],
       out_of_delivery: ["delivered", "cancelled"],
       delivered: ['returned'],   // final

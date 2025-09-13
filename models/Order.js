@@ -29,7 +29,7 @@ const orderSchema = new mongoose.Schema(
         volume:{type:Object,required:true},
         status: {
           type: String,
-          enum: ["pending", "shipped", 'Out of delivery', "delivered", "cancelled", "returned"],
+          enum: ["pending",'confirmed', "shipped", 'Out of delivery', "delivered", "cancelled", "returned"],
           default: "pending",
         },
         image:String,
@@ -46,14 +46,14 @@ const orderSchema = new mongoose.Schema(
 
     status: {
       type: String,
-      enum: ["pending", "shipped", 'Out of delivery', "delivered", "cancelled", "returned"],
+      enum: ["pending",'confirmed', "shipped", 'Out of delivery', "delivered", "cancelled", "returned"],
       default: "pending",
     },
 
     payment: {
       method: {
         type: String,
-        enum: ["cod", "online", "wallet"],
+        enum: ["COD", "RAZORPAY", "WALLET"],
         required: true,
       },
       status: {
@@ -61,7 +61,6 @@ const orderSchema = new mongoose.Schema(
         enum: ["pending", "paid", "failed", "refunded"],
         default: "pending",
       },
-      provider: String,
       transactionId: String,
       paidAt: Date,
     },

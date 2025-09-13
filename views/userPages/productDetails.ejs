@@ -130,8 +130,9 @@
           <%const lowestVariant = product.variants.reduce((min, v) => v.finalDiscount < min.finalDiscount ? v : min, product.variants[0])%>
 
           <div class="d-flex flex-column mt-3 gap-2 align-items-start">
-            <form action="/whishlist/addToWhishlist/<%=product._id%>" method="POST">
+            <form action="/wishlist/add/<%=product._id%>" method="POST">
               <input type="hidden" name="variantId" id="" value="<%= lowestVariant._id %>">
+              <input type="hidden" name="source" id="" value="details">
             <button class="btn btn-dark rounded-5" style="width: 100%; max-width: 100%;padding:1rem 2rem">
               <span class="fw-bold">ADD TO WISHLIST</span>
             </button>

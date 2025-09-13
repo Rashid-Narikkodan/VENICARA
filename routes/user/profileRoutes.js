@@ -9,7 +9,7 @@ const {
 const auth = require("../../middlewares/authUser");
 const upload = require("../../middlewares/multer");
 
-router.get("/", auth.requireLogin, userController.showProfile);
+router.get("/", userController.showProfile);
 
 router
   .route("/delete")

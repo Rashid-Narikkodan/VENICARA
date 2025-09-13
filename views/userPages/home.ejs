@@ -176,7 +176,7 @@
                     <div class="product-name mt-4 fs-4">
                       <%=product.name%>
                     </div>
-                    <div class="product-price">Rs.<%=Math.min(...product.variants.map(v=>v.discount-1))%>.99</div>
+                    <div class="product-price">Rs.<%=Math.min(...product.variants.map(v=>v.finalDiscount))%></div>
                   </div>
                 </a>
                 <% }) %>

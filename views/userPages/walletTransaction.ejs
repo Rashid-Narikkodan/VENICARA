@@ -1,0 +1,61 @@
+<%- include('../partials/user/header.ejs') %>
+<%-include('../partials/user/sidebarProfile.ejs') %>
+
+
+<main class="w-100 justify-content-center d-flex ">
+<div class="container">
+        <div class="row align-items-center mb-5">
+          <div class="col-md-6">
+            <h1>Transaction History</h1>
+          </div>
+          <div class="col-md-6 d-flex justify-content-end gap-2">
+            <form action="/admin/customers" method="GET" class="d-flex gap-2 w-100">
+              <input type="text" name="search" class="form-control w-50" placeholder="Search..." value="<%= search %>">
+              <button class="btn btn-dark">Search</button>
+            </form>
+          </div>
+        </div>
+        <div class="table-responsive shadow rounded-3 bg-white">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-dark">
+              <tr>
+                <th class="text-center p-3">Transaction</th>
+                <th class="text-center p-3">Date</th>
+                <th class="text-center p-3">Status</th>
+                <th class="text-center p-3">Amount</th>
+                <th class="text-center p-3">Last Balance</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% transactions.forEach(transaction=> { %>
+                <%count++%>
+                  <tr>
+                    <td class="text-center fw-semibold fs-5">
+                       <%= transaction.type.charAt(0).toUpperCase()+transaction.type.slice(1) %>
+                    </td>
+                    <td class="text-center">
+                      <%= transaction.createdAt.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) %>
+                    </td>
+                    <td class="text-center fw-bold <%= 
+                          transaction.status === 'pending' ? 'text-primary' : 
+                          (transaction.status === 'success' ? 'text-success' : 'text-danger')%>">
+                      <%= transaction.status %>
+                    </td>
+
+                    <td class="text-center fw-semibold <%=transaction.type == 'credit'?'text-success':'text-danger'%>">
+                      <%=transaction.type == 'credit'?'+':'-'%>₹<%= transaction.amount/100%>
+                    </td>
+                    
+                    <td class="text-center">
+                      ₹<%= transaction.lastBalance%>
+                    </td>
+                  </tr>
+                  <% }) %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+</main>
+</div>
+</body>
+</html>

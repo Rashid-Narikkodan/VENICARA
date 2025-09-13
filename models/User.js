@@ -49,10 +49,11 @@ const userSchema=new Schema({
     unique:true,
     index:true,
   },
-  referredBy:{
-    type:String,
-    default:null
-  },
+  referredBy: {
+  type: mongoose.Schema.Types.ObjectId,
+  ref: 'User',
+  default: null
+},
   otp:{
     type:String,
   },

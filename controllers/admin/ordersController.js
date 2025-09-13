@@ -1,5 +1,7 @@
 const Order = require("../../models/Order");
 const User = require("../../models/User");
+const Wallet = require("../../models/Wallet");
+const WalletTransaction = require("../../models/WalletTransaction");
 const Product = require("../../models/Product");  // ✅ Need this for stock update
 const handleError = require("../../helpers/handleError");
 
@@ -105,6 +107,7 @@ const handleProductStatus = async (req, res) => {
     const { id } = req.params;
     const { index } = req.query;
     const { status } = req.body;
+    const userId=req.session.user.id
 
     const order = await Order.findById(id);
     if (!order) {
@@ -118,7 +121,6 @@ const handleProductStatus = async (req, res) => {
       return res.redirect(`/admin/order/${id}`);
     }
 
-    // ✅ Handle stock restoration when return is approved
     if (status === "returned") {
       product.isRequested = false;
 
@@ -126,10 +128,23 @@ const handleProductStatus = async (req, res) => {
         { _id: product.productId, "variants._id": product.variantId },
         { $inc: { "variants.$.stock": product.quantity } }
       );
+      if(["WALLET","RAZORPAY"].includes(order.payment.method)){
+        const wallet=await Wallet.findone({userId})
+        wallet.balance+=product.subtotal
+        await wallet.save()
+        await WalletTransaction.create({
+          userId,
+          type:'credit',
+          status:'success',
+          amount:100*subtotal,
+          lastBalance:wallet.balance
+        })
+      }
     }
 
     product.status = status;
     await order.save();
+
 
     return res.redirect(`/admin/order/${id}`);
   } catch (error) {
@@ -142,6 +157,7 @@ const handleOrderStatus = async (req, res) => {
   try {
     const { id } = req.params;
     const { status } = req.body;
+    const userId = req.session.user.id;
 
     const order = await Order.findById(id);
     if (!order) {
@@ -151,8 +167,40 @@ const handleOrderStatus = async (req, res) => {
 
     order.status = status;
 
+    if (status === "returned"||status==='cancelled') {
+      order.isRequested = false;
+      order.products.forEach(async(p) => {
+        await Product.findOneAndUpdate(
+          { _id: p.productId, "variants._id": p.variantId },
+          { $inc: { "variants.$.stock": p.quantity } }
+        );
+    });
+    }
+    
+    
+    if (status === "returned") {
+      for(let prod of order.products){
+        if(prod.status === 'returned'){
+          
+        }
+      }
+      if(["WALLET","RAZORPAY"].includes(order.payment.method)){
+        const wallet=await Wallet.findone({userId})
+        wallet.balance+=totalToWallet
+        await wallet.save()
+        await WalletTransaction.create({
+          userId,
+          type:'credit',
+          status:'success',
+          amount:100*totalToWallet,
+          lastBalance:wallet.balance
+        })
+      }
+    }
+
+    //change per product status
     order.products.forEach((p) => {
-      if (p.status !== "cancelled") {
+      if (p.status !== "cancelled"&&p.status != 'returned') {
         p.status = status;
       }
     });

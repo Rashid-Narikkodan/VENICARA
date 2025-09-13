@@ -1,0 +1,129 @@
+<%-include('../partials/user/header.ejs')%>
+
+<!-- ✅ Toastr CSS -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+
+<style>
+  body {
+    background-color: #fff;
+    font-family: Arial, sans-serif;
+  }
+  .title { text-align: center; }
+  .shopping-bag-title {
+    font-weight: bold;
+    text-align: center;
+    margin: 2rem 0;
+    font-size: 1.8rem;
+    letter-spacing: 2px;
+  }
+  .card { border: none; }
+  .item-img { max-width: 100px; }
+  .remove-btn { cursor: pointer; }
+</style>
+
+<main style="min-height:80vh">
+  <div class="title py-3">
+    <span class="shopping-bag-title">WISHLIST</span>
+    <p>Time To Fulfill Your Wishes</p>
+  </div>
+  <div class="px-5">
+    <div class="row">
+      <% if(items&&items.length) { %>
+        <div class="col-lg-12">
+          <% items.forEach(item => { %>
+          <div class="card mb-4 p-3 shadow-sm" style="background-color: #f3f3f38e;position:relative;">
+            <div class="row align-items-center rounded-4 p-3">
+              <div class="col-md-2">
+                <a href="/products/<%=item.product._id%>">
+                  <img
+                    src="<%= item.product.images[0] %>"
+                    class="img-fluid item-img rounded-4"
+                    alt="<%= item.product.name %>"
+                  />
+                </a>
+              </div>
+              <div class="col-md-6">
+                <h6 class="mb-1 fs-5 fw-bold"><%= item.product.name %></h6>
+                <small class="mb-1 fw-semibold fs-5"><%= item.variant?.volume || "N/A" %> ML</small>
+                <p class="mb-1 fw-bold fs-5">Rs. <%= item.variant?.finalDiscount || 0 %></p>
+                <p class="mb-1 fw-bold fs-5">Added On : <%= item.createdAt.toLocaleDateString()%></p>
+              </div>
+              <div class="col-md-4 text-end d-flex align-items-center justify-content-end ">
+                <button class="rounded-pill btn btn-outline-dark px-5 fs-5" 
+                data-id="<%=item._id%>" 
+                onclick="addToCart(this)">
+                Add To Cart
+              </button>
+              <button class="btn fs-5 position-absolute end-0 bottom-0" 
+                      data-id="<%=item._id%>" 
+                      onclick="removeWishlist(this)">
+                <i class="fa fa-trash"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+          <% }) %>
+        </div>
+      <% } else { %>
+        <div class="col-12 text-center my-5">
+          <h4 class="mb-3">Your wishlist is empty</h4>
+          <p class="text-muted">Looks like you haven’t wished anything to buy yet.</p>
+          <a href="/shop" class="btn btn-dark mt-3">Start Shopping</a>
+        </div>
+      <% } %>
+    </div>
+  </div>
+</main>
+
+<!-- ✅ Toastr JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+
+<script>
+  // ✅ Toastr options
+  toastr.options = {
+    "closeButton": true,
+    "progressBar": true,
+    "positionClass": "toast-top-right",
+    "timeOut": "3000"
+  };
+
+  async function addToCart(btn) {
+    try {
+      const id = btn.getAttribute('data-id');
+      const res = await fetch(`/wishlist/api/add/${id}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" }
+      });
+      const data = await res.json();
+      if (data.success) {
+        toastr.success(data.message);
+        btn.closest(".card").remove();
+      } else {
+        toastr.error(data.message);
+      }
+    } catch (error) {
+      toastr.error(error.message);
+    }
+  }
+
+  async function removeWishlist(btn) {
+    try {
+      const id = btn.getAttribute('data-id');
+      const res = await fetch(`/wishlist/api/remove/${id}`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" }
+      });
+      const data = await res.json();
+      if (data.status) {
+        toastr.success(data.message);
+        btn.closest(".card").remove(); // remove card from DOM instantly
+      } else {
+        toastr.error("data-false"+data.message);
+      }
+    } catch (error) {
+      toastr.error(error.message);
+    }
+  }
+</script>
+
+<%-include('../partials/user/footer.ejs')%>

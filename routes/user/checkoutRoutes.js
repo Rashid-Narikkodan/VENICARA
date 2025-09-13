@@ -24,8 +24,10 @@ router
 router.post("/address/selectAddress",auth.requireLogin, checkoutController.handleSelectAddress);
 
 router.get("/paymentMethod",auth.requireLogin, checkoutController.showPaymentMethods);
+router.post("/api/razorpay/success",auth.requireLogin, checkoutController.handleRazorpaySuccess);
 
 router.patch('/api/coupon/apply',checkoutController.applyCoupon)
+router.patch('/api/coupon/cancel',checkoutController.cancelCoupon)
 
 router.post("/api/placeOrder",auth.requireLogin, checkoutController.handlePlaceOrder);
 

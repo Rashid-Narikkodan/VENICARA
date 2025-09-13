@@ -8,7 +8,7 @@ const requireLogin = async (req, res, next) => {
 const isUserBlocked=async(req, res, next)=>{
   const User = require('../models/User');
   const user=await User.findById(req.session.user.id);
-  if (user.isBlocked||user.isDeleted) {
+  if (!user||user.isBlocked||user.isDeleted) {
      req.logout((err) => {
     if (err) {
       console.log("Error destroying session:", err);

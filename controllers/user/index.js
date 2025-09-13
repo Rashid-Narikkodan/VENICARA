@@ -9,4 +9,6 @@ module.exports={
   walletController:require('./walletController'),
   checkoutController:require('./checkoutController'),
   orderController:require('./orderController'),
+  wishlistController:require('./wishlistController'),
+  deleteController:require('./deleteController')
 }

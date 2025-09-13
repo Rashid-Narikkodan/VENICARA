@@ -129,12 +129,11 @@ const editCategory = async (req, res) => {
     const update = {};
     if (name) update.name = name;
     if (description) update.description = description;
-    if (discount) update.discount = parseFloat(discount);
+    if (discount) update.discount = parseInt(discount);
 
     await Category.findByIdAndUpdate(id, update);
 
     const products = await Product.find({ category: id });
-    console.log(products);
     products.forEach(async (p) => {
       p.variants.forEach(async (v, index) => {
         await Product.updateOne(

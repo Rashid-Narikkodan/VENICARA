@@ -4,9 +4,8 @@ const express = require("express")
 const app = express()
 const connectDB = require('./config/db')
 const path = require('path')
-const userRoutes = require('./routes/userRoutes')
 const adminRoutes = require('./routes/adminRoutes')
-const userRoute = require('./routes/user')
+const userRoutes = require('./routes/user')
 const sessionConfig = require('./middlewares/session')
 const flash = require('connect-flash')
 const flashMsg = require('./middlewares/flash')
@@ -37,8 +36,8 @@ app.use(express.static(path.join(__dirname, 'public')))
 
 //routers
 app.use('/admin', adminRoutes)
-app.use('/',userRoute)
-// app.use('/', userRoutes)
+app.use('/',userRoutes)
+
 //pagenotfound
 app.use((req, res, next) => {
   res.status(404).render('userPages/404', { url: req.originalUrl })

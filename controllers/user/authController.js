@@ -5,6 +5,10 @@ const sendEmail = require('../../helpers/sendMail.js')
 const generateRefCode = require('../../helpers/referralCode.js')
 const { nanoid } = require('nanoid')
 const handleError = require('../../helpers/handleError.js')
+const Referrals = require('../../models/Referrals.js')
+const Wallet = require('../../models/Wallet.js')
+const WalletTransaction = require('../../models/WalletTransaction.js')
+
 
 
 const showLogin = (req, res) => {
@@ -96,6 +100,11 @@ const handleGoogleAuth = async (req, res) => {
       isBlocked: user.isBlocked,
       referralCode: user.referralCode,
     }
+
+    
+    const wallet=await Wallet.find({userId:req.user._id})
+    if(!wallet) await Wallet.create({userId:req.user._id})
+
     req.flash('success', 'Logged in successfully with Google')
     return res.redirect('/home')
   } catch (err) {
@@ -231,13 +240,6 @@ const handleSignup = async (req, res) => {
       if (user.isDeleted) {
         user.isDeleted = false
         user.isVerified = false
-        if (refCode !== '') {
-          const code = await User.findOne({ referralCode: refCode })
-          if (!code) {
-            req.flash('error', 'invalid referral code')
-            return res.redirect('/auth/signup')
-          }
-          user.referredBy = refCode
           if (password == confirmPassword) {
             user.password = await bcrypt.hash(password, 10)
           } else {
@@ -245,7 +247,6 @@ const handleSignup = async (req, res) => {
             return res.redirect('/auth/signup')
           }
           await user.save()
-        }
         if (user.isBlocked) {
           req.flash('error', 'Access denied')
           return res.redirect('/auth/signup')
@@ -270,9 +271,10 @@ const handleSignup = async (req, res) => {
       return res.redirect('/auth/signup')
     }
 
+    let refUser='';
     if (refCode !== '') {
-      const code = await User.findOne({ referralCode: refCode })
-      if (!code) {
+      refUser = await User.findOne({ referralCode: refCode })
+      if (!refUser) {
         req.flash('error', 'invalid referral code')
         return res.redirect('/auth/signup')
       }
@@ -281,7 +283,7 @@ const handleSignup = async (req, res) => {
     const otp = generateOTP()
     const otpExpiry = new Date(Date.now() + 5 * 60 * 1000)
     const hashedPass = await bcrypt.hash(password, 10)
-    const referralCode = generateRefCode(name)
+    const referralCode =await generateRefCode(name)
     const userId = `USR-${nanoid(6).toUpperCase()}`
     const newUser = new User({
       name,
@@ -289,7 +291,7 @@ const handleSignup = async (req, res) => {
       userId,
       password: hashedPass,
       referralCode,
-      referredBy: refCode || null,
+      referredBy: refUser._id || null,
       otp,
       otpExpiry
     })
@@ -298,6 +300,27 @@ const handleSignup = async (req, res) => {
 
     req.session.userId = newUser._id
     sendEmail(email, otp, name)
+
+    const wallet=await Wallet.find({userId:newUser._id})
+    if(!wallet) await Wallet.create({userId:newUser._id})
+
+      if (refCode !== '') {
+      const user = await User.findOne({ referralCode: refCode })
+      await Referrals.create({
+        referrerUserId:user._id,
+        referredUserId:newUser._id,
+        referralCodeUsed:refCode,
+        amount:200,
+        status:'pending',
+      })
+    await WalletTransaction.create({
+      userId:user._id,
+      type:'credit',
+      status:'pending',
+      amount:200*100,//paise
+      lasBalance:wallet.balance
+    })
+    }
 
     req.flash('success', `OTP sent to your email: ${email}`)
     return res.redirect('/auth/signup/verify-otp')
@@ -372,7 +395,7 @@ const handleLogout = (req, res) => {
 module.exports = {
   showLogin,
   handleLogin,
-  handleGoogleAuth,
+  handleGoogleAuth,//entry by create
 
   showForgot,
   handleForgot,
@@ -383,9 +406,9 @@ module.exports = {
   handleChangePass,
 
   showSignup,
-  handleSignup,
+  handleSignup,//entry by create
   showSignupOTP,
   handleSignupOTP,
   resendOTP,
-  handleLogout,
+  handleLogout,//exit
 }

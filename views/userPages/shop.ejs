@@ -23,6 +23,7 @@
     .card:hover {
       transform: scale(1.05);
     }
+
   </style>
   <main class="flex-grow-1 bg-light w-100">
     <div class="ps-3 mt-5">
@@ -155,9 +156,12 @@
                   <% products.forEach(product=> { %>
                     <div class="col-md-3">
                       <a href="/products/<%=product._id%>"
-                        class="card text-decoration-none shadow p-3 rounded-4 border-0"
+                        class="card text-decoration-none shadow p-3 rounded-4 border-0 position-relative"
                         style="max-width: 18rem;background:linear-gradient(to right, #e6cc6b, #c1a86e);">
                         <img src="<%=product.images[0]%>" loading="eager" class="card-img-top rounded-4" alt="Product Image">
+                        <div id="addToWishlist" class="position-absolute wishlist-btn" data-product-id="<%= product._id %>" data-variant-id="<%= product.variants.reduce((min, v) => {
+                                      return parseInt(v.volume) < parseInt(min.volume) ? v : min
+                                  }, product.variants[0])._id %>"  style="right:1rem;bottom:6.5rem"><i class="fa-regular fa-heart fs-5" style="pointer-events: none;"></i></div>
                         <div class="card-body p-0 pt-3">
                           <h6 class="card-title mb-1">
                             <%=product.name%>
@@ -272,6 +276,40 @@
           </nav>
         </div>
   </main>
-  <script>
+    <script>
+  document.getElementById("addToWishlist").addEventListener("click", async (e) => {
+    e.preventDefault();          // stop default <a>/<form> behavior
+    e.stopPropagation();         // stop bubbling to the card link
+
+    const btn = e.target.closest(".wishlist-btn");
+    if (!btn) return; // clicked somewhere else
+
+    const icon = btn.querySelector("i");
+    const productId = btn.dataset.productId; // keep product id in data attribute
+    const variantId = btn.dataset.variantId; // keep product id in data attribute
+
+    try {
+      const res = await fetch(`/wishlist/api/add/toWish/${productId}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ productId,variantId }),
+      });
+
+      const data = await res.json();
+      if (data.status) {
+        // Toggle UI state only on success
+        icon.classList.toggle("fa-regular");
+        icon.classList.toggle("fa-solid");
+        icon.classList.toggle("text-dark");
+      } else {
+        alert(data.message || "Something went wrong");
+      }
+    } catch (err) {
+      console.error("Wishlist error:", err);
+      alert("Server error while adding to wishlist");
+    }
+  });
   </script>
   <%- include('../partials/user/footer.ejs')%>

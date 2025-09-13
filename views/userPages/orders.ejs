@@ -9,7 +9,7 @@
           <span class="badge bg-primary"><%=order.status%></span>
         </div>
 
-        <div class="col-md-12 px-3 py-1 rounded-2 my-2" style="background-color: rgb(193, 193, 193)">
+        <div class="col-md-12 px-3 py-1 rounded-2 my-2" style="background-color: rgb(230, 230, 230)">
           <!-- product based start -->
           <% order.products.forEach((product,index)=>{ %>
           <div class="row p-1 rounded-3 <%=product.status === 'cancelled'?'text-secondary':''%>">
@@ -148,7 +148,12 @@
 
       const data = await res.json();
       if (data.status) {
-        location.reload();
+        const modalEl = document.getElementById("returnModal");
+      const modalInstance = bootstrap.Modal.getInstance(modalEl);
+      modalInstance.hide();
+
+      // Optionally refresh UI
+      location.reload();
       } else {
         alert(data.message || "Return request failed");
       }
