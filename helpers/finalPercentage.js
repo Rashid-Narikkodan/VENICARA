@@ -6,6 +6,5 @@ module.exports = async function finalDiscountPercent(bp, dp, id) {
     const catDiscount = parseInt(category.discount)
     const productDiscount = parseInt(getDiscountPercent(bp, dp))
     const finalDiscount = Math.max(catDiscount, productDiscount)
-    console.log(finalDiscount)
     return finalDiscount
 }
