@@ -312,6 +312,8 @@ const handlePlaceOrder = async (req, res) => {
 
     // Apply coupon if exists
     let totalDiscountPerc = 0;
+    let discountAmount = 0;
+    let couponDiscount = 0;
     let coupon = null;
     if (req.session.coupon) {
       coupon = await Coupon.findById(req.session.coupon);
@@ -322,10 +324,11 @@ const handlePlaceOrder = async (req, res) => {
 
       if (coupon) {
         totalDiscountPerc = coupon.discount;
-        totalAmount -= (coupon.discount / 100) * totalAmount;
+        couponDiscount = (coupon.discount / 100) * totalAmount || 0;
+        totalAmount -= couponDiscount;
       }
     }
-
+    discountAmount += products.reduce((ac, cu) => ac + (cu.basePrice - cu.finalDiscount) * cu.quantity, 0);
     totalAmount = parseFloat(totalAmount.toFixed(2));
 
     // Payment placeholder
@@ -384,6 +387,8 @@ const handlePlaceOrder = async (req, res) => {
       couponApplied: coupon?._id || null,
       totalAmount,
       totalDiscountPerc,
+      discountAmount,
+      couponDiscount,
       status: "pending", // important
       razorpayOrderId,
     });
@@ -498,9 +503,9 @@ module.exports = {
   handleEditAddress,
   handleSelectAddress,
   showPaymentMethods,
-  handleRazorpaySuccess,
   applyCoupon,
   cancelCoupon,
+  handleRazorpaySuccess,
   handlePlaceOrder,
   showPlaceOrder,
 };

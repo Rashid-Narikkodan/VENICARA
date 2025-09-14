@@ -1,8 +1,221 @@
-<%- include('../partials/admin/header.ejs')%>
-<%- include('../partials/admin/sidebar.ejs')%>
-<main class="">
-  <!-- Page Content -->
-  salesReport
+<%- include('../partials/admin/header.ejs') %>
+<%- include('../partials/admin/sidebar.ejs') %>
+
+<style>
+  .card {
+    border-radius: 12px;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+  }
+  .card h4 { font-weight: 700; letter-spacing: 0.5px; }
+  .table thead th {
+    color: #fff;
+    border: none;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+    text-align: center;
+    padding: 1rem 1rem !important; ;
+  }
+  .table tbody tr:hover { background-color: #e9f5ff; transition: background-color 0.2s; }
+  .table td, .table th { vertical-align: middle; }
+
+  .text-success { color: #198754 !important; }
+  .text-danger { color: #dc3545 !important; }
+  .text-warning { color: #ffc107 !important; }
+  .text-primary { color: #0d6efd !important; }
+  .text-info { color: #0dcaf0 !important; }
+
+  @media (max-width: 768px) { .card h4 { font-size: 1.2rem; } }
+</style>
+
+<main class="p-4">
+  <div class="container-fluid">
+
+    <!-- Title -->
+    <div class="mb-3">
+      <h2 class="fw-bold">Sales Report</h2>
+      <p class="text-muted">View detailed sales statistics and export reports.</p>
+    </div>
+
+    <!-- Filters + Export -->
+    <div class="row align-items-center mb-4 g-3">
+      <div class="col-lg-8 col-md-7">
+        <form action="/admin/salesReport" method="GET">
+          <div class="d-flex flex-wrap gap-2 align-items-center w-100">
+            <label for="durationFilter" class="form-label fw-semibold me-2 mb-0">Filter:</label>
+            <select class="form-select w-auto" id="durationFilter" name="filter">
+              <option value="daily" <%= filter === 'daily' ? 'selected' : '' %>>Today</option>
+              <option value="weekly" <%= filter === 'weekly' ? 'selected' : '' %>>This Week</option>
+              <option value="monthly" <%= filter === 'monthly' ? 'selected' : '' %>>This Month</option>
+              <option value="yearly" <%= filter === 'yearly' ? 'selected' : '' %>>This Year</option>
+              <option value="custom" <%= filter === 'custom' ? 'selected' : '' %>>Custom</option>
+            </select>
+
+            <div id="customDateRange" class="<%= filter === 'custom' ? '' : 'd-none' %> ms-3">
+              <input name="startDate" type="date" class="form-control d-inline-block w-auto" value="<%= startDate || '' %>">
+              <span class="mx-2 fw-semibold">to</span>
+              <input name="endDate" type="date" class="form-control d-inline-block w-auto" value="<%= endDate || '' %>">
+            </div>
+            <div>
+              <button type="submit" class="btn btn-dark">Apply</button>
+            </div>
+            <div>
+              <a href="/admin/salesReport" class="btn btn-outline-dark">Cancel</a>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <div class="col-lg-4 col-md-5 text-md-end d-flex justify-content-md-end gap-2">
+        <!-- Excel Export -->
+        <form action="/admin/salesReport/export/excel" method="POST">
+          <button type="submit" class="btn btn-outline-dark w-auto">
+            <i class="bi bi-file-earmark-excel"></i> Export Excel
+          </button>
+        </form>
+
+        <!-- PDF Export -->
+        <form action="/admin/salesReport/export/pdf" method="POST">
+          <button type="submit" class="btn btn-dark w-auto">
+            <i class="bi bi-file-earmark-pdf"></i> Export PDF
+          </button>
+        </form>
+      </div>
+
+    </div>
+
+    <!-- Sales Report Cards -->
+    <div class="row g-3 mb-4">
+      <div class="col-md-2 col-sm-6">
+        <div class="card shadow-sm text-center p-3">
+          <h6 class="text-muted mb-2">Total Orders</h6>
+          <h4 class="fw-bold"><%= data.totalOrders %></h4>
+        </div>
+      </div>
+      <div class="col-md-2 col-sm-6">
+        <div class="card shadow-sm text-center p-3">
+          <h6 class="text-muted mb-2">Products Sold</h6>
+          <h4 class="fw-bold"><%= data.totalProductSold %></h4>
+        </div>
+      </div>
+      <div class="col-md-2 col-sm-6">
+        <div class="card shadow-sm text-center p-3">
+          <h6 class="text-muted mb-2">Customers</h6>
+          <h4 class="fw-bold"><%= data.totalCustomers %></h4>
+        </div>
+      </div>
+      <div class="col-md-2 col-sm-6">
+        <div class="card shadow-sm text-center p-3">
+          <h6 class="text-muted mb-2">Cancelled Orders</h6>
+          <h4 class="fw-bold text-danger"><%= data.totalCancelled %></h4>
+        </div>
+      </div>
+      <div class="col-md-2 col-sm-6">
+        <div class="card shadow-sm text-center p-3">
+          <h6 class="text-muted mb-2">Returned Orders</h6>
+          <h4 class="fw-bold text-warning"><%= data.totalReturned %></h4>
+        </div>
+      </div>
+      <div class="col-md-2 col-sm-6">
+        <div class="card shadow-sm text-center p-3">
+          <h6 class="text-muted mb-2">Cancelled (Product)</h6>
+          <h4 class="fw-bold text-primary"><%= data.totalProductCancelled %></h4>
+        </div>
+      </div>
+      <div class="col-md-2 col-sm-6">
+        <div class="card shadow-sm text-center p-3">
+          <h6 class="text-muted mb-2">Returned (Products)</h6>
+          <h4 class="fw-bold text-primary"><%= data.totalProductReturned %></h4>
+        </div>
+      </div>
+      <div class="col-md-2 col-sm-6">
+        <div class="card shadow-sm text-center p-3">
+          <h6 class="text-muted mb-2">Discounts (Product)</h6>
+          <h4 class="fw-bold text-primary">₹<%= data.totalDiscountPerProduct.toFixed(2) %></h4>
+        </div>
+      </div>
+      <div class="col-md-2 col-sm-6">
+        <div class="card shadow-sm text-center p-3">
+          <h6 class="text-muted mb-2">Discounts (Order)</h6>
+          <h4 class="fw-bold text-primary">₹<%= data.totalDiscountPerOrder.toFixed(2) %></h4>
+        </div>
+      </div>
+      <div class="col-md-2 col-sm-6">
+        <div class="card shadow-sm text-center p-3">
+          <h6 class="text-muted mb-2">Total Revenue</h6>
+          <h4 class="fw-bold text-success">₹<%= data.totalRevenue.toFixed(2) %></h4>
+        </div>
+      </div>
+      <div class="col-md-2 col-sm-12">
+        <div class="card shadow-sm text-center p-3">
+          <h6 class="text-muted mb-2">Total Refunds</h6>
+          <h4 class="fw-bold text-danger">₹<%= data.totalRefund.toFixed(2) %></h4>
+        </div>
+      </div>
+      <div class="col-md-2 col-sm-12">
+        <div class="card shadow-sm text-center p-3">
+          <h6 class="text-muted mb-2">AOV</h6>
+          <h4 class="fw-bold text-info">₹<%= data.AverageOrderValue.toFixed(2) %></h4>
+        </div>
+      </div>
+    </div>
+
+    <!-- Detailed Order Table -->
+    <div class="table-responsive mt-5 shadow-sm rounded">
+      <table class="table table-bordered table-striped align-middle mb-0">
+        <thead class="table-dark">
+          <tr>
+            <th>Order ID</th>
+            <th>Date</th>
+            <th>Customer</th>
+            <th>Products</th>
+            <th>Payment</th>
+            <th>Status</th>
+            <th>Subtotal</th>
+            <th>Discount</th>
+            <th>Coupon Off</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% orders.forEach(order => { %>
+            <tr>
+              <td class="text-center"><%= order.orderId %></td>
+              <td class="text-center"><%= order.createdAt.toLocaleDateString("en-US", {day: "2-digit",month: "short",year: "numeric"});%></td>
+              <td class="text-center"><%= order.userId.name %></td>
+              <td class="text-center"><%= order.products.reduce((s,p)=>s+p.quantity,0) %></td>
+              <td class="text-center"><%= order.payment.method %></td>
+              <td class="text-center <%= order.status === 'delivered' ? 'text-success' : (order.status === 'cancelled' ? 'text-danger' : 'text-warning') %>">
+                <%= order.status.charAt(0).toUpperCase()+order.status.slice(1) %>
+              </td>
+              <td class="text-center">₹<%= order.products.reduce((s,p)=>s+p.basePrice*p.quantity,0) %></td>
+              <td class="text-center">₹<%= order.discountAmount.toFixed(2) %></td>
+              <td class="text-center"><%= order.couponDiscount?"₹"+order.couponDiscount.toFixed(2):'No Coupon'%></td>
+              <td class="text-center">₹<%= order.totalAmount.toFixed(2) %></td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
 </main>
 </div>
-<%- include('../partials/admin/footer.ejs')%>
+
+<%- include('../partials/admin/footer.ejs') %>
+
+<script>
+  document.getElementById('durationFilter').addEventListener('change', function () {
+    const customRange = document.getElementById('customDateRange');
+    if (this.value === 'custom') {
+      customRange.classList.remove('d-none');
+    } else {
+      customRange.classList.add('d-none');
+    }
+  });
+  
+</script>

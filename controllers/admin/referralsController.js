@@ -1,55 +1,86 @@
 const handleError = require("../../helpers/handleError");
 const Referrals=require('../../models/Referrals')
+const User=require('../../models/User')
 
 const showReferrals = async (req, res) => {
   try {
-    const referrals = await Referrals.find({}).lean()
-    const pipeline=[
-  {
-    $group: {
-      _id: null,
-      referrers: { $addToSet: "$referrerUserId" },
-      referred: { $addToSet: "$referredUserId" },
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 5;
+
+    // Total referrals for pagination
+    const totalReferrals = await Referrals.countDocuments();
+
+    // Fetch referrals with pagination
+    const referrals = await Referrals.find()
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .sort({ createdAt: -1 })
+      .lean();
+
+    // Populate referrer and referred names
+    for (let r of referrals) {
+      const referrer = await User.findById(r.referrerUserId).lean();
+      const referred = await User.findById(r.referredUserId).lean();
+      r.referrer = referrer?.name || "N/A";
+      r.referred = referred?.name || "N/A";
     }
-  },
-  {
-    $project: {
-      _id: 0,
-      totalReferrerUsers: { $size: "$referrers" },
-      totalReferredUsers: { $size: "$referred" }
+
+    // Global totals
+    const pipeline = [
+      {
+        $group: {
+          _id: null,
+          referrers: { $addToSet: "$referrerUserId" },
+          referred: { $addToSet: "$referredUserId" },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          totalReferrerUsers: { $size: "$referrers" },
+          totalReferredUsers: { $size: "$referred" },
+        },
+      },
+    ];
+
+    const total = await Referrals.aggregate(pipeline);
+    const { totalReferredUsers, totalReferrerUsers } = total[0] || {};
+
+    let totalPaid = 0;
+    let totalPending = 0;
+    for (let reward of referrals) {
+      if (reward.status === "claimed") totalPaid += reward.amount;
+      else totalPending += reward.amount;
     }
-  }
-]
-    const total=await Referrals.aggregate(pipeline)
-    const {totalReferredUsers,totalReferrerUsers}=total[0] 
-  let totalPaid = 0;
-  let totalPending = 0;
-  for(let reward of referrals){
-    if(reward.status == 'claimed'){
-      totalPaid+=reward.amount
-    }else{
-      totalPending+=reward.amount
-    }
-  }
-    const data={
-      referredCount:totalReferredUsers,
-      referrerCount:totalReferrerUsers,
+
+    const data = {
+      referredCount: totalReferredUsers,
+      referrerCount: totalReferrerUsers,
       totalPaid,
       totalPending,
-    }
+    };
 
-    console.log(data)
+    const totalPages = Math.ceil(totalReferrals / limit);
 
-    return res.render("adminPages/referrals", { page: "referrals", referrals,data });
+    return res.render("adminPages/referrals", {
+      page: "referrals",
+      referrals, // table rows
+      currentPage: page,
+      totalPages,
+      limit,
+      count: (page - 1) * limit,
+      data,      // global stats
+    });
   } catch (err) {
     handleError(res, "showReferrals", err);
   }
 };
-const handleStatus= async (req,res)=>{
+
+const approveReward= async (req,res)=>{
   try{
-    const {userId}=req.body
-    await Referrals.findOneAndUpdate({userId},{status:'claim'})
-    res.json({status:true,message:'Claim'})
+    const {id}=req.params
+    await Referrals.findOneAndUpdate({_id:id},{status:'claim'})
+    res.json({success:true,message:'Claim'})
   }catch(error){
     res.json({status:false,message:error.message})
   }
@@ -57,5 +88,9 @@ const handleStatus= async (req,res)=>{
 
 module.exports = {
   showReferrals,
-  handleStatus,
+  approveReward,
 };
+
+
+
+

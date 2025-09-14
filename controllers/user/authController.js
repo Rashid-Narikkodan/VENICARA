@@ -235,7 +235,6 @@ const handleSignup = async (req, res) => {
 
   try {
     const user = await User.findOne({ email })
-
     if (user) {
       if (user.isDeleted) {
         user.isDeleted = false
@@ -313,13 +312,6 @@ const handleSignup = async (req, res) => {
         amount:200,
         status:'pending',
       })
-    await WalletTransaction.create({
-      userId:user._id,
-      type:'credit',
-      status:'pending',
-      amount:200*100,//paise
-      lasBalance:wallet.balance
-    })
     }
 
     req.flash('success', `OTP sent to your email: ${email}`)

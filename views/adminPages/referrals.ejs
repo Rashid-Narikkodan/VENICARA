@@ -1,7 +1,156 @@
 <%- include('../partials/admin/header.ejs')%>
 <%- include('../partials/admin/sidebar.ejs')%>
-<main class="">
+<main class="flex-grow-1 min-vh-100 p-3">
+  <div class="conatiner">
+    <div class="p-4">
+        <h3>Referrals</h3>
+    </div>
+    <div class="row">
+<div class="container my-4">
+  <div class="row g-3 p-4  rounded" style="background:#dbdbdb">
+
+    <div class="col-md-6 d-flex justify-content-evenly align-items-center">
+      <span class="fw-semibold">Total Referrals:</span>
+      <span class="bg-secondary text-white px-3 py-1 rounded"><%=data.referredCount%></span>
+    </div>
+    
+    <div class="col-md-6 d-flex justify-content-evenly align-items-center">
+      <span class="fw-semibold">Total Rewards Paid:</span>
+      <span class="bg-secondary text-white px-3 py-1 rounded"><%=data.totalPaid%></span>
+    </div>
+    
+    <div class="col-md-6 d-flex justify-content-evenly align-items-center">
+      <span class="fw-semibold">Referred Users:</span>
+      <span class="bg-secondary text-white px-3 py-1 rounded"><%=data.referrerCount%></span>
+    </div>
+
+    <div class="col-md-6 d-flex justify-content-evenly align-items-center">
+      <span class="fw-semibold">Pending Rewards:</span>
+      <span class="bg-secondary text-white px-3 py-1 rounded"><%=data.totalPending%></span>
+    </div>
+
+  </div>
+</div>
+
+        <div class="col-md-12">
+                <div class="table-responsive shadow rounded-3 bg-white">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-dark">
+          <tr>
+            <th class="text-center p-3">No.</th>
+            <th class="text-center p-3">Referrer Name</th>
+            <th class="text-center p-3">Referral Code</th>
+            <th class="text-center p-3">Referred Users</th>
+            <th class="text-center p-3">Reward Status</th>
+            <th class="text-center p-3">Reward Amount</th>
+            <th class="text-center p-3">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% referrals.forEach(referral=> { %> <%count++%>
+          <tr>
+            <td class="text-center"><%= count %></td>
+            <td class="text-center"><%= referral.referrer%></td>
+            <td class="text-center"><%= referral.referralCodeUsed %></td>
+            <td class="text-center"><%= referral.referred%></td>
+            <td class="text-center <%=referral.status == 'pending'?'text-primary':'text-success'%>"><%=referral.status%></td>
+            <td class="text-center"><%=referral.amount%></td>
+            <td class="text-center">
+                <button onclick="approveReward(this)" data-id="<%=referral._id%>" class="btn btn-sm btn-outline-primary <%=referral.status == 'claimed'?'disabled':''%>">
+                   <%=referral.status == 'claimed'?'Claimed':referral.status=='pending'?'Approve':'Approved'%>
+                </button>
+            </td>
+          </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+        </div>
+    </div>
+  </div>
   
+  <div class="d-flex justify-content-end">
+        <nav aria-label="Page navigation">
+          <ul class="pagination justify-content-end flex-wrap p-3">
+
+            <!-- Previous Button -->
+            <% if (currentPage> 1) { %>
+              <li class="page-item">
+                <a class="page-link bg-dark" href="?page=<%= currentPage - 1 %>&limit=<%= limit %>">
+                  <i class="fa-solid fa-caret-left text-white"></i>
+                </a>
+              </li>
+              <% } else { %>
+                <li class="page-item disabled">
+                  <span class="page-link bg-dark">
+                    <i class="fa-solid fa-caret-left text-white"></i>
+                  </span>
+                </li>
+                <% } %>
+
+                  <!-- Left Page (if exists) -->
+                  <% if (currentPage - 1>= 1) { %>
+                    <li class="page-item">
+                      <a class="page-link" href="?page=<%= currentPage - 1 %>&limit=<%= limit %>">
+                        <%= currentPage - 1 %>
+                      </a>
+                    </li>
+                    <% } %>
+
+                      <!-- Current Page -->
+                      <li class="page-item active">
+                        <span class="page-link bg-white text-dark border-0">
+                          <%= currentPage %>
+                        </span>
+                      </li>
+
+                      <!-- Right Page (if exists) -->
+                      <% if (currentPage + 1 <=totalPages) { %>
+                        <li class="page-item">
+                          <a class="page-link" href="?page=<%= currentPage + 1 %>&limit=<%= limit %>">
+                            <%= currentPage + 1 %>
+                          </a>
+                        </li>
+                        <% } %>
+
+                          <!-- Next Button -->
+                    <% if (currentPage < totalPages) { %>
+                      <li class="page-item">
+                        <a class="page-link bg-dark" href="?page=<%= currentPage + 1 %>&limit=<%= limit %>">
+                          <i class="fa-solid fa-caret-right text-white"></i>
+                        </a>
+                      </li>
+                      <% } else { %>
+                        <li class="page-item disabled">
+                          <span class="page-link bg-dark">
+                            <i class="fa-solid fa-caret-right text-white"></i>
+                          </span>
+                        </li>
+                        <% } %>
+
+          </ul>
+        </nav>
+      </div>
 </main>
 </div>
+<script>
+  async function approveReward(btn){
+    const id=btn.getAttribute('data-id')
+    try{
+      const res=await fetch(`/admin/referrals/${id}`,{
+        method:"PATCH"
+      })
+      const data=await res.json()
+      if(data.success){
+        btn.innerHTML = 'Approved'
+        btn.disabled=true
+        window.location.reload()
+      }else{
+        alert('unable to approve'+data.message)
+      }
+    }catch(error){
+      
+    }
+  }
+</script>
 <%- include('../partials/admin/footer.ejs')%>

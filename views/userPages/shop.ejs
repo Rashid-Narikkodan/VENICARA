@@ -1,4 +1,6 @@
 <%-include("../partials/user/header.ejs")%>
+
+
   <style>
     .form-check-input {
       padding: .7rem .7rem;
@@ -159,9 +161,20 @@
                         class="card text-decoration-none shadow p-3 rounded-4 border-0 position-relative"
                         style="max-width: 18rem;background:linear-gradient(to right, #e6cc6b, #c1a86e);">
                         <img src="<%=product.images[0]%>" loading="eager" class="card-img-top rounded-4" alt="Product Image">
-                        <div id="addToWishlist" class="position-absolute wishlist-btn" data-product-id="<%= product._id %>" data-variant-id="<%= product.variants.reduce((min, v) => {
-                                      return parseInt(v.volume) < parseInt(min.volume) ? v : min
-                                  }, product.variants[0])._id %>"  style="right:1rem;bottom:6.5rem"><i class="fa-regular fa-heart fs-5" style="pointer-events: none;"></i></div>
+                        <div class="position-absolute wishlist-btn p-2" 
+                            data-product-id="<%= product._id %>" 
+                            data-variant-id="<%=product.variants.reduce((min, v) => {
+                              return parseInt(v.volume) < parseInt(min.volume) ? v : min
+                            }, product.variants[0])._id %>"  
+                            style="right:1rem;bottom:6.5rem">
+                             <% if (wishlistIds.length && wishlistIds.includes(product.variants.reduce((min, v) => {
+                              return parseInt(v.volume) < parseInt(min.volume) ? v : min
+                            }, product.variants[0])._id.toString())) { %>
+                                  <i class="fa-solid fa-heart fs-5 text-dark"></i> <!-- filled black heart -->
+                                <% } else { %>
+                                  <i class="fa-regular fa-heart fs-5"></i> <!-- empty heart -->
+                                <% } %>
+                        </div>
                         <div class="card-body p-0 pt-3">
                           <h6 class="card-title mb-1">
                             <%=product.name%>
@@ -201,115 +214,104 @@
         </div>
 
         <!-- pagination -->
-        <div class="d-flex justify-content-end mt-4">
-          <nav aria-label="Page navigation">
-            <ul class="pagination justify-content-end flex-wrap p-3">
+<div class="d-flex justify-content-end mt-4">
+  <nav aria-label="Page navigation">
+    <ul class="pagination justify-content-end flex-wrap p-3">
 
-              <!-- Previous Button -->
-              <% if (currentPage> 1) { %>
-                <li class="page-item">
-                  <a class="page-link bg-dark" href="?page=<%= currentPage - 1 %>&limit=<%= limit %>
-                  <%for(const key in query){if(key!='page'&&key!='limit'){%>
-                                  &<%= key %>=<%= query[key] %>
-                                  <% } } %>">
-                    <i class="fa-solid fa-caret-left text-white"></i>
-                  </a>
-                </li>
-                <% } else { %>
-                  <li class="page-item disabled">
-                    <span class="page-link bg-dark">
-                      <i class="fa-solid fa-caret-left text-white"></i>
-                    </span>
-                  </li>
-                  <% } %>
+      <!-- Previous Button -->
+      <% if (currentPage > 1) { %>
+        <li class="page-item">
+          <a class="page-link bg-dark" href="?<%= buildQuery({ page: currentPage - 1, limit }) %>">
+            <i class="fa-solid fa-caret-left text-white"></i>
+          </a>
+        </li>
+      <% } else { %>
+        <li class="page-item disabled">
+          <span class="page-link bg-dark">
+            <i class="fa-solid fa-caret-left text-white"></i>
+          </span>
+        </li>
+      <% } %>
 
-                    <!-- Left Page (if exists) -->
-                    <% if (currentPage - 1>= 1) { %>
-                      <li class="page-item">
-                        <a class="page-link" href="?page=<%= currentPage - 1 %>&limit=<%= limit %>
-                         <%for(const key in query){if(key!='page'&&key!='limit'){%>
-                                  &<%= key %>=<%= query[key] %>
-                                  <% } } %>">
-                          <%= currentPage - 1 %>
-                        </a>
-                      </li>
-                      <% } %>
+      <!-- Left Page (if exists) -->
+      <% if (currentPage - 1 >= 1) { %>
+        <li class="page-item">
+          <a class="page-link" href="?<%= buildQuery({ page: currentPage - 1, limit }) %>">
+            <%= currentPage - 1 %>
+          </a>
+        </li>
+      <% } %>
 
-                        <!-- Current Page -->
-                        <li class="page-item active">
-                          <span class="page-link bg-white text-dark border-0">
-                            <%= currentPage %>
-                          </span>
-                        </li>
+      <!-- Current Page -->
+      <li class="page-item active">
+        <span class="page-link bg-white text-dark border-0">
+          <%= currentPage %>
+        </span>
+      </li>
 
-                        <!-- Right Page (if exists) -->
-                        <% if (currentPage + 1 <=totalPages) { %>
-                          <li class="page-item">
-                            <a class="page-link" href="?page=<%= currentPage + 1 %>&limit=<%= limit %>
-                            <%for(const key in query){if(key!='page'&&key!='limit'){%>
-                                  &<%= key %>=<%= query[key] %>
-                                  <% } } %>">
-                              <%= currentPage + 1 %>
-                            </a>
-                          </li>
-                          <% } %>
+      <!-- Right Page (if exists) -->
+      <% if (currentPage + 1 <= totalPages) { %>
+        <li class="page-item">
+          <a class="page-link" href="?<%= buildQuery({ page: currentPage + 1, limit }) %>">
+            <%= currentPage + 1 %>
+          </a>
+        </li>
+      <% } %>
 
-                            <!-- Next Button -->
-                            <% if (currentPage < totalPages) { %>
-                              <li class="page-item">
-                                <a class="page-link bg-dark" href="?page=<%= currentPage + 1 %>&limit=<%= limit %>
-                                 <%for(const key in query){if(key!='page'&&key!='limit'){%>
-                                  &<%= key %>=<%= query[key] %>
-                                  <% } } %>">
-                                  <i class="fa-solid fa-caret-right text-white"></i>
-                                </a>
-                              </li>
-                              <% } else { %>
-                                <li class="page-item disabled">
-                                  <span class="page-link bg-dark">
-                                    <i class="fa-solid fa-caret-right text-white"></i>
-                                  </span>
-                                </li>
-                                <% } %>
+      <!-- Next Button -->
+      <% if (currentPage < totalPages) { %>
+        <li class="page-item">
+          <a class="page-link bg-dark" href="?<%= buildQuery({ page: currentPage + 1, limit }) %>">
+            <i class="fa-solid fa-caret-right text-white"></i>
+          </a>
+        </li>
+      <% } else { %>
+        <li class="page-item disabled">
+          <span class="page-link bg-dark">
+            <i class="fa-solid fa-caret-right text-white"></i>
+          </span>
+        </li>
+      <% } %>
 
-            </ul>
-          </nav>
-        </div>
+    </ul>
+  </nav>
+</div>
+
   </main>
     <script>
-  document.getElementById("addToWishlist").addEventListener("click", async (e) => {
-    e.preventDefault();          // stop default <a>/<form> behavior
-    e.stopPropagation();         // stop bubbling to the card link
+  document.addEventListener("click", async (e) => {
+  const btn = e.target.closest(".wishlist-btn");
+  if (!btn) return;   // click outside wishlist buttons
 
-    const btn = e.target.closest(".wishlist-btn");
-    if (!btn) return; // clicked somewhere else
+  e.preventDefault();
+  e.stopPropagation();
 
-    const icon = btn.querySelector("i");
-    const productId = btn.dataset.productId; // keep product id in data attribute
-    const variantId = btn.dataset.variantId; // keep product id in data attribute
+  const icon = btn.querySelector("i");
+  const productId = btn.dataset.productId;
+  const variantId = btn.dataset.variantId;
 
-    try {
-      const res = await fetch(`/wishlist/api/add/toWish/${productId}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ productId,variantId }),
-      });
+  try {
+    const res = await fetch(`/wishlist/api/add/toWish/${productId}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ productId, variantId }),
+    });
 
-      const data = await res.json();
-      if (data.status) {
-        // Toggle UI state only on success
-        icon.classList.toggle("fa-regular");
-        icon.classList.toggle("fa-solid");
-        icon.classList.toggle("text-dark");
-      } else {
-        alert(data.message || "Something went wrong");
-      }
-    } catch (err) {
-      console.error("Wishlist error:", err);
-      alert("Server error while adding to wishlist");
+    const data = await res.json();
+
+    if (data.status) {
+      // toggle UI only on success
+      icon.classList.toggle("fa-regular");
+      icon.classList.toggle("fa-solid");
+      icon.classList.toggle("text-dark");
+    } else {
+      alert(data.message || "Something went wrong");
     }
-  });
+  } catch (err) {
+    console.error("Wishlist error:", err);
+    alert("Server error while adding to wishlist");
+  }
+});
+
   </script>
   <%- include('../partials/user/footer.ejs')%>

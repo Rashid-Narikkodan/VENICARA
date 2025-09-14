@@ -75,7 +75,12 @@
                   <span class="fw-bold text-start">Referral Reward</span>
                   <small class="d-block text-muted">Get ₹<%=reward.amount%> as Referral reward</small>
                 </div>
-                <button <%=reward.status==='claimed'||reward.status=='pending'?'disabled':''%> class="btn btn-dark btn-sm rounded-pill claim-reward px-3" data-id="<%=reward._id%>"><%=reward.status.charAt(0).toUpperCase()+reward.status.slice(1)%></button>
+<button 
+  class="btn btn-dark btn-sm rounded-pill claim-reward px-3" 
+  data-id="<%= reward._id %>"
+  <%= (reward.status === 'claimed' || reward.status === 'pending') ? 'disabled' : '' %>>
+  <%= reward.status.charAt(0).toUpperCase() + reward.status.slice(1) %>
+</button>
               </div>
               <%})%>
             </div>

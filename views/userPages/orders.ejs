@@ -15,9 +15,9 @@
           <div class="row p-1 rounded-3 <%=product.status === 'cancelled'?'text-secondary':''%>">
             
             <!-- Product Image -->
-            <div class="col-md-2 text-center p-1 d-flex align-items-center justify-content-center">
-              <img src="<%=product?.image%>" alt="Product Image" class="img-fluid rounded" style="max-height: 70px" />
-            </div>
+            <a href="/products/<%=product.productId._id%>" class="col-md-2 text-center d-flex align-items-center justify-content-center">
+              <img src="<%=product?.image%>" alt="Product Image" class="img-fluid rounded" style="max-height: 80%" />
+            </a>
 
             <!-- Product Info -->
             <div class="col-md-4 p-3">

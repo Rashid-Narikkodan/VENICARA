@@ -1,7 +1,8 @@
-const Product = require('../../models/Product');
-const Category = require('../../models/Category');
-const mongoose = require('mongoose');
-const handleError = require('../../helpers/handleError');
+const Product = require("../../models/Product");
+const Category = require("../../models/Category");
+const mongoose = require("mongoose");
+const handleError = require("../../helpers/handleError");
+const Wishlist = require("../../models/Wishlist");
 
 const landingPage = async (req, res) => {
   try {
@@ -11,9 +12,9 @@ const landingPage = async (req, res) => {
     );
 
     if (categories.length >= 3) {
-      categories[0].img = '/images/category-women.avif';
-      categories[1].img = '/images/category-unisex.avif';
-      categories[2].img = '/images/category-MEN.avif';
+      categories[0].img = "/images/category-women.avif";
+      categories[1].img = "/images/category-unisex.avif";
+      categories[2].img = "/images/category-MEN.avif";
     }
 
     const products = await Product.find({
@@ -22,9 +23,9 @@ const landingPage = async (req, res) => {
       isFeatured: true,
     });
 
-    return res.render('userPages/landing', { products, categories });
+    return res.render("userPages/landing", { products, categories });
   } catch (err) {
-    handleError(res, 'landingPage', err);
+    handleError(res, "landingPage", err);
   }
 };
 
@@ -36,9 +37,9 @@ const showHome = async (req, res) => {
     );
 
     if (categories.length >= 3) {
-      categories[0].img = '/images/category-women.avif';
-      categories[1].img = '/images/category-unisex.avif';
-      categories[2].img = '/images/category-MEN.avif';
+      categories[0].img = "/images/category-women.avif";
+      categories[1].img = "/images/category-unisex.avif";
+      categories[2].img = "/images/category-MEN.avif";
     }
 
     const products = await Product.find({
@@ -47,9 +48,9 @@ const showHome = async (req, res) => {
       isFeatured: true,
     });
 
-    return res.render('userPages/home', { products, categories });
+    return res.render("userPages/home", { products, categories });
   } catch (err) {
-    handleError(res, 'showHome', err);
+    handleError(res, "showHome", err);
   }
 };
 
@@ -62,7 +63,7 @@ const showShop = async (req, res) => {
     if (Object.keys(req.query).length === 0) {
       const [products, categories] = await Promise.all([
         Product.find({ isDeleted: false, isAvailable: true })
-          .populate('category')
+          .populate("category")
           .skip((page - 1) * limit)
           .limit(limit)
           .sort({ createdAt: -1 }),
@@ -74,7 +75,12 @@ const showShop = async (req, res) => {
       });
       const totalPages = Math.ceil(totalProducts / limit);
 
-      return res.render('userPages/shop', {
+      const wishlist = await Wishlist.find({
+        userId: req.session.user.id,
+      }).lean();
+      const wishlistIds = wishlist.map((item) => item.variantId.toString());
+
+      return res.render("userPages/shop", {
         products,
         categories,
         minPrice,
@@ -84,12 +90,18 @@ const showShop = async (req, res) => {
         currentPage: page,
         totalPages,
         limit,
-        query: req.query,
+        wishlistIds,
+        buildQuery: (extra) => {
+          const params = { ...req.query, ...extra };
+          return Object.entries(params)
+            .map(([k, v]) => `${k}=${encodeURIComponent(v)}`)
+            .join("&");
+        },
       });
     }
 
     const selectedCategory =
-      category && category !== 'all' && mongoose.isValidObjectId(category)
+      category && category !== "all" && mongoose.isValidObjectId(category)
         ? new mongoose.Types.ObjectId(category)
         : null;
 
@@ -105,57 +117,64 @@ const showShop = async (req, res) => {
     };
     const selectedSort = sortOptions[sort] || sortOptions.newest;
 
-const pipeline = [
-  {
-    $match: {
-      isDeleted: false,
-      ...(selectedCategory && { category: selectedCategory }),
-    },
-  },
-  {
+    const pipeline = [
+      {
+        $match: {
+          isDeleted: false,
+          ...(selectedCategory ? { category: selectedCategory } : {}),
+        },
+      },
+      {
+        $addFields: {
+          variantPrices: {
+            $map: {
+              input: "$variants",
+              as: "v",
+              in: {
+                $subtract: [
+                  "$$v.basePrice",
+                  {
+                    $multiply: [
+                      "$$v.basePrice",
+                      { $divide: ["$$v.productDiscountPerc", 100] },
+                    ],
+                  },
+                ],
+              },
+            },
+          },
+        },
+      },
+      {
+        $addFields: {
+          lowestPrice: { $min: "$variantPrices" },
+        },
+      },
+      {
+        $match: {
+          lowestPrice: { $gte: selectedMinPrice, $lte: selectedMaxPrice },
+        },
+      },
+      {
+        $facet: {
+          data: [
+            { $sort: selectedSort },
+            { $skip: (page - 1) * limit },
+            { $limit: limit },
+          ],
+          totalCount: [{ $count: "total" }],
+        },
+      },
+    ];
 
-    $addFields: {
-      variantPrices: {
-        $map: {
-          input: '$variants',
-          as: 'v',
-          in: {
-            $subtract: [
-              '$$v.basePrice',
-              { $multiply: ['$$v.basePrice', { $divide: ['$$v.productDiscountPerc', 100] }] }
-            ]
-          }
-        }
-      }
-    }
-  },
-  {
-    $addFields: {
-      lowestPrice: { $min: '$variantPrices' }
-    }
-  },
-  {
-    $match: {
-      lowestPrice: { $gte: selectedMinPrice, $lte: selectedMaxPrice }
-    }
-  },
-  {
-    $facet: {
-      data: [
-        { $sort: selectedSort },
-        { $skip: (page - 1) * limit },
-        { $limit: limit },
-      ],
-      totalCount: [{ $count: 'total' }],
-    },
-  },
-];
-
-
+    const wishlist = await Wishlist.find({
+      userId: req.session.user.id,
+    }).lean();
+    const wishlistIds = wishlist.map((item) => item.variantId.toString());
 
     const result = await Product.aggregate(pipeline);
     let products = result[0].data;
-    products = await Product.populate(products, { path: 'category' });
+    products = await Product.populate(products, { path: "category" });
 
     const totalProducts = result[0].totalCount[0]?.total || 0;
     const totalPages = Math.ceil(totalProducts / limit);
@@ -165,7 +184,7 @@ const pipeline = [
       isDeleted: false,
     });
 
-    return res.render('userPages/shop', {
+    return res.render("userPages/shop", {
       products,
       categories,
       minPrice,
@@ -176,9 +195,16 @@ const pipeline = [
       totalPages,
       limit,
       query: req.query,
+      wishlistIds,
+      buildQuery: (extra) => {
+        const params = { ...req.query, ...extra };
+        return Object.entries(params)
+          .map(([k, v]) => `${k}=${encodeURIComponent(v)}`)
+          .join("&");
+      },
     });
   } catch (err) {
-    handleError(res, 'showShop', err);
+    handleError(res, "showShop", err);
   }
 };
 

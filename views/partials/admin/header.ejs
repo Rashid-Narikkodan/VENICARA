@@ -23,7 +23,7 @@
     </a>
    </div>
     <div id="successBox" class="successBox w-100 d-flex justify-content-center">
-    <%if(messages.success.length>0){%>
+    <%if(messages&&messages.success.length>0){%>
     <div class="alert alert-success text-center w-md-25 w-75"><%=messages.success[0]%></div>
     <%}%>
   </div>

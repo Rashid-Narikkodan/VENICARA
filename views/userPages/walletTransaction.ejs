@@ -9,7 +9,7 @@
             <h1>Transaction History</h1>
           </div>
           <div class="col-md-6 d-flex justify-content-end gap-2">
-            <form action="/admin/customers" method="GET" class="d-flex gap-2 w-100">
+            <form action="/wallet/history" method="GET" class="d-flex gap-2 w-100">
               <input type="text" name="search" class="form-control w-50" placeholder="Search..." value="<%= search %>">
               <button class="btn btn-dark">Search</button>
             </form>
@@ -54,7 +54,71 @@
             </tbody>
           </table>
         </div>
-      </div>
+      
+ <!-- //pagination -->
+      <div class="d-flex justify-content-end">
+        <nav aria-label="Page navigation">
+          <ul class="pagination justify-content-end flex-wrap p-3">
+
+            <!-- Previous Button -->
+            <% if (page> 1) { %>
+              <li class="page-item">
+                <a class="page-link bg-dark" href="?page=<%= page - 1 %>&limit=<%= limit %>">
+                  <i class="fa-solid fa-caret-left text-white"></i>
+                </a>
+              </li>
+              <% } else { %>
+                <li class="page-item disabled">
+                  <span class="page-link bg-dark">
+                    <i class="fa-solid fa-caret-left text-white"></i>
+                  </span>
+                </li>
+                <% } %>
+
+                  <!-- Left Page (if exists) -->
+                  <% if (page - 1>= 1) { %>
+                    <li class="page-item">
+                      <a class="page-link" href="?page=<%= page - 1 %>&limit=<%= limit %>">
+                        <%= page - 1 %>
+                      </a>
+                    </li>
+                    <% } %>
+
+                      <!-- Current Page -->
+                      <li class="page-item active">
+                        <span class="page-link bg-white text-dark border-0">
+                          <%= page %>
+                        </span>
+                      </li>
+
+                      <!-- Right Page (if exists) -->
+                      <% if (page + 1 <=totalPages) { %>
+                        <li class="page-item">
+                          <a class="page-link" href="?page=<%= page + 1 %>&limit=<%= limit %>">
+                            <%= page + 1 %>
+                          </a>
+                        </li>
+                        <% } %>
+
+                          <!-- Next Button -->
+                    <% if (page < totalPages) { %>
+                      <li class="page-item">
+                        <a class="page-link bg-dark" href="?page=<%= page + 1 %>&limit=<%= limit %>">
+                          <i class="fa-solid fa-caret-right text-white"></i>
+                        </a>
+                      </li>
+                      <% } else { %>
+                        <li class="page-item disabled">
+                          <span class="page-link bg-dark">
+                            <i class="fa-solid fa-caret-right text-white"></i>
+                          </span>
+                        </li>
+                        <% } %>
+
+          </ul>
+        </nav>
+      </div>   
+      </div>    
 </main>
 </div>
 </body>

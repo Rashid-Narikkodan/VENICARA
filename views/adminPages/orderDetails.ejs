@@ -33,7 +33,7 @@ include('../partials/admin/sidebar.ejs')%>
             </div>
             <div class="col-md-6 p-3">
               <span class="fw-bold">Coupon : </span>
-              <span class="fw-semibold">No coupons</span>
+              <span class="fw-semibold"><%=order.couponApplied.code%></span>
             </div>
             <div class="col-md-6 p-3">
               <span class="fw-bold">Total Amount : </span>
@@ -157,8 +157,8 @@ include('../partials/admin/sidebar.ejs')%>
     const transitions = {
       pending: ["confirmed"],
       confirmed:["shipped", "Out of delivery","cancelled"],
-      shipped: ["Out of delivery", "delivered", "cancelled"],
-      out_of_delivery: ["delivered", "cancelled"],
+      shipped: ["Out of delivery", "delivered"],
+      out_of_delivery: ["delivered"],
       delivered: ['returned'],   // final
       cancelled: [],   // final
       returned: []     // final

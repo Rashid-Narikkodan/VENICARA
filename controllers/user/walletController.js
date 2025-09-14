@@ -112,16 +112,32 @@ const verifyPayment = async (req, res) => {
 
 const showTransactionHistory = async (req, res) => {
   try {
-    const transactions = await WalletTransaction.find({
+
+    let page=parseInt(req.query.page)||1;
+    let limit=parseInt(req.query.limit)||6;
+    let search=req.query.search||null
+
+    let filter={
       userId: req.session.user.id,
-    })
-      .sort({ createdAt: -1 })
-      .lean();
+    }
+
+    
+    const transactions = await WalletTransaction.find(filter)
+    .skip((page-1)*limit)
+    .limit(limit)
+    .sort({ createdAt: -1 })
+    .lean();
+    
+    const totalTransactions = await WalletTransaction.countDocuments(filter)
+    const totalPages = Math.ceil(totalTransactions/limit)
 
     res.render("userPages/walletTransaction", {
        transactions,
        search:null,
-       count:0
+       count:(page-1)*limit,
+       totalPages,
+       page,
+       limit,
       });
   } catch (error) {
     handleError(res, "showTransactionHistory", error);

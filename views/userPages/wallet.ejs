@@ -101,6 +101,14 @@ include('../partials/user/sidebarProfile.ejs') %>
 </div>
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script>
+
+      toastr.options = {
+    "closeButton": true,
+    "progressBar": true,
+    "positionClass": "toast-top-center",
+    "timeOut": "3000"
+  };
+
   const input = document.getElementById("amount");
   const form = document.getElementById("walletForm");
 
@@ -181,7 +189,7 @@ include('../partials/user/sidebarProfile.ejs') %>
       rzp.open();
     } catch (error) {
       console.error(error);
-      alert("Something went wrong. Try again later.");
+      toastr.error("Something went wrong. Try again later.");
     }
   });
 </script>

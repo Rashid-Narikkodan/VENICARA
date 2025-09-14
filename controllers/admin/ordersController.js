@@ -84,6 +84,7 @@ const showOrderDetails = async (req, res) => {
     const order = await Order.findById(req.params.id)
       .populate("userId")
       .populate("shippingAddress")
+      .populate("couponApplied")
       .lean();
 
     if (!order) {
@@ -107,8 +108,7 @@ const handleProductStatus = async (req, res) => {
     const { id } = req.params;
     const { index } = req.query;
     const { status } = req.body;
-    const userId=req.session.user.id
-
+    
     const order = await Order.findById(id);
     if (!order) {
       req.flash("error", "Order not found");
@@ -120,6 +120,8 @@ const handleProductStatus = async (req, res) => {
       req.flash("error", "Invalid product index");
       return res.redirect(`/admin/order/${id}`);
     }
+
+    const userId=order.userId;
 
     if (status === "returned") {
       product.isRequested = false;
@@ -143,6 +145,9 @@ const handleProductStatus = async (req, res) => {
     }
 
     product.status = status;
+
+    order.products.every((p)=>p.status == status&&p.status!=='returned'&&p.status!=='cancelled') ? order.status = status:order.status;
+
     await order.save();
 
 
@@ -157,14 +162,14 @@ const handleOrderStatus = async (req, res) => {
   try {
     const { id } = req.params;
     const { status } = req.body;
-    const userId = req.session.user.id;
-
+    
     const order = await Order.findById(id);
     if (!order) {
       req.flash("error", "Order not found");
       return res.redirect("/admin/orders");
     }
-
+    
+    const userId=order.userId;
     order.status = status;
 
     if (status === "returned"||status==='cancelled') {
@@ -176,7 +181,7 @@ const handleOrderStatus = async (req, res) => {
         );
     });
     }
-    
+    const totalToWallet = order.totalAmount; // or whatever refund logic you want
     
     if (status === "returned") {
       for(let prod of order.products){
@@ -185,7 +190,7 @@ const handleOrderStatus = async (req, res) => {
         }
       }
       if(["WALLET","RAZORPAY"].includes(order.payment.method)){
-        const wallet=await Wallet.findone({userId})
+        const wallet=await Wallet.findOne({userId})
         wallet.balance+=totalToWallet
         await wallet.save()
         await WalletTransaction.create({

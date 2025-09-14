@@ -75,7 +75,6 @@ const remove = async (req, res) => {
     const id = req.params.id;
     const wishlist = await Wishlist.findById(id);
     if (!wishlist) {
-      console.log('error-1')
       res.json({status:false,message: "wishlist item not found"});
       return
     }
@@ -190,7 +189,12 @@ const addToWishlist = async (req, res) => {
     });
 
     if (existingWishlistItem) {
-      return res.json({ status: false, message: "You already wished to buy this product" });
+      await Wishlist.findOneAndDelete({
+        userId,
+        productId,
+        variantId,
+      });
+      return res.json({status:true,message:"Product removed from wishlist"})
     }
 
     const newItem = new Wishlist({
