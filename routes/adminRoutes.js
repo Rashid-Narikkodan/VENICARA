@@ -66,6 +66,7 @@ router.route("/coupons").get(auth.requireLogin, couponsController.showCoupons);
 router
   .route("/coupons/add")
   .post(auth.requireLogin, couponsController.showCouponsAdd);
+router.patch("/coupons/:id", couponsController.deleteCoupon);
 
 router
   .route("/categories")

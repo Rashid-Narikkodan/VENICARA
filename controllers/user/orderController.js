@@ -177,15 +177,16 @@ const downloadInvoice = async (req, res) => {
   try {
     const { orderId } = req.params;
     const userId = req.session.user?.id;
-    console.log(orderId)
+
     if (!userId) {
       req.flash("error", "Login required");
       return res.redirect("/login");
     }
 
+    // Fetch order and populate required fields
     const order = await Order.findOne({ _id: orderId, userId })
-      .populate("userId", "name email")
-      .populate("shippingAddress")
+      .populate("userId", "name email")           // Get user details
+      .populate("shippingAddress")                // Get full shipping address
       .lean();
 
     if (!order) {
@@ -193,12 +194,51 @@ const downloadInvoice = async (req, res) => {
       return res.redirect("/orders");
     }
 
-    generateInvoice(order, res); // 🔥 helper used here
+    const discountAmount = order.products.reduce((acc, p) => acc + (p.discountAmount || 0), 0);
 
-  }catch(error){
-    handleError(res,'downloadInvoice',error)
+    // Ensure all necessary fields exist for the PDF
+    const populatedOrder = {
+      ...order,
+      orderId:order.orderId || order._id,
+      userId: {
+        name: order.userId?.name || "N/A",
+        email: order.userId?.email || "N/A"
+      },
+      shippingAddress: {
+        fullName: order.shippingAddress?.fullName || "N/A",
+        street: order.shippingAddress?.street || "N/A",
+        city: order.shippingAddress?.city || "N/A",
+        state: order.shippingAddress?.state || "N/A",
+        pin: order.shippingAddress?.pin || "N/A",
+        mobile: order.shippingAddress?.mobile || "N/A"
+      },
+      products: order.products?.map(p => ({
+        productName: p.productName || "N/A",
+        volume: p.volume || "-",
+        quantity: p.quantity || 0,
+        discountPrice: p.finalDiscount || 0,
+        subtotal: p.subtotal || 0,
+        createdAt: order.createdAt || new Date(),
+        finalDiscount: p.finalDiscount || 0,
+        discountAmount: p.discountAmount || 0.
+        
+      })),
+      totalAmount: order.totalAmount || 0,
+      payment: {
+        method: order.payment?.method || "N/A"
+      },
+      status: order.status || "N/A"
+    };
+
+    // Generate the invoice PDF
+    generateInvoice(populatedOrder, res);
+
+  } catch (error) {
+    handleError(res, "downloadInvoice", error);
   }
-}
+};
+
+module.exports = downloadInvoice;
 
 const orderDetails=async(req,res)=>{
   try{

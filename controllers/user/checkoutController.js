@@ -8,8 +8,8 @@ const generateOrderId = require("../../helpers/orderID");
 const handleError = require("../../helpers/handleError");
 const razorpay = require("../../config/payment");
 const User = require("../../models/User");
-const Wallet=require('../../models/Wallet')
-const WalletTransaction=require('../../models/WalletTransaction')
+const Wallet = require("../../models/Wallet");
+const WalletTransaction = require("../../models/WalletTransaction");
 const crypto = require("crypto");
 
 const showAddress = async (req, res) => {
@@ -191,6 +191,7 @@ const showPaymentMethods = async (req, res) => {
     });
 
     const coupons = await Coupon.find({
+      minPrice: { $lte: total },
       expireAt: { $gte: new Date() },
       usedBy: { $nin: [req.session.user.id] },
       isDeleted: false,
@@ -208,7 +209,6 @@ const showPaymentMethods = async (req, res) => {
     handleError(res, "showPaymentMethods", error);
   }
 };
-
 
 const applyCoupon = async (req, res) => {
   try {
@@ -326,9 +326,17 @@ const handlePlaceOrder = async (req, res) => {
         totalDiscountPerc = coupon.discount;
         couponDiscount = (coupon.discount / 100) * totalAmount || 0;
         totalAmount -= couponDiscount;
+
+        await Coupon.updateOne(
+          { _id: coupon._id, usedBy: { $ne: user.id } },
+          { $push: { usedBy: user.id }, $inc: { used: 1 } }
+        );
       }
     }
-    discountAmount += products.reduce((ac, cu) => ac + (cu.basePrice - cu.finalDiscount) * cu.quantity, 0);
+    discountAmount += products.reduce(
+      (ac, cu) => ac + (cu.basePrice - cu.finalDiscount) * cu.quantity,
+      0
+    );
     totalAmount = parseFloat(totalAmount.toFixed(2));
 
     // Payment placeholder
@@ -349,26 +357,26 @@ const handlePlaceOrder = async (req, res) => {
       const razorpayOrder = await razorpay.orders.create(options);
       razorpayOrderId = razorpayOrder.id;
     } else if (paymentMethod === "WALLET") {
-      const wallet= await Wallet.findOne({userId:req.session.user.id})
-      if(!wallet||wallet.balance<totalAmount){
-      await WalletTransaction.create({
-      userId: req.session.user.id,
-      type: "debit",
-      amount: totalAmount * 100, // store in paise
-      status: "failed",
-      lastBalance:wallet.balance
-    });
-        return res.json({status:false,message:'Insufficient balance'})
+      const wallet = await Wallet.findOne({ userId: req.session.user.id });
+      if (!wallet || wallet.balance < totalAmount) {
+        await WalletTransaction.create({
+          userId: req.session.user.id,
+          type: "debit",
+          amount: totalAmount * 100, // store in paise
+          status: "failed",
+          lastBalance: wallet.balance,
+        });
+        return res.json({ status: false, message: "Insufficient balance" });
       }
-      let lastBalance=wallet.balance -= totalAmount;
+      let lastBalance = (wallet.balance -= totalAmount);
       await wallet.save();
       await WalletTransaction.create({
-      userId: req.session.user.id,
-      type: "debit",
-      amount: totalAmount * 100, // store in paise
-      status: "success",
-      lastBalance
-    });
+        userId: req.session.user.id,
+        type: "debit",
+        amount: totalAmount * 100, // store in paise
+        status: "success",
+        lastBalance,
+      });
       payment.status = "paid";
       payment.method = "WALLET";
       payment.paidAt = new Date();
@@ -389,7 +397,7 @@ const handlePlaceOrder = async (req, res) => {
       totalDiscountPerc,
       discountAmount,
       couponDiscount,
-      status: "pending", // important
+      status: "pending",
       razorpayOrderId,
     });
 
@@ -402,7 +410,8 @@ const handlePlaceOrder = async (req, res) => {
       );
     }
 
-    if(paymentMethod!=='RAZORPAY') await Cart.deleteMany({userId:req.session.user.id})
+    if (paymentMethod !== "RAZORPAY")
+      await Cart.deleteMany({ userId: req.session.user.id });
 
     return res.json({
       status: true,
@@ -475,7 +484,6 @@ const handleRazorpaySuccess = async (req, res) => {
     res.status(500).json({ status: false, message: "Something went wrong" });
   }
 };
-
 
 const showPlaceOrder = async (req, res) => {
   try {

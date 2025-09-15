@@ -29,6 +29,7 @@ include('../partials/admin/sidebar.ejs')%>
             <th class="text-center p-3">No.</th>
             <th class="text-center p-3">Name</th>
             <th class="text-center p-3">Coupon</th>
+            <th class="text-center p-3">Minimum</th>
             <th class="text-center p-3">Discount</th>
             <th class="text-center p-3">Active from</th>
             <th class="text-center p-3">Active to</th>
@@ -43,6 +44,7 @@ include('../partials/admin/sidebar.ejs')%>
             <td class="text-center"><%= count %></td>
             <td class="text-center"><%= coupon.name%></td>
             <td class="text-center"><%= coupon.code %></td>
+            <td class="text-center"><%= coupon.minPrice %></td>
             <td class="text-center"><%= coupon.discount%>%</td>
             <td class="text-center">
               <%= coupon.createdAt.toLocaleDateString()%>
@@ -53,11 +55,6 @@ include('../partials/admin/sidebar.ejs')%>
             <td class="text-center"><%=coupon.limit%></td>
             <td class="text-center"><%=coupon.used%></td>
             <td class="text-center">
-              <a href="/admin/coupons/edit/<%=coupon._id%>">
-                <button class="btn btn-sm btn-outline-primary">
-                  <i class="fa fa-pen"></i>
-                </button>
-              </a>
               <form
                 action="/admin/coupons/<%=coupon._id%>?_method=PATCH"
                 method="POST"

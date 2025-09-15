@@ -86,7 +86,24 @@ const date = new Date(
   }
 }
 
+const deleteCoupon=async(req,res)=>{
+  try {
+    const {id}=req.params
+    if(!id){
+      req.flash('error','Invalid request')
+      return res.redirect('/admin/coupons')
+    }
+    
+    await Coupon.findByIdAndUpdate(id,{isDeleted:true})
+    req.flash('success','Coupon deleted successfully')
+    return res.redirect('/admin/coupons')
+  } catch (error) {
+    handleError(res,'deleteCoupon',error)
+  } 
+}
+
 module.exports = {
   showCoupons,
   showCouponsAdd,
+  deleteCoupon,
 };

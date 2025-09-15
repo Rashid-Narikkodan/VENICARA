@@ -7,7 +7,9 @@ const WalletTransaction = require('../../models/WalletTransaction');
 const showReferEarn = async (req, res) => {
   try {
     const user=await User.findById(req.session.user.id)
-    const rewards=await Referrals.find({referrerUserId:req.session.user.id}).limit(6)
+    const rewards=await Referrals.find({referrerUserId:req.session.user.id})
+    .sort({createdAt:-1})
+    .limit(6)
     res.render('userPages/refer',{referralCode:user.referralCode,rewards});
   } catch (err) {
     handleError(res, "showReferEarn", err);

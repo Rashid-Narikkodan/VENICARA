@@ -114,7 +114,7 @@ const showTransactionHistory = async (req, res) => {
   try {
 
     let page=parseInt(req.query.page)||1;
-    let limit=parseInt(req.query.limit)||6;
+    let limit=parseInt(req.query.limit)||12;
     let search=req.query.search||null
 
     let filter={

@@ -75,7 +75,8 @@ const orderSchema = new mongoose.Schema(
     couponDiscount:{type:Number,default:0},
     orderId:{type:String,required:true},
     isRequested:{type:Boolean,default:false},
-    reqReason:String
+    reqReason:String,
+    returnTimeLimit:{type:Date}
   },
   { timestamps: true } // handles createdAt & updatedAt automatically
 );

@@ -33,7 +33,7 @@ include('../partials/admin/sidebar.ejs')%>
             </div>
             <div class="col-md-6 p-3">
               <span class="fw-bold">Coupon : </span>
-              <span class="fw-semibold"><%=order.couponApplied.code%></span>
+              <span class="fw-semibold"><%=order.couponApplied?.code || 'Not Applied'%></span>
             </div>
             <div class="col-md-6 p-3">
               <span class="fw-bold">Total Amount : </span>

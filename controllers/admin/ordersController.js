@@ -210,6 +210,10 @@ const handleOrderStatus = async (req, res) => {
       }
     });
 
+    if(status==='delivered'){
+      order.returnTimeLimit=new Date(Date.now() + 2*24*60*60*5000) // 2 days from now
+    }
+
     await order.save();
 
     return res.redirect(`/admin/order/${id}`);

@@ -1,141 +1,111 @@
 const PDFDocument = require("pdfkit");
+const fs = require("fs");
 
-const generateInvoice = (order, res) => {
-  // Create a new PDF document with A4 size and 50px margins
+function generateInvoicePDF(order, res) {
   const doc = new PDFDocument({ size: "A4", margin: 50 });
 
-  // Set response headers for PDF download
-  res.setHeader("Content-Type", "application/pdf");
-  res.setHeader(
-    "Content-Disposition",
-    `attachment; filename=invoice-${order.orderId}.pdf`
-  );
+  // Pipe PDF to response or save locally
+  if (res) {
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename=invoice-${order.orderId}.pdf`
+    );
+    doc.pipe(res);
+  } else {
+    doc.pipe(fs.createWriteStream(`invoice-${order.orderId}.pdf`));
+  }
 
-  // Pipe the PDF content to the response
-  doc.pipe(res);
-
-  // --- Header Section ---
+  // ---- Header ----
   doc
-    .fillColor("rgba(246, 240, 58, 0.87)") // Dodger Blue for header
+    .fillColor("#2E7D32")
     .fontSize(24)
-    .font("Helvetica-Bold")
-    .text("VENICARA Pvt Ltd", { align: "center" });
+    .text("VENICARA", { align: "center" })
+    .fontSize(16)
+    .text("INVOICE", { align: "center" })
+    .moveDown();
 
-  doc
-    .fillColor("#555") // Dark Gray for details
-    .fontSize(12)
-    .font("Helvetica")
-    .text("123 Market Street, Kochi, Kerala", { align: "center" })
-    .text("GSTIN: 32XXXXXX1234Z5", { align: "center" });
+  // ---- Order & Customer Info Table ----
+  const infoTableTop = 100;
+  const labelX = 50;
+  const valueX = 200;
+  const labelX2 = 350;
+  const valueX2 = 450;
+  const rowHeight = 15;
 
-  doc.moveDown(2);
+  const infoData = [
+    ["Date", order.createdAt?.toISOString().split("T")[0] || "-", "TO", order.shippingAddress?.fullName || "-"],
+    ["Order ID", order.orderId, "Street", order.shippingAddress?.street || "-"],
+    ["Customer", order.userId?.name || "-", "City", order.shippingAddress?.city || "-"],
+    ["Phone", order.shippingAddress?.mobile || "-", "State", order.shippingAddress?.state || "-"],
+    ["Email", order.userId?.email || "-", "PIN", order.shippingAddress?.pin || "-"]
+  ];
 
-  // --- Invoice Title ---
-  doc
-    .fillColor("#000") // Black for title
-    .fontSize(20)
-    .font("Helvetica-Bold")
-    .text("INVOICE", { align: "center" });
-
-  doc.moveDown(1);
-
-  // --- Order Details ---
-  doc
-    .fontSize(12)
-    .font("Helvetica")
-    .text(`Invoice #: ${order.orderId}`, 50, doc.y, { width: 300 })
-    .text(`Date: ${new Date(order.createdAt).toLocaleDateString("en-IN")}`, 350, doc.y, { width: 200, align: "right" });
-
-  doc.moveDown(1);
-
-  // --- Customer Information ---
-  doc
-    .fillColor("#000")
-    .font("Helvetica-Bold")
-    .text("Bill To:", 50, doc.y);
-
-  doc
-    .font("Helvetica")
-    .fillColor("#333")
-    .text(`${order.userId.name} (${order.userId.email})`, 50, doc.y + 20)
-    .text(
-      `${order.shippingAddress.fullName || ""}, ${order.shippingAddress.street || ""}, ${order.shippingAddress.city || ""}, ${order.shippingAddress.state || ""} - ${order.shippingAddress.pin || ""}`,
-      50,
-      doc.y + 35
-    )
-    .text(`Phone: ${order.shippingAddress.mobile || "-"}`, 50, doc.y + 50);
-
-  doc.moveDown(2);
-
-  // --- Products Table ---
-  const tableTop = doc.y;
-  const itemX = 50;
-  const variantX = 250;
-  const qtyX = 400;
-  const priceX = 450;
-  const subtotalX = 520;
-
-  // Table Header with Background
-  doc
-    .fillColor("#b4b4b4ff")
-    .rect(itemX, tableTop, 530, 25)
-    .fill("#000000ff") // Dodger Blue background
-    .fillColor("#c8c8c8ff");
-
-  doc
-    .font("Helvetica-Bold")
-    .text("Item", itemX, tableTop + 5, { width: 200 })
-    .text("Variant", variantX, tableTop + 5, { width: 150 })
-    .text("Qty", qtyX, tableTop + 5, { width: 50 })
-    .text("Price", priceX, tableTop + 5, { width: 70 })
-    .text("Subtotal", subtotalX, tableTop + 5, { width: 80 });
-
-  doc.moveDown(1.5);
-  doc.fillColor("#000");
-
-  // Table Rows
-  order.products.forEach((p, i) => {
-    const y = doc.y;
-    doc
-      .text(p.productName, itemX, y, { width: 200 })
-      .text(p.volume || "-", variantX, y, { width: 150 })
-      .text(p.quantity.toString(), qtyX, y, { width: 50 })
-      .text(`${p.discountPrice.toFixed(2)}`, priceX, y, { width: 70 })
-      .text(`${p.subtotal.toFixed(2)}`, subtotalX, y, { width: 80 });
-    doc.moveDown();
+  doc.font("Helvetica-Bold").fillColor("#2E7D32").fontSize(10);
+  infoData.forEach((row, index) => {
+    const y = infoTableTop + index * rowHeight;
+    doc.text(row[0], labelX, y);
+    doc.text(row[1], valueX, y);
+    doc.text(row[2], labelX2, y);
+    doc.text(row[3], valueX2, y);
   });
 
-  // Draw Table Border
-  const tableBottom = doc.y;
-  doc
-    .rect(itemX, tableTop, 530, tableBottom - tableTop + 5)
-    .stroke("#999"); // Light Gray border
+  doc.moveDown(4);
 
-  doc.moveDown(1);
+  // ---- Products Table ----
+  const tableTop = infoTableTop + infoData.length * rowHeight + 30;
+  const descriptionX = 100;
+  const quantityX = 50;
+  const unitPriceX = 350;
+  const lineTotalX = 450;
 
-  // --- Totals Section ---
-  doc
-    .font("Helvetica-Bold")
-    .fillColor("#000")
-    .text(`Total Amount: ${order.totalAmount.toFixed(2)}`, 400, doc.y, { width: 180, align: "right" });
+  // Table Header
+  doc.rect(50, tableTop - 10, 500, 20).fillAndStroke("#C8E6C9", "#2E7D32");
+  doc.fillColor("#555").font("Helvetica-Bold").text("QTY", quantityX, tableTop - 5)
+    .text("DESCRIPTION", descriptionX, tableTop - 5)
+    .text("UNIT PRICE", unitPriceX, tableTop - 5)
+    .text("LINE TOTAL", lineTotalX, tableTop - 5);
 
-  doc
-    .font("Helvetica")
-    .fillColor("#333")
-    .text(`Payment Method: ${order.payment.method}`, 400, doc.y + 20, { width: 180, align: "right" });
-  doc
-    .font("Helvetica")
-    .fillColor("#333")
-    .text(`Status: ${order.status}`, 400, doc.y + 20, { width: 180, align: "right" });
+  doc.moveTo(50, tableTop + 10).lineTo(550, tableTop + 10).stroke();
 
-  // --- Footer ---
-  doc
-    .fillColor("#777") // Medium Gray for footer
-    .fontSize(12)
-    .text("Thank you for shopping with us!", 50, 750, { align: "center", width: 500 });
+  // Table Rows
+  let position = tableTop + 20;
+  const items = order.products || [];
+  items.forEach((item, index) => {
+    if (position > 700) {
+      doc.addPage();
+      position = 50;
+    }
+    if (index % 2 === 0) doc.rect(50, position - 5, 500, 15).fill("#f9f9f9");
 
-  // Finalize the PDF
+    doc.fillColor("#000").font("Helvetica")
+      .text(item.quantity || 0, quantityX, position)
+      .text(item.productName || "-", descriptionX, position)
+      .text((item.finalDiscount || 0).toFixed(2), unitPriceX, position)
+      .text((item.subtotal || 0).toFixed(2), lineTotalX, position);
+
+    position += 20;
+  });
+
+  // ---- Summary Table ----
+  const summaryTop = position + 20;
+  const summaryData = [
+    ["Subtotal", (order.totalAmount + (order.discountAmount || 0)).toFixed(2)],
+    ["Discount", (order.discountAmount || 0).toFixed(2)],
+    ["Total", (order.totalAmount || 0).toFixed(2)]
+  ];
+
+  summaryData.forEach((row, index) => {
+    const y = summaryTop + index * rowHeight;
+    doc.font("Helvetica-Bold").text(row[0], 400, y);
+    doc.font("Helvetica").text(row[1], lineTotalX, y, { align: "right" });
+  });
+
+  // ---- Footer ----
+  doc.font("Helvetica").fontSize(10)
+    .text("Thank you for your business!", 50, 750, { align: "center", width: 500 });
+
   doc.end();
-};
+}
 
-module.exports = generateInvoice;
+module.exports = generateInvoicePDF;
