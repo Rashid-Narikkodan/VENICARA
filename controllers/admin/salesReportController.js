@@ -49,7 +49,7 @@ const showSalesReport = async (req, res) => {
     };
     const refunded = {
       createdAt: { $gte: startDate, $lte: endDate },
-      payment: { status: "refunded" },
+      "payment.status": "refunded" ,
     };
     const productCancelled = {
       createdAt: { $gte: startDate, $lte: endDate },
@@ -73,12 +73,11 @@ const showSalesReport = async (req, res) => {
     }, 0);
 
     const totalDiscountPerProduct = orders.reduce((sum, order) => {
-      const productDiscount = order.products.reduce((discSum, product) =>discSum +(product.basePrice * product.quantity -
-        product.finalDiscount * product.quantity),0);
+      const productDiscount = order.products.reduce((discSum, product) =>discSum+(product.basePrice-product.finalAmount)*product.quantity,0);
         return sum + productDiscount;
       }, 0);
 
-    const totalDiscountPerOrder = orders.reduce((sum, order) => sum + order.discountAmount,0);
+    const totalDiscountPerOrder = orders.reduce((sum, order) => sum + (order.discountAmount+order.couponDiscount),0);
     const totalRefund = await Order.find(refunded).then((refundOrders)=>refundOrders.reduce((sum, order) => sum + order.totalAmount, 0));
     const AverageOrderValue = totalOrders ? totalRevenue / totalOrders : 0;
     const countUser = await Order.distinct("userId",delivered);
@@ -118,7 +117,7 @@ const showSalesReport = async (req, res) => {
       totalProductCancelled,
       totalProductReturned
     };
-
+    console.log(data)
     req.session.salesReport = { data, filter, startDate, endDate, orders };
 
     return res.render("adminPages/salesReport", {

@@ -147,10 +147,11 @@ const handleProductStatus = async (req, res) => {
     product.status = status;
 
     order.products.every((p)=>p.status == status&&p.status!=='returned'&&p.status!=='cancelled') ? order.status = status:order.status;
-
+    if(status=='returned') order.products.every((p)=>p.status == status) ? order.status = status:order.status;
     await order.save();
 
 
+    req.flash("success", "Product status updated successfully");
     return res.redirect(`/admin/order/${id}`);
   } catch (error) {
     handleError(res, "handleProductStatus", error);

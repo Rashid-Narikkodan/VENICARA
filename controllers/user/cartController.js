@@ -19,7 +19,7 @@ const showCart = async (req, res) => {
       ) || {
         _id: null,
         name: "Default Variant",
-        finalDiscount: 0,
+        finalAmount: 0,
         price: doc.productId?.price || 0
       };
       return {
@@ -33,7 +33,7 @@ const showCart = async (req, res) => {
 
     let total=0;
     cartItems.forEach((item) => {
-       let lineTotal = (item.variant.finalDiscount)* item.quantity;
+       let lineTotal = (item.variant.finalAmount)* item.quantity;
        item.lineTotal=lineTotal
         total += lineTotal;
     })
@@ -43,7 +43,7 @@ for (const doc of carts) {
     v._id.toString() === doc.variantId?.toString()
   );
   if (variant) {
-    doc.lineTotal = variant.finalDiscount * doc.quantity;
+    doc.lineTotal = variant.finalAmount * doc.quantity;
     await doc.save(); // save one document at a time
   }
 }
@@ -179,7 +179,7 @@ const increaseQuantity = async (req, res) => {
     await cartItem.save();
 
     // calculate line total
-    const price = variant.finalDiscount || variant.basePrice; // safer: fallback to price
+    const price = variant.finalAmount || variant.basePrice; // safer: fallback to price
     const lineTotal = price * cartItem.quantity;
 
     // calculate cart total
@@ -188,7 +188,7 @@ const increaseQuantity = async (req, res) => {
       const itemVariant = item.productId.variants.find(
         (v) => v._id.toString() === item.variantId.toString()
       );
-      const itemPrice = itemVariant?.finalDiscount || itemVariant?.price || 0;
+      const itemPrice = itemVariant?.finalAmount || itemVariant?.price || 0;
       return sum + itemPrice * item.quantity;
     }, 0);
 
@@ -217,12 +217,12 @@ const decreaseQuantity = async (req, res) => {
     }
 
     const variant = cartItem.productId.variants.find(v => v._id.toString() === cartItem.variantId.toString());
-    const lineTotal = (variant?.finalDiscount) * cartItem.quantity;
+    const lineTotal = (variant?.finalAmount) * cartItem.quantity;
 
     const cartItems = await Cart.find({ userId: cartItem.userId }).populate("productId");
     const total = cartItems.reduce((sum, item) => {
       const itemVariant = item.productId.variants.find(v => v._id.toString() === item.variantId.toString());
-      return sum + ((itemVariant?.finalDiscount || 0)) * item.quantity;
+      return sum + ((itemVariant?.finalAmount || 0)) * item.quantity;
     }, 0);
 
     res.json({ success: true, newQuantity: cartItem.quantity, lineTotal, total, decreased: cartItem.quantity > 0 });

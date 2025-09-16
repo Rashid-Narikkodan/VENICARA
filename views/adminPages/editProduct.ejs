@@ -80,7 +80,7 @@
                         </div>
                         <div class="col-md-3">
                           <label class="form-label">Discount Price (₹)</label>
-                          <input name="discountPrice" type="text" class="form-control" value="<%=variant.productDiscount%>">
+                          <input name="discount" type="text" class="form-control" value="<%=variant.discount%>">
                         </div>
                         <div class="col-md-3">
                           <label class="form-label">Stock</label>
@@ -157,14 +157,12 @@
         if (!tags) errors.push('Tags are required.');
         for (let i = 0; i < document.getElementsByName('volume').length; i++) {
           const bp = document.getElementsByName('basePrice')[i].value;
-          const dp = document.getElementsByName('discountPrice')[i].value;
+          const disc = document.getElementsByName('discount')[i].value;
           const st = document.getElementsByName('stock')[i].value.trim();
           const vol = document.getElementsByName('volume')[i].value.trim();
 
           if (!bp || bp <= 0) errors.push(`Base price must be greater than 0 in variant ${i + 1}.`);
-          if (dp && dp < 0) errors.push(`Discount price cannot be negative in variant ${i + 1}.`);
-          console.log('discountPrice :-',dp," basePrice :- ",bp," is discount > basePrice",dp>bp)
-          if (dp && Number(dp) > Number(bp)) errors.push(`Discount price must be less than base price in variant ${i + 1}.`);
+          if (disc && Number(disc) < 0||Number(disc)>100) errors.push(`Discount cannot be negative or greater than 100 in variant ${i + 1}.`);
           if (!st || st < 0) errors.push(`Stock must be 0 or more in variant ${i + 1}.`);
           if (!vol) errors.push(`Volume is required in variant ${i + 1}.`);
         }

@@ -47,7 +47,7 @@
                     </td>
                     <td class="text-center">
                       <button type="button" onclick="toggleUserStatus('<%=user._id%>')"
-                        class="badge <%=  user.isBlocked?'bg-danger':'bg-success'%>">
+                        class="alert px-3 py-0 <%=  user.isBlocked?'alert-danger text-danger':'alert-success text-success'%>">
                         <%= user.isBlocked? 'Blocked' : 'Active' %>
                       </button>
                     </td>

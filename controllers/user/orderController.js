@@ -55,6 +55,7 @@ const cancelProduct = async (req, res) => {
     }
     if (order.products.every(p => p.status === "returned")) {
       order.status = "returned";
+      order.payment.status = "refunded";
     }
 
     if (["WALLET", "RAZORPAY"].includes(order.payment.method)) {
@@ -130,6 +131,8 @@ const cancelOrder = async (req, res) => {
         status: "success",
         lastBalance: wallet.balance,
       });
+      order.payment.status='refunded'
+      await order.save()
     }
     }
     // restore stock for all products

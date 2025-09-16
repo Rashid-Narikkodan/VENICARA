@@ -64,19 +64,19 @@ function addVariant(container) {
       <div class="row m-0 g-3">
         <div class="col-md-3">
           <label class="form-label mt-0">Base Price (₹)</label>
-          <input name="basePrice" type="number" class="form-control" placeholder="300">
+          <input name="basePrice" type="number" class="form-control" placeholder=" eg :- 5000">
         </div>
         <div class="col-md-3">
           <label class="form-label mt-0">Discount Price (₹)</label>
-          <input name="discountPrice" type="number" class="form-control" placeholder="250">
+          <input name="discount" type="number" class="form-control" placeholder= " eg :- 10(percentage)">
         </div>
         <div class="col-md-3">
           <label class="form-label mt-0">Stock</label>
-          <input name="stock" type="number" class="form-control" placeholder="50">
+          <input name="stock" type="number" class="form-control" placeholder=" eg :- 50">
         </div>
         <div class="col-md-2">
           <label class="form-label">Volume (ml)</label>
-          <input name="volume" type="text" class="form-control" placeholder="50, 100">
+          <input name="volume" type="text" class="form-control" placeholder=" eg :-  100">
         </div>
         <div class="col-md-1 d-flex align-items-end">
           <button type="button" class="btn btn-danger delete-variant-btn">Delete</button>

@@ -110,24 +110,24 @@
               </span>
             </div>
             <div>
-              <span id="variantPrice" class="fw-bold fs-4">RS. <%= Math.min(...product.variants.map(v=>v.finalDiscount))%></span>
+              <span id="variantPrice" class="fw-bold fs-4">RS. <%= Math.min(...product.variants.map(v=>v.finalAmount))%></span>
               <span id="variantBasePrice" class="ms-2 me-2 fw-semibold fs-5 text-muted text-decoration-line-through">₹
                 <%=Math.min(...product.variants.map(v=>v.basePrice))%>
               </span>
               <span id="variantPerc" class="rounded text-success fw-bold p-1">
             <%= product.variants.reduce((min, v) => {
-           return  parseInt(v.volume) < parseInt(min.volume) ? v : min}, product.variants[0]).finalDiscountPerc %>% off
+           return  parseInt(v.volume) < parseInt(min.volume) ? v : min}, product.variants[0]).finalDiscount %>% off
           </span>
             </div>
             <div>
               <span id="variantStock" class="text-danger fs-4 fw-bold">
                 <%=!product.isAvailable?'Product not Available': product.variants.reduce((min, v)=>
-                 v.finalDiscount < min.finalDiscount ? v : min).stock <= 0 ? 'Out of Stock':''%>
+                 v.finalAmount < min.finalAmount ? v : min).stock <= 0 ? 'Out of Stock':''%>
               </span>
             </div>
           </div>
 
-          <%const lowestVariant = product.variants.reduce((min, v) => v.finalDiscount < min.finalDiscount ? v : min, product.variants[0])%>
+          <%const lowestVariant = product.variants.reduce((min, v) => v.finalAmount < min.finalAmount ? v : min, product.variants[0])%>
 
           <div class="d-flex flex-column mt-3 gap-2 align-items-start">
             <form action="/wishlist/add/<%=product._id%>" method="POST">
@@ -147,10 +147,10 @@
 
           <!-- Variant buttons -->
           <div class="mt-4">
-            <% product.variants.forEach((variant, index)=> { %>
+            <% product.variants.sort((a,b)=>a.volume-b.volume).forEach((variant, index)=> { %>
               <button class="btn btn-outline-dark rounded-5 variant-btn <%= index === 0 ? 'active' : '' %>"
-                data-price="<%= variant.finalDiscount%>" data-volume="<%= variant.volume %>"
-                data-basePrice="<%= variant.basePrice%>" data-discountPerc="<%= variant.finalDiscountPerc %>"
+                data-price="<%= variant.finalAmount%>" data-volume="<%= variant.volume %>"
+                data-basePrice="<%= variant.basePrice%>" data-discount="<%= variant.finalDiscount %>"
                 data-stock="<%=variant.stock%>" data-isAvailable="<%=product.isAvailable%>"
                 data-id="<%=variant._id%>">
                 <%= variant.volume %>ML
@@ -206,14 +206,14 @@
                       <p class="mb-0 justify-content-between d-flex align-items-center">
                         <span>
                           <span class="text-success fw-bold">₹<%=Math.min(...product.variants.map(v=>
-                              v.finalDiscount))%></span> <!-- 80% off -->
+                              v.finalAmount))%></span> <!-- 80% off -->
                           <span class="text-muted text-decoration-line-through">₹
                             <%=Math.min(...product.variants.map(v=>
                               v.basePrice))%>
                           </span>
                           <span class="text-success fw-bold">
             <%= product.variants.reduce((min, v) => {
-           return  parseInt(v.volume) < parseInt(min.volume) ? v : min}, product.variants[0]).finalDiscountPerc %>% off
+           return  parseInt(v.volume) < parseInt(min.volume) ? v : min}, product.variants[0]).finalDiscount %>% off
                           </span>
                         </span>
                       </p>
@@ -250,7 +250,7 @@
         btn.classList.add("active");
         const price = btn.getAttribute("data-price");
         const basePrice = btn.getAttribute("data-basePrice");
-        const percentage = btn.getAttribute("data-discountPerc");
+        const percentage = btn.getAttribute("data-discount");
         const stock = btn.getAttribute('data-stock')
         const isAvailable = btn.getAttribute('data-isAvailable') === 'true'
         variantPrice.textContent = `RS. ${price}`;

@@ -101,7 +101,7 @@
               item.variant.volume %>ml)</span
             >
             <span
-              >Rs.<%= ((item.variant.finalDiscount) *
+              >Rs.<%= ((item.variant.finalAmount) *
               item.quantity).toLocaleString() %></span
             >
           </div>
@@ -186,7 +186,6 @@
     const paymentMethod = document.querySelector(
       'input[name="paymentMethod"]:checked'
     )?.value;
-    const code = document.getElementById("coupon")?.value || null;
 
     if (!paymentMethod) throw new Error("Please select a payment method.");
 
@@ -194,7 +193,7 @@
     const response = await fetch("/checkout/api/placeOrder", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ paymentMethod, code }),
+      body: JSON.stringify({ paymentMethod}),
     });
 
     if (!response.ok) {

@@ -11,10 +11,9 @@ const productSchema = new mongoose.Schema({
       volume: { type: String, required: true },
       stock: { type: Number, default: 0 },
       basePrice: { type: Number, required: true },
-      productDiscount:{ type: Number,  },
-      productDiscountPerc:{type:Number,},
+      discount: { type: Number, default: 0 },
       finalDiscount:{type:Number},
-      finalDiscountPerc:{type:Number}
+      finalAmount:{type:Number}
     }
   ],
   isAvailable: { type: Boolean, default: true },

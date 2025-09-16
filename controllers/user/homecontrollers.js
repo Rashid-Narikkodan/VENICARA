@@ -76,7 +76,7 @@ const showShop = async (req, res) => {
       const totalPages = Math.ceil(totalProducts / limit);
 
       const wishlist = await Wishlist.find({
-        userId: req.session.user.id,
+        userId: req.session.user?.id,
       }).lean();
       const wishlistIds = wishlist.map((item) => item.variantId.toString());
 
@@ -136,7 +136,7 @@ const showShop = async (req, res) => {
                   {
                     $multiply: [
                       "$$v.basePrice",
-                      { $divide: ["$$v.productDiscountPerc", 100] },
+                      { $divide: ["$$v.finalDiscount", 100] },
                     ],
                   },
                 ],

@@ -9,7 +9,7 @@ const finalPercentage = require('../../helpers/finalPercentage')
 const showProducts = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 5;
+    const limit = parseInt(req.query.limit) || 6;
     const search = req.query.search || "";
 
     let filter = { isDeleted: false };
@@ -113,7 +113,7 @@ const addProduct = async (req, res) => {
       categoryId,
       tags,
       basePrice,
-      discountPrice,
+      discount,
       stock,
       volume,
     } = req.body;
@@ -125,19 +125,18 @@ const addProduct = async (req, res) => {
     const variants = Array.isArray(volume)
       ? volume.map((vol, i) => {
           const bp = Number(basePrice?.[i] || 0);
-          const dp = Number(discountPrice?.[i] || 0);
-
+          const disc = Number(discount?.[i] || 0);
           if (!vol) {
             req.flash("error", `Variant ${i + 1}: Volume is required`);
             return res.redirect("/admin/products/add");
           }
-          let percentage = getDiscountPercent(bp, dp)
           return {
             volume: vol,
             stock: Number(stock?.[i] || 0),
             basePrice: bp,
-            productDiscountPerc: bp > 0 ? percentage : 0,
-            finalDiscountPerc:percentage<category.discount?category.discount:percentage
+            discount: disc,
+            finalDiscount:disc<category.discount?category.discount:disc,
+            finalAmount: parseInt(bp - (bp * (disc < category.discount ? category.discount : disc)) / 100)
           };
         })
       : [
@@ -145,8 +144,9 @@ const addProduct = async (req, res) => {
             volume,
             stock: Number(stock || 0),
             basePrice: Number(basePrice || 0),
-            productDiscountPerc:basePrice > 0 ? getDiscountPercent(basePrice, discountPrice) : 0,
-            finalDiscountPerc:getDiscountPercent(basePrice, discountPrice)<category.discount?category.discount:getDiscountPercent(basePrice, discountPrice)
+            discount: parseInt(discount || 0),
+            finalDiscount: parseInt(discount < category.discount ? category.discount : discount),
+            finalAmount: parseInt(basePrice - (basePrice * (discount < category.discount ? category.discount : discount)) / 100)
           },
         ];
 
@@ -199,13 +199,14 @@ const editProduct = async (req, res) => {
       return res.redirect("/admin/products");
     }
 
+
     const {
       name,
       description,
       categoryId,
       tags,
       basePrice,
-      discountPrice,
+      discount,
       stock,
       volume,
     } = req.body;
@@ -215,19 +216,19 @@ const editProduct = async (req, res) => {
     const volumes = Array.isArray(volume) ? volume : [volume];
     const stocks = Array.isArray(stock) ? stock : [stock];
     const basePrices = Array.isArray(basePrice) ? basePrice : [basePrice];
-    const discountPrices = Array.isArray(discountPrice)? discountPrice : [discountPrice];
+    const disc = Array.isArray(discount)? discount : [discount];
+    const category=await Category.findById(categoryId)
 
     for (let i = 0; i < volumes.length; i++) {
-      if (!volumes[i] && !basePrices[i] && !discountPrices[i] && !stocks[i])
+      if (!volumes[i] && !basePrices[i] && !disc[i] && !stocks[i])
         continue;
       variants.push({
         volume: volumes[i] || product.variants[i]?.volume || "",
         stock: Number(stocks[i] || product.variants[i]?.stock || 0),
         basePrice: Number(basePrices[i] || product.variants[i]?.basePrice || 0),
-        productDiscount:Number(discountPrice[i] || product.variants[i]?.productDiscount || 0),
-        productDiscountPerc: getDiscountPercent(basePrice?.[i],discountPrice?.[i]),
-        finalDiscount:await finalAmount(basePrice[i],discountPrice[i],categoryId),
-        finalDiscountPerc:await finalPercentage(basePrice[i],discountPrice[i],categoryId),
+        discount: Number(disc[i] || product.variants[i]?.discount || 0),
+        finalDiscount: Number(disc[i]<category.discount?category.discount:disc[i] || product.variants[i]?.finalDiscount || 0),
+        finalAmount: parseInt(basePrices[i] - (basePrice[i] * (disc[i] < category.discount ? category.discount : disc[i])) / 100||product.variants[i]?.finalAmount || 0)
       });
     }
 

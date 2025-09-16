@@ -63,7 +63,7 @@
                     </div>
                     <div class="col-md-3">
                       <label class="form-label">Discount Price (₹)</label>
-                      <input name="discountPrice" type="number" class="form-control" placeholder="eg :- 4500">
+                      <input name="discount" type="number" class="form-control" placeholder="eg :- 10(percentage)">
                     </div>
                     <div class="col-md-3">
                       <label class="form-label">Stock</label>
@@ -112,20 +112,19 @@
 
     // Variant fields
     const basePrices = Array.from(document.getElementsByName('basePrice')).map(i => i.value.trim());
-    const discountPrices = Array.from(document.getElementsByName('discountPrice')).map(i => i.value.trim());
+    const discounts = Array.from(document.getElementsByName('discount')).map(i => i.value.trim());
     const stocks = Array.from(document.getElementsByName('stock')).map(i => i.value.trim());
     const volumes = Array.from(document.getElementsByName('volume')).map(i => i.value.trim());
 
     volumes.forEach((vol, i) => {
         const bp = Number(basePrices[i]);
-        const dp = Number(discountPrices[i]);
+        const disc = Number(discounts[i]);
         const st = parseInt(stocks[i]);
 
         if (!bp || bp <= 0) errors.push(`Base price must be greater than 0 in variant ${i + 1}.`);
         if (!st && st !== 0 || st < 0) errors.push(`Stock must be 0 or more in variant ${i + 1}.`);
         if (!vol) errors.push(`Volume is required in variant ${i + 1}.`);
-        if (dp < 0) errors.push(`Discount price cannot be negative in variant ${i + 1}.`);
-        if (dp > bp) errors.push(`Discount price must be less than base price in variant ${i + 1}.`);
+        if (disc < 0||disc>100) errors.push(`Discount cannot be negative or more than 100 in variant ${i + 1}.`);
     });
 
     // FormData

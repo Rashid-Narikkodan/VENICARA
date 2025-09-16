@@ -186,20 +186,23 @@
                             Quantity: <%=Math.min(...product.variants.map(v=>v.volume)) %>
                               <!-- change to dynamic - rating average -->
                               <span class="mb-2 text-end" style="font-size:0.85rem;">
-                                <span class="text-warning">★★★★☆</span>
+                                <span class="text-dark">★★★★☆</span>
                                 <span class="text-muted">(200)</span>
                               </span>
                           </p>
                           <p class="mb-0 justify-content-between d-flex align-items-center">
                             <span>
                               <span class="text-success fw-bold">₹<%=Math.min(...product.variants.map(v=>
-                                 v.finalDiscount))%></span>
+                                 v.finalAmount))%></span>
                               <span class="text-muted text-decoration-line-through">₹
                                 <%=Math.min(...product.variants.map(v=>v.basePrice))%></span>
+                                <% const perc=product.variants.reduce((min, v) => { 
+                                  return parseInt(v.volume) < parseInt(min.volume) ? v : min
+                                  }, product.variants[0]).finalDiscount
+                                  %>
+
                               <span class="text-success fw-bold">
-                                <%= product.variants.reduce((min, v) => {
-                                      return parseInt(v.volume) < parseInt(min.volume) ? v : min
-                                  }, product.variants[0]).finalDiscountPerc %>%
+                                <%=perc?perc+'%':''%>
                               </span>
 
                             </span>

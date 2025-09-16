@@ -28,7 +28,7 @@ const showAddress = async (req, res) => {
         (v) => v._id.toString() === p.variantId.toString()
       );
       if (variant) {
-        p.lineTotal = Math.round(variant.finalDiscount * p.quantity);
+        p.lineTotal = Math.round(variant.finalAmount * p.quantity);
         await p.save();
       }
     }
@@ -185,7 +185,7 @@ const showPaymentMethods = async (req, res) => {
 
     let total = 0;
     items.forEach((item) => {
-      let lineTotal = item.variant.finalDiscount * item.quantity;
+      let lineTotal = item.variant.finalAmount * item.quantity;
       item.lineTotal = lineTotal;
       total += lineTotal;
     });
@@ -293,7 +293,7 @@ const handlePlaceOrder = async (req, res) => {
           message: `Insufficient stock for ${item.productId.name} (${variant.volume}ml)`,
         });
 
-      const subtotal = Number(variant.finalDiscount) * item.quantity;
+      const subtotal = Number(variant.finalAmount) * item.quantity;
       totalAmount += subtotal;
 
       products.push({
@@ -301,8 +301,8 @@ const handlePlaceOrder = async (req, res) => {
         variantId: item.variantId,
         productName: item.productId.name,
         basePrice: Number(variant.basePrice),
-        finalDiscount: Number(variant.finalDiscount),
-        finalDiscountPerc: Number(variant.finalDiscountPerc || 0),
+        finalAmount: Number(variant.finalAmount),
+        discount: Number(variant.finalDiscount || 0),
         quantity: item.quantity,
         subtotal,
         volume: variant.volume,
@@ -334,7 +334,7 @@ const handlePlaceOrder = async (req, res) => {
       }
     }
     discountAmount += products.reduce(
-      (ac, cu) => ac + (cu.basePrice - cu.finalDiscount) * cu.quantity,
+      (ac, cu) => ac + (cu.basePrice - cu.finalAmount) * cu.quantity,
       0
     );
     totalAmount = parseFloat(totalAmount.toFixed(2));

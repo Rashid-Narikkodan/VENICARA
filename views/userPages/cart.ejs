@@ -90,7 +90,7 @@
               <small class="text-muted">Free Delivery</small><br />
             </div>
             <div class="col-md-4 text-end">
-              <p class="fw-bold">Rs.<%= item.variant.finalDiscount%></p>
+              <p class="fw-bold">Rs.<%= item.variant.finalAmount%></p>
               <div class="d-flex align-items-center justify-content-end mb-3">
                 <button
                   class="btn btn-outline-secondary btn-sm me-2 decrease"
@@ -139,7 +139,7 @@
               item.variant.volume %>ml)</span
             >
             <span
-              >Rs.<%= ((item.variant.finalDiscount) *
+              >Rs.<%= ((item.variant.finalAmount) *
               item.quantity).toLocaleString() %></span
             >
           </div>

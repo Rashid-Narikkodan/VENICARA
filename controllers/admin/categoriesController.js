@@ -140,10 +140,10 @@ const editCategory = async (req, res) => {
           { _id: p._id, "variants._id": v._id },
           {
             $set: {
+              "variants.$.finalAmount":
+               await finalAmount(v.basePrice,v.discount,id),
               "variants.$.finalDiscount":
-               await finalAmount(v.basePrice,v.productDiscount,id),
-              "variants.$.finalDiscountPerc":
-               await finalPercentage(v.basePrice,v.productDiscount,id),
+               await finalPercentage(v.basePrice,v.discount,id),
             },
           }
         );

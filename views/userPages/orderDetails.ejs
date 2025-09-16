@@ -30,18 +30,57 @@
       <!-- Price Details -->
       <div class="row">
         <div class="col-md-6">
-          <div class="border p-3 rounded-3">
-            <h6 class="fw-bold mb-3">Price details</h6>
-            <ul class="list-unstyled small">
-              <li>MRP : <span class="float-end">₹<%=product.basePrice%></span></li>
-              <li>Selling Price : <span class="float-end">₹<%=product.finalDiscount%></span></li>
-              <li>Total MRP : <span class="float-end"><%=product.quantity%> × ₹<%=product.basePrice%> - ₹<%=product.quantity*product.basePrice%></span></li>
-              <li>Total Selling Price : <span class="float-end"><%=product.quantity%> × ₹<%=product.finalDiscount%> - ₹<%=product.quantity*product.finalDiscount%></span></li>
-              <li>Discount percentage : <span class="float-end text-success fw-semibold">₹<%=product.finalDiscountPerc%>%</span></li>
-              <hr>
-              <li class="fw-bold">Total Amount <span class="float-end">₹<%=product.quantity*product.finalDiscount%></span></li>
-            </ul>
-          </div>
+<div class="border p-3 rounded-3">
+  <h6 class="fw-bold mb-3">Price Details</h6>
+  <ul class="list-unstyled small">
+    <!-- Base Details -->
+    <li>Product Price (per item): 
+      <span class="float-end">₹<%= product.basePrice %></span>
+    </li>
+    <li>Discount Percentage: 
+      <span class="float-end text-success fw-semibold"><%= product.discount %>%</span>
+    </li>
+
+    <!-- Discount Amount (per item) -->
+    <li>Discount Amount (per item): 
+      <span class="float-end text-danger">-₹<%= product.basePrice - product.finalAmount %></span>
+    </li>
+
+    <!-- Final Unit Price -->
+    <li>Final Price (per item): 
+      <span class="float-end text-success">₹<%= product.finalAmount %></span>
+    </li>
+
+    <hr>
+
+    <!-- Quantity and Totals -->
+    <li>Total Price (before discount): 
+      <span class="float-end">
+        <%= product.quantity %> × ₹<%= product.basePrice %> = ₹<%= product.basePrice * product.quantity %>
+      </span>
+    </li>
+    <li>Total Discount (all items): 
+      <span class="float-end text-danger">
+        -₹<%= (product.basePrice - product.finalAmount) * product.quantity %>
+      </span>
+    </li>
+    <li>Total After Discount: 
+      <span class="float-end fw-semibold text-success">₹<%= product.subtotal %></span>
+    </li>
+    
+    <hr>
+    
+    <li class="fs-5">Total Amount: 
+      <span class="float-end fw-semibold">₹<%= product.subtotal %></span>
+    </li>
+    
+    <li class="mt-3 fw-bold alert px-3 py-1 alert-success text-success">You Saved: 
+      <span class="float-end">
+        ₹<%= (product.basePrice * product.quantity) - product.subtotal %>
+      </span>
+    </li>
+  </ul>
+</div>
         </div>
 
         <!-- Shipping -->
@@ -55,46 +94,6 @@
             <p class="small mb-0"><%= shippedAddress.state %></p>
           </div>
         </div>
-      </div>
-    </div>
-
-    <!-- RIGHT SIDE (Order Timeline) -->
-    <div class="col-lg-4">
-      <div class="border p-4 rounded-3">
-        <ul class="list-unstyled">
-          <li class="d-flex mb-4">
-            <span class="rounded-circle bg-success me-3" style="width:14px; height:14px;"></span>
-            <div>
-              <strong>Order Confirmed</strong>
-              <p class="small text-muted mb-0">Sun, 4th May 2025</p>
-              <p class="small text-muted">Your Order Has Been Placed</p>
-            </div>
-          </li>
-          <li class="d-flex mb-4">
-            <span class="rounded-circle bg-success me-3" style="width:14px; height:14px;"></span>
-            <div>
-              <strong>Shipped</strong>
-              <p class="small text-muted mb-0">Tue, 6th May 2025</p>
-              <p class="small text-muted">Your Item Has Been Shipped</p>
-            </div>
-          </li>
-          <li class="d-flex mb-4">
-            <span class="rounded-circle bg-success me-3" style="width:14px; height:14px;"></span>
-            <div>
-              <strong>Out For Delivery</strong>
-              <p class="small text-muted mb-0">Tue, 8th May 2025</p>
-              <p class="small text-muted">Your Item Is Out For Delivery</p>
-            </div>
-          </li>
-          <li class="d-flex">
-            <span class="rounded-circle bg-success me-3" style="width:14px; height:14px;"></span>
-            <div>
-              <strong>Delivered</strong>
-              <p class="small text-muted mb-0">Tue, 8th May 2025</p>
-              <p class="small text-muted">Your Item Has Been Delivered</p>
-            </div>
-          </li>
-        </ul>
       </div>
     </div>
   </div>
