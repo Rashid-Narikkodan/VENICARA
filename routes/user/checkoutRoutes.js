@@ -9,29 +9,29 @@ const auth = require("../../middlewares/authUser");
 
 router
   .route("/address")
-  .get(auth.requireLogin,checkoutController.showAddress);
+  .get(checkoutController.showAddress);
 
 router
   .route("/address/new")
-  .get(auth.requireLogin,checkoutController.showAddAddress)
-  .post(auth.requireLogin,checkoutController.handleAddAddress);
+  .get(checkoutController.showAddAddress)
+  .post(checkoutController.handleAddAddress);
 
 router
   .route("/address/edit/:id")
-  .get(auth.requireLogin,checkoutController.showEditAddress)
-  .put(auth.requireLogin,checkoutController.handleEditAddress);
+  .get(checkoutController.showEditAddress)
+  .put(checkoutController.handleEditAddress);
 
-router.post("/address/selectAddress",auth.requireLogin, checkoutController.handleSelectAddress);
+router.post("/address/selectAddress", checkoutController.handleSelectAddress);
 
-router.get("/paymentMethod",auth.requireLogin, checkoutController.showPaymentMethods);
-router.post("/api/razorpay/success",auth.requireLogin, checkoutController.handleRazorpaySuccess);
+router.get("/paymentMethod", checkoutController.showPaymentMethods);
+router.post("/api/razorpay/success", checkoutController.handleRazorpaySuccess);
 
 router.patch('/api/coupon/apply',checkoutController.applyCoupon)
 router.patch('/api/coupon/cancel',checkoutController.cancelCoupon)
 
-router.post("/api/placeOrder",auth.requireLogin, checkoutController.handlePlaceOrder);
+router.post("/api/placeOrder", checkoutController.handlePlaceOrder);
 
-router.get("/placeOrder/:id",auth.requireLogin, checkoutController.showPlaceOrder);
+router.get("/placeOrder/:id", checkoutController.showPlaceOrder);
 
 
 module.exports = router

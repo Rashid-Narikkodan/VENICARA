@@ -27,7 +27,8 @@ const cartSchema = new mongoose.Schema(
       enum: ["active", "saved", "ordered"],
       default: "active",
     },
-    lineTotal:{type:Number}
+    lineTotal:{type:Number},
+    
   },
   {
     timestamps: true,

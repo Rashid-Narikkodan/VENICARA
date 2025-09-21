@@ -23,6 +23,8 @@ const showAddress = async (req, res) => {
       status: "active",
     }).populate("productId");
 
+    req.session.order={}
+
     for (const p of cartDocs) {
       const variant = p.productId?.variants.find(
         (v) => v._id.toString() === p.variantId.toString()
@@ -51,8 +53,13 @@ const showAddress = async (req, res) => {
         items.splice(items.indexOf(item), 1);
       }
     });
+    const totalCartAmount=items.reduce((sum,p)=>{
+      console.log(p.variant.finalAmount)
+      return sum+p.variant.finalAmount
+    },0)
+    req.session.order.deliveryCharge = totalCartAmount>3000?0:200
 
-    res.render("userPages/checkoutAddress", { addresses, items });
+    res.render("userPages/checkoutAddress", { addresses, items,deliveryCharge:req.session.order.deliveryCharge });
   } catch (error) {
     handleError(res, "showAddress", error);
   }
@@ -189,6 +196,8 @@ const showPaymentMethods = async (req, res) => {
       item.lineTotal = lineTotal;
       total += lineTotal;
     });
+    const deliveryCharge = req.session.order.deliveryCharge
+    total+=deliveryCharge
 
     const coupons = await Coupon.find({
       minPrice: { $lte: total },
@@ -203,6 +212,7 @@ const showPaymentMethods = async (req, res) => {
       items,
       coupons,
       total,
+      deliveryCharge,
       user,
     });
   } catch (error) {
@@ -232,7 +242,7 @@ const applyCoupon = async (req, res) => {
 
     const lineTotal = cartItems.reduce((ac, cu) => ac + (cu.lineTotal || 0), 0);
     const discount = Math.round((lineTotal * coupon.discount) / 100);
-    const finalAmount = lineTotal - discount;
+    const finalAmount = (lineTotal - discount) + req.session.order.deliveryCharge;
     const discPerc = coupon.discount;
     res.json({
       status: true,
@@ -240,6 +250,7 @@ const applyCoupon = async (req, res) => {
       discount,
       finalAmount,
       discPerc,
+      
     });
   } catch (error) {
     handleError(res, "applyCoupon", error);
@@ -251,7 +262,7 @@ const cancelCoupon = (req, res) => {
     delete req.session.coupon;
     res.json({ status: true, message: "coupon cancelled" });
   } catch (error) {
-    handeError(res, "cancelCoupon", error);
+    handleError(res, "cancelCoupon", error);
   }
 };
 
@@ -279,7 +290,7 @@ const handlePlaceOrder = async (req, res) => {
         .json({ status: false, message: "No items in cart" });
 
     // Prepare products & calculate total
-    let totalAmount = 0;
+    let totalOrderPrice = 0;
     const products = [];
     for (const item of cartItems) {
       const variant = item.productId?.variants?.find(
@@ -294,7 +305,7 @@ const handlePlaceOrder = async (req, res) => {
         });
 
       const subtotal = Number(variant.finalAmount) * item.quantity;
-      totalAmount += subtotal;
+      totalOrderPrice += subtotal;
 
       products.push({
         productId: item.productId._id,
@@ -311,10 +322,10 @@ const handlePlaceOrder = async (req, res) => {
     }
 
     // Apply coupon if exists
-    let totalDiscountPerc = 0;
-    let discountAmount = 0;
     let couponDiscount = 0;
+    let couponAmount = 0;
     let coupon = null;
+    let finalAmount = totalOrderPrice;
     if (req.session.coupon) {
       coupon = await Coupon.findById(req.session.coupon);
       if (coupon && coupon.usedBy.includes(user.id))
@@ -323,9 +334,9 @@ const handlePlaceOrder = async (req, res) => {
           .json({ status: false, message: "Coupon already used" });
 
       if (coupon) {
-        totalDiscountPerc = coupon.discount;
-        couponDiscount = (coupon.discount / 100) * totalAmount || 0;
-        totalAmount -= couponDiscount;
+        couponDiscount = coupon.discount;
+        couponAmount = Math.floor((coupon.discount / 100) * totalOrderPrice) || 0;
+        finalAmount-=couponAmount;
 
         await Coupon.updateOne(
           { _id: coupon._id, usedBy: { $ne: user.id } },
@@ -333,11 +344,8 @@ const handlePlaceOrder = async (req, res) => {
         );
       }
     }
-    discountAmount += products.reduce(
-      (ac, cu) => ac + (cu.basePrice - cu.finalAmount) * cu.quantity,
-      0
-    );
-    totalAmount = parseFloat(totalAmount.toFixed(2));
+    finalAmount = parseFloat((finalAmount+req.session.order.deliveryCharge).toFixed(2));
+    
 
     // Payment placeholder
     let payment = {
@@ -349,7 +357,7 @@ const handlePlaceOrder = async (req, res) => {
 
     if (paymentMethod === "RAZORPAY") {
       const options = {
-        amount: Math.round(totalAmount * 100),
+        amount: Math.round(finalAmount * 100),
         currency: "INR",
         receipt: `rcpt_${Date.now()}`,
         payment_capture: 1,
@@ -358,22 +366,22 @@ const handlePlaceOrder = async (req, res) => {
       razorpayOrderId = razorpayOrder.id;
     } else if (paymentMethod === "WALLET") {
       const wallet = await Wallet.findOne({ userId: req.session.user.id });
-      if (!wallet || wallet.balance < totalAmount) {
+      if (!wallet || wallet?.balance < finalAmount) {
         await WalletTransaction.create({
           userId: req.session.user.id,
           type: "debit",
-          amount: totalAmount * 100, // store in paise
+          amount: finalAmount * 100, // store in paise
           status: "failed",
-          lastBalance: wallet.balance,
+          lastBalance: wallet?.balance,
         });
         return res.json({ status: false, message: "Insufficient balance" });
       }
-      let lastBalance = (wallet.balance -= totalAmount);
+      let lastBalance = (wallet.balance -= finalAmount);
       await wallet.save();
       await WalletTransaction.create({
         userId: req.session.user.id,
         type: "debit",
-        amount: totalAmount * 100, // store in paise
+        amount: finalAmount * 100, // store in paise
         status: "success",
         lastBalance,
       });
@@ -393,10 +401,10 @@ const handlePlaceOrder = async (req, res) => {
       shippingAddress: address,
       payment,
       couponApplied: coupon?._id || null,
-      totalAmount,
-      totalDiscountPerc,
-      discountAmount,
+      totalOrderPrice,
       couponDiscount,
+      deliveryCharge:req.session.order.deliveryCharge,
+      finalAmount,
       status: "pending",
       razorpayOrderId,
     });
@@ -418,7 +426,7 @@ const handlePlaceOrder = async (req, res) => {
       message: "Order created successfully",
       orderId,
       razorpayOrderId,
-      totalAmount,
+      finalAmount,
     });
   } catch (error) {
     handleError(res, "handlePlaceOrder", error);
@@ -484,6 +492,7 @@ const handleRazorpaySuccess = async (req, res) => {
     res.status(500).json({ status: false, message: "Something went wrong" });
   }
 };
+
 
 const showPlaceOrder = async (req, res) => {
   try {

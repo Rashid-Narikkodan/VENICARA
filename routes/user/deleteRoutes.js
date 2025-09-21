@@ -6,6 +6,8 @@ const {
 
 const auth = require("../../middlewares/authUser");
 
-router.get('/',deleteController.show)
+router.route('/')
+.get(deleteController.show)
+.patch(deleteController.deleteAc)
 
 module.exports = router

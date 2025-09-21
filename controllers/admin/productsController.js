@@ -117,11 +117,39 @@ const addProduct = async (req, res) => {
       stock,
       volume,
     } = req.body;
-
-    const images = await processImages(req.files);
-
+    
+    
     const category=await Category.findById(categoryId)
-
+    if (!category || category.isDeleted || !category.isActive) {
+      req.flash("error", "Category not found or inactive");
+      return res.redirect("/admin/products/add");
+    }
+    if (!name || typeof name !== "string" || name.length > 100) {
+      req.flash("error", "Product name is required and max 100 chars");
+      return res.redirect("/admin/products/add");
+    }
+    if (description && description.length > 500) {
+      req.flash("error", "Description max 500 chars");
+      return res.redirect("/admin/products/add");
+    }
+    if(discount&&discount>50){
+      req.flash("error", "discount should be less than 50%");
+      return res.redirect("/admin/products/add");
+    }
+    let tagsArray = tags?.split(",").map((tag) => tag.trim()) || [];
+    if (tags) {
+      tagsArray = tags.split(",").map((t) => t.trim()).filter(Boolean);
+      if (tagsArray.length > 10) {
+        req.flash("error", "Maximum 10 tags allowed");
+        return res.redirect("/admin/products/add");
+      }
+    }
+    if(!req.files||!req.files.length){
+      req.flash("error", "Atleast One image is neccessary");
+      return res.redirect("/admin/products/add");
+    }
+    
+    const images = await processImages(req.files);
     const variants = Array.isArray(volume)
       ? volume.map((vol, i) => {
           const bp = Number(basePrice?.[i] || 0);
@@ -150,7 +178,6 @@ const addProduct = async (req, res) => {
           },
         ];
 
-    const tagsArray = tags?.split(",").map((tag) => tag.trim()) || [];
     const product = new Product({
       name,
       description,

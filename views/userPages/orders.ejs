@@ -3,82 +3,134 @@
 <main class="container my-4">
   <% if (orders && orders.length > 0) { %> 
     <% orders.forEach(order => { %>
-      <div class="card row rounded-3 p-3 mb-4 shadow">
-        <div class="col-md-12 d-flex justify-content-between">
-          <span>Order ID : <%=order.orderId%></span>
+      <div class="card rounded-3 px-4 py-3 mb-4 shadow">
+        
+        <!-- Order Header -->
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <span class="fw-semibold">Order ID : <%=order.orderId%></span>
           <span class="badge bg-primary"><%=order.status%></span>
         </div>
 
-        <div class="col-md-12 px-3 py-1 rounded-2 my-2" style="background-color: rgb(230, 230, 230)">
-          <!-- product based start -->
-          <% order.products.forEach((product,index)=>{ %>
-          <div class="row p-1 rounded-3 <%=product.status === 'cancelled'?'text-secondary':''%>">
-            
-            <!-- Product Image -->
-            <a href="/products/<%=product.productId._id%>" class="col-md-2 text-center d-flex align-items-center justify-content-center">
-              <img src="<%=product?.image%>" alt="Product Image" class="img-fluid rounded" style="max-height: 80%" />
-            </a>
+        <!-- Products Section -->
+        <div class="row">
+          <div class="col-md-9 px-3 py-2 rounded-2 my-2" style="background-color: rgb(230, 230, 230);">
+            <% order.products.forEach((product,index)=>{ %>
+              <div class="row py-2 mb-2 border-bottom <%=product.status === 'cancelled'?'text-secondary':''%>">
+                
+                <!-- Product Image -->
+                <a href="/products/<%=product.productId._id%>" class="col-md-2 d-flex align-items-center justify-content-center">
+                  <img src="<%=product?.image%>" alt="Product Image" class="img-fluid rounded" style="max-height: 90%" />
+                </a>
 
-            <!-- Product Info -->
-            <div class="col-md-4 p-3">
-              <h5 class="fw-semibold mb-1"><%=product?.productName%></h5>
-              <p class="<%=product.status === 'cancelled'?'text-secondary':'text-muted'%> mb-1 fw-semibold">Volume: <%=product?.volume%>ML</p>
-              <p class="<%=product.status === 'cancelled'?'text-secondary':'text-muted'%> mb-1 fw-semibold">Qty: <%=product.quantity%></p>
-              <p class="<%=product.status === 'cancelled'?'text-secondary':'text-muted'%> mb-1 fw-bold">Total : ₹<%=product.subtotal%></p>
-            </div>
+                <!-- Product Info -->
+                <div class="col-md-4">
+                  <h6 class="fw-semibold mb-1"><%=product?.productName%></h6>
+                  <p class="mb-1 <%=product.status === 'cancelled'?'text-secondary':'text-muted'%>">Volume: <%=product?.volume%> ML</p>
+                  <p class="mb-1 <%=product.status === 'cancelled'?'text-secondary':'text-muted'%>">Qty: <%=product.quantity%></p>
+                  <p class="fw-normal mb-0">Price : ₹<%=product.finalAmount%></p>
+                  <p class="fw-bold mb-0">Total : ₹<%=product.subtotal%></p>
+                </div>
 
-            <!-- Status -->
-            <div class="col-md-3 d-flex flex-column justify-content-center align-items-start">
-              <p class="small mb-0"><strong>Ordered On :</strong> <%= order.createdAt.toLocaleString('en-IN', { dateStyle: 'medium' }) %></p>
-              <p class="small mb-0"><strong>Expected :</strong> <%= new Date(order.createdAt.getTime() + 1000*60*60*24*3).toLocaleString('en-IN', { dateStyle: 'medium' }) %></p>
-              <p class="small mb-0"><strong>Status : </strong>
-                <span class="<%=product.status === 'cancelled'?'text-secondary':'text-success'%> fw-bold fs-6">
-                  <%=product.status.charAt(0).toUpperCase()+product.status.slice(1)%>
-                </span>
-              </p>
-            </div>
+                <!-- Status -->
+                <div class="col-md-3">
+                  <p class="small mb-1"><strong>Ordered On :</strong> <%= order.createdAt.toLocaleString('en-IN', { dateStyle: 'medium' }) %></p>
+                  <p class="small mb-1"><strong>Expected :</strong> <%= new Date(order.createdAt.getTime() + 1000*60*60*24*3).toLocaleString('en-IN', { dateStyle: 'medium' }) %></p>
+                  <p class="small mb-0"><strong>Status : </strong>
+                    <span class="<%=product.status === 'cancelled'?'text-secondary':'text-success'%> fw-bold">
+                      <%=product.status.charAt(0).toUpperCase()+product.status.slice(1)%>
+                    </span>
+                  </p>
+                  <p class="small mb-1"><strong>Payment Method :</strong> <%=order.payment.method%></p>
+                </div>
 
-            <!-- Actions -->
-            <div class="col-md-3 p-3 d-flex flex-column gap-2 justify-content-center align-items-end text-center">
-              <% if(!["shipped","Out of delivery","delivered","cancelled","returned"].includes(product.status)) { %>
-                <button class="btn btn-danger" onclick="cancelOrderProduct('<%=order._id%>','<%=index%>')">Cancel</button>
-              <% } %>
+                <!-- Actions -->
+                <div class="col-md-3 d-flex flex-column gap-2 justify-content-center align-items-end">
+                  <% if(!["shipped","Out of delivery","delivered","cancelled","returned"].includes(product.status)) { %>
+                    <button class="btn btn-sm btn-danger" onclick="cancelOrderProduct('<%=order._id%>','<%=index%>')">Cancel</button>
+                  <% } %>
 
-              <% if(product.status === 'delivered'&&order?.returnTimeLimit>Date.now()) { %>
-                <button class="btn btn-secondary"
-                  data-bs-toggle="modal"
-                  data-bs-target="#returnModal"
-                  onclick="openReturnModal('<%= order._id %>', '<%= index %>')">
-                  <%= product.isRequested ? "Requested" : "Return" %>
-                </button>
-              <% } %>
+                  <% if(product.status === 'delivered'&&product.return?.returnTimeLimit>Date.now()) { %>
+                    <button class="btn btn-sm btn-secondary"
+                      data-bs-toggle="modal"
+                      data-bs-target="#returnModal"
+                      onclick="openReturnModal('<%= order._id %>', '<%= index %>')">
+                      <%= product.return?.isRequested ? "Requested" : "Return" %>
+                    </button>
+                  <% } %>
 
-              <a href="/orders/details/<%=order._id%>?index=<%=index%>" class="btn btn-dark">Details</a>
-            </div>
+                  <a href="/orders/details/<%=order._id%>?index=<%=index%>" class="btn btn-sm btn-dark">Details</a>
+                </div>
+              <div class="col-md-12 <%=!product.return?.adminReason?'d-none':''%>">
+                <span class="text-danger fw-normal text-start text-danger small fw-semibold">Return Rejected Reason : <span><%=product.return.adminReason%></span></span>            
+              </div>
+              </div>
+            <% }) %>
           </div>
-          <hr class="p-0 m-0" />
-          <% }) %>
+
+          <!-- Price Details -->
+          <div class=" col-md-3 d-flex justify-content-center p-2 pe-0">
+              <div class="row rounded-3 gap-2 " style="width:100%;height: fit-content;">
+            <div class=" p-3 rounded-3 col-md-12" style="background-color: rgb(230, 230, 230);">
+              <h6 class="fw-bold mb-3">Price Details</h6>
+              <div class="d-flex justify-content-between mb-2">
+                <span>Items (<%=order.products.length%>)</span>
+              <span>₹<%=order.totalOrderPrice%></span>
+            </div>
+            <div class="d-flex justify-content-between mb-2 <%=order.products.some(o=>o.status=='cancelled'||o.status === 'returned')?'':'d-none'%>">
+              <span>Refunded Amount</span>
+              <span class="text-dark">₹<%=order.refundAmount%></span>
+            </div>
+            <div class="d-flex justify-content-between mb-2 <%=order.couponApplied?'':'d-none'%>">
+              <span>Discount</span>
+              <span class="text-success"><%=order.couponDiscount?order.couponDiscount+'%':'No Discounts'%></span>
+            </div>
+            <div class="d-flex justify-content-between mb-2 <%=order.couponApplied?'':'d-none'%>">
+              <span>Discount Amount</span>
+              <span class="text-danger">-₹<%=parseFloat(((order.totalOrderPrice-order.refundAmount)*order.couponDiscount/100).toFixed(2))%></span>
+            </div>
+            <div class="d-flex justify-content-between mb-2">
+              <span>deliveryCharge</span>
+              <span class="text-success">₹<%=order.deliveryCharge%></span>
+            </div>
+            <div class="d-flex justify-content-between border-top pt-2 fw-bold">
+              <span>Total Amount</span>
+              <span>₹<%=order.finalAmount%></span>
+            </div>
+            <!-- <div style="font-size: small;" class="m-0 d-flex justify-content-between fw-bold p-1 <%=order.totalOrderPrice-order.finalAmount>0&&order.couponDiscount?'':'d-none'%>">
+              <span class=" alert alert-success text-success py-1 px-2">You have saved ₹<%=order.totalOrderPrice-order.finalAmount%> on this order</span>
+            </div> -->
+          </div>
+          <div class="alert alert-dark p-2  rounded-3 col-md-12 <%=!order.return?.adminReason?'d-none':''%>">
+            <p class="text-dark m-0 p-0 fw-bold text-start">Return request rejected</p>
+            <span class="text-dark fw-semibold text-start ">Reason : <span><%=order.return.adminReason%></span></span>            
+          </div>
+          </div>
+          </div>
         </div>
 
         <!-- Order-level actions -->
-        <div class="col-md-12 d-flex justify-content-between align-items-center">
+        <div class="d-flex justify-content-between align-items-center mt-3">
           <% if(!["delivered","cancelled","returned"].includes(order.status)) { %>
-            <button class="btn btn-outline-dark fw-semibold" onclick="cancelOrder('<%=order._id%>')">Cancel order</button>
+            <button class="btn btn-outline-dark btn-sm fw-semibold" onclick="cancelOrder('<%=order._id%>')">Cancel Order</button>
           <% } %>
 
-          <% if(order.status === 'delivered'&&order?.returnTimeLimit>Date.now()) { %>
-            <button class="btn btn-secondary"
-              data-bs-toggle="modal"
-              data-bs-target="#returnModal"
-              onclick="openReturnModal('<%= order._id %>')"
-              <%= order.isRequested ? "disabled" : "" %>>
-              <%= order.isRequested ? "Return Requested" : "Return Order" %>
-            </button>
-          <% } %>
-<div>
-  <span class="fw-bold me-3">Total: ₹<%=order.totalAmount%></span>
-  <a href="/orders/<%=order._id%>/invoice" class="btn btn-outline-primary fw-bold">Invoice</a>
-</div>
+          <%if(order.status=='delivered'){%>
+          <button class="btn btn-sm btn-secondary"
+            data-bs-toggle="modal"
+            data-bs-target="#returnModal"
+            onclick="openReturnModal('<%= order._id %>')">
+            <%= order.return?.isRequested ? "Return Requested" : order.return?.adminReason ? "Return Rejected" : "Return Order" %>
+          </button>
+          <%}%>
+
+          <div class="text-end">
+            <a href="/orders/<%=order._id%>/invoice" class="btn btn-outline-primary btn-sm fw-bold">Invoice</a>
+          </div>
+        </div>
+        
+
+        <div class="mt-2">
+          <span class="text-danger small fw-semibold">* If you return/cancel any product and used a coupon, the coupon amount will be reduced from your refund.</span>
         </div>
       </div>
     <% }) %> 
@@ -89,43 +141,58 @@
       <a href="/shop" class="btn btn-primary mt-2">Shop Now</a>
     </div>
   <% } %>
+  <!-- Return Modal -->
+<div class="modal fade" id="returnModal" tabindex="-1" aria-labelledby="returnModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form id="returnForm">
+        <div class="modal-header">
+          <h5 class="modal-title" id="returnModalLabel">Return Order</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
 
-  <!-- Return Reason Modal -->
-  <div class="modal fade" id="returnModal" tabindex="-1" aria-labelledby="returnModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content">
-        <form id="returnForm">
-          <div class="modal-header">
-            <h5 class="modal-title" id="returnModalLabel">Return Product</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="returnReason" class="form-label">Reason for return</label>
+            <textarea id="returnReason" class="form-control" rows="3" placeholder="Enter your reason"></textarea>
           </div>
-          <div class="modal-body">
-            <div class="mb-3">
-              <label for="returnReason" class="form-label">Reason for Return</label>
-              <textarea id="returnReason" name="reason" class="form-control" rows="3" placeholder="Enter reason..." required></textarea>
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-            <button type="submit" class="btn btn-danger">Submit Return</button>
-          </div>
-        </form>
-      </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary">Submit</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        </div>
+      </form>
     </div>
   </div>
+</div>
+
 </main>
 
 <script>
   let currentReturnId = null;
   let currentReturnIndex = null;
 
-  function openReturnModal(id, index = null) {
-    currentReturnId = id;
-    currentReturnIndex = index;
-    document.getElementById("returnReason").value = "";
-    const modal = new bootstrap.Modal(document.getElementById("returnModal"));
-    modal.show();
+function openReturnModal(id, index = null) {
+  currentReturnId = id;
+  currentReturnIndex = index;
+
+  const reasonInput = document.getElementById("returnReason");
+  if (reasonInput) {
+    reasonInput.value = "";
+  } else {
+    console.error("returnReason element not found!");
   }
+
+  const modalEl = document.getElementById("returnModal");
+  if (modalEl) {
+    const modal = new bootstrap.Modal(modalEl);
+    modal.show();
+  } else {
+    console.error("returnModal element not found!");
+  }
+}
+
 
   // Return form submit
   document.getElementById("returnForm").addEventListener("submit", async (e) => {
@@ -151,9 +218,9 @@
         const modalEl = document.getElementById("returnModal");
       const modalInstance = bootstrap.Modal.getInstance(modalEl);
       modalInstance.hide();
-
       // Optionally refresh UI
       location.reload();
+
       } else {
         alert(data.message || "Return request failed");
       }

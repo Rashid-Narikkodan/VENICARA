@@ -5,8 +5,9 @@
     box-sizing: border-box;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
-html, body {        /* Remove default padding */
-  overflow-x: hidden; /* Prevent horizontal scrolling */
+
+html, body {
+    overflow-x: hidden; /* Prevent horizontal scrolling */
 }
 
 body {
@@ -26,67 +27,134 @@ input, button, textarea {
     font-size: 1rem;
 }
 
-.header-logo{
-  width:15rem;
+/* Header Logo */
+.header-logo {
+    width: 15rem;
 }
-div>i{
-    font-size:large;
+
+/* Sidebar Icon Positioning */
+div > i {
+    font-size: large;
     position: absolute;
-    right:1rem;
-    top:.5rem
+    right: 1rem;
+    top: 0.5rem;
 }
-#sidebar > ul > li{
-    border:none;
-    padding:.4rem 1rem
+
+/* Sidebar Navigation */
+#sidebar {
+    min-width: 200px;
+    max-width: 250px;
+    transition: all 0.3s;
 }
-#sidebar > ul > li > a:hover:not(.logout){
+
+#sidebar > ul > li {
+    border: none;
+    padding: 0.4rem .5rem;
+}
+
+#sidebar > ul > li > a {
+    color: black;
+}
+
+#sidebar > ul > li > a:hover:not(.logout) {
     background-color: rgb(178, 178, 178);
-    color:black
+    color: black;
 }
-#sidebar > ul > li > a{
-    color:black
-}
-/* Active sidebar button */
+
+/* Active Sidebar Button */
 #sidebar .nav .active {
-  background-color: #212529 !important; /* dark bg */
-  color: #fff !important; /* white text */
+    background-color: #212529 !important; /* Dark background */
+    color: #fff !important; /* White text */
 }
 
 #sidebar .nav .active i {
-  color: #fff !important; /* white icon */
-}
-nav{
-    width:18rem;
-    transition: width .3s;
-}
-#sidebar.collapsed {
- width:6rem
+    color: #fff !important; /* White icon */
 }
 
-#sidebar.collapsed span {
-  display: none; /* hide text, keep icons */
-}
-.center{
-  justify-content: center !important;
+/* Sidebar Collapsed State */
+#sidebar.shrink {
+    min-width: 70px;
+    max-width: 70px;
 }
 
-
-/* all success and error handle in header */
-.successBox,.errorBox {
-  position: fixed;
-  top: 6rem;
-  left: 0;
-  width: 100%;
-  z-index: 9999; /* stays above everything */
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  color: white;
-  padding: 12px;
-  font-weight: bold;
-  transition: opacity 1s ease,transform 1s ease;
+#sidebar.shrink .nav-item span {
+    opacity: 0;
+    display: none;
 }
-.fadeOut{
-  opacity:0;
-  transform: translateY(-2rem);
+
+#sidebar.shrink .nav-item a {
+    justify-content: center;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+}
+
+#sidebar.shrink .nav-item.mt-3 a {
+    justify-content: center;
+    padding: 0.5rem;
+}
+
+/* Success and Error Messages */
+.successBox, .errorBox {
+    position: fixed;
+    top: 6rem;
+    left: 0;
+    width: 100%;
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    padding: 12px;
+    font-weight: bold;
+    transition: opacity 1s ease, transform 1s ease;
+}
+
+.fadeOut {
+    opacity: 0;
+    transform: translateY(-2rem);
+}
+
+/* Responsive Adjustments */
+@media (max-width: 767.98px) {
+    .header-logo {
+        width: 6rem;
+    }
+    #sidebar {
+    min-width: 250px;
+    max-width: 250px;
+    transition: all 0.3s;
+}
+}
+
+@media (min-width: 992px) {
+
+    #sidebar.shrink + main {
+        margin-left: 70px;
+    }
+}
+
+/* Sidebar Overlay for Mobile */
+#sidebarOverlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 998;
+}
+
+@media (max-width: 991px) {
+    #sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100%;
+        z-index: 999;
+    }
+
+    main {
+        margin-left: 0;
+    }
 }

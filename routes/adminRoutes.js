@@ -37,6 +37,8 @@ router.patch(
   ordersController.handleProductStatus
 );
 router.patch("/orders/:id/status", ordersController.handleOrderStatus);
+router.patch("/orders/:orderId/return/reject", ordersController.rejectReturn);
+router.patch("/orders/:orderId/return/approve", ordersController.approveReturn);
 
 router
   .route("/products")
@@ -65,7 +67,7 @@ router.post(
 router.route("/coupons").get(auth.requireLogin, couponsController.showCoupons);
 router
   .route("/coupons/add")
-  .post(auth.requireLogin, couponsController.showCouponsAdd);
+  .post(auth.requireLogin, couponsController.addCoupon);
 router.patch("/coupons/:id", couponsController.deleteCoupon);
 
 router

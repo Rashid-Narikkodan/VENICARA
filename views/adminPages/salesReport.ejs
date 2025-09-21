@@ -1,5 +1,4 @@
 <%- include('../partials/admin/header.ejs') %>
-<%- include('../partials/admin/sidebar.ejs') %>
 <style>
   .card {
     border-radius: 12px;
@@ -205,9 +204,9 @@
                 <%= order.status.charAt(0).toUpperCase()+order.status.slice(1) %>
               </td>
               <td class="text-center">₹<%= order.products.reduce((s,p)=>s+p.basePrice*p.quantity,0) %></td>
-              <td class="text-center">₹<%= order.discountAmount.toFixed(2) %></td>
-              <td class="text-center"><%= order.couponDiscount?"₹"+order.couponDiscount.toFixed(2):'No Coupon'%></td>
-              <td class="text-center">₹<%= order.totalAmount.toFixed(2) %></td>
+              <td class="text-center">₹<%= order.productDiscount.toFixed(2) %></td>
+              <td class="text-center"><%= (order.totalOrderPrice-order.finalAmount).toFixed(2)||'No Coupon'%></td>
+              <td class="text-center">₹<%= order.finalAmount.toFixed(2) %></td>
             </tr>
           <% }) %>
         </tbody>

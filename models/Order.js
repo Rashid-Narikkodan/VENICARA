@@ -33,8 +33,14 @@ const orderSchema = new mongoose.Schema(
           default: "pending",
         },
         image:String,
-        isRequested:{type:Boolean,default:false},
-        reqReason:String
+        return:{
+          isRequested:{type:Boolean,default:false},
+          reason:String,
+          returnTimeLimit:{type:Date},
+          adminReason:String,
+          status:{type:String,enum:["pending","approved","rejected"],default:"pending"}
+        },
+        refundAmount: { type: Number, default: 0 }
       },
     ],
 
@@ -70,13 +76,20 @@ const orderSchema = new mongoose.Schema(
       ref: "Coupon",
     },
 
-    totalAmount: { type: Number, required: true },
-    discountAmount: { type: Number, default: 0 },
-    couponDiscount:{type:Number,default:0},
+    totalOrderPrice: { type: Number, required: true },
+    couponDiscount:{type:Number,default:0},//percentage discount
+    finalAmount: { type: Number, required: true }, // totalOrderPrice - couponDiscount
+    deliveryCharge:{ type:Number},
     orderId:{type:String,required:true},
-    isRequested:{type:Boolean,default:false},
-    reqReason:String,
-    returnTimeLimit:{type:Date}
+    return:{
+      isRequested:{type:Boolean,default:false},
+      reason:String,
+      returnTimeLimit:{type:Date},
+      adminReason:String,
+      status:{type:String,enum:["pending","approved","rejected"],default:"pending"}
+    },
+    refundAmount: { type: Number, default: 0 },
+    deliveryCharge:{type:Number,default:200}
   },
   { timestamps: true } // handles createdAt & updatedAt automatically
 );

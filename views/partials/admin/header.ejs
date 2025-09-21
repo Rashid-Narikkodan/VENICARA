@@ -1,35 +1,192 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="shortcut icon" href="/images/favicon.ico" type="image/x-icon">
-    <title><%=title%></title>
-    <link rel="stylesheet" href="/css/adminDashboard.css" />
-    <link
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="shortcut icon" href="/images/favicon.ico" type="image/x-icon">
+  <title><%=title%></title>
+
+  <!-- Bootstrap CSS -->
+  <link
     href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css"
-   rel="stylesheet"
-   integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr"
-   crossorigin="anonymous"/>
- </head>
- <body>
-  <header class="shadow p-4">
-   <div class="w-100 d-flex justify-content-center position-relative">
-    <img class="header-logo" src="/images/logo.avif" alt="">
-    <a href="/admin/profile" class="text-dark">
-    <div>
-    <i class="fa-regular fa-circle-user fs-3"></i>
+    rel="stylesheet"
+    integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr"
+    crossorigin="anonymous"/>
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="/css/adminDashboard.css" />
+</head>
+<body>
+  <!-- Header -->
+  <header class="shadow-sm p-3 d-flex align-items-center justify-content-between" style="min-height: 5rem;">
+    <!-- Left: Mobile Menu & Sidebar Toggle -->
+    <div class="d-flex align-items-center gap-2">
+      <button id="sidebarToggleMobile" class="btn d-md-none" style="background:#e8e7e5; color:#000;">
+        <i class="fa-solid fa-bars"></i>
+      </button>
+      <button id="arrow" class="btn btn-outline-secondary d-none d-md-block">
+        <i class="fa-solid fa-angle-left"></i>
+      </button>
     </div>
-    </a>
-   </div>
-    <div id="successBox" class="successBox w-100 d-flex justify-content-center">
-    <%if(messages&&messages.success.length>0){%>
-    <div class="alert alert-success text-center w-md-25 w-75"><%=messages.success[0]%></div>
-    <%}%>
-  </div>
-    <div id="errorBox" class="errorBox w-100 d-flex justify-content-center">
-    <%if(messages.error.length>0){%>
-    <div class="alert alert-danger text-center w-md-25 w-75"><%=messages.error[0]%></div>
-    <%}%>
+
+    <!-- Center: Logo / Brand -->
+    <div class="d-flex justify-content-center">
+      <img class="header-logo" src="/images/logo.avif" alt="Logo" >
+    </div>
+
+    <!-- Right: Profile -->
+    <div class="d-flex align-items-center">
+      <a href="/admin/profile" class="text-dark">
+        <i class="fa-regular fa-circle-user fs-3"></i>
+      </a>
     </div>
   </header>
+
+  <!-- Notifications -->
+  <div id="successBox" class="successBox w-100 d-flex justify-content-center mt-2">
+    <% if(messages && messages.success && messages.success.length > 0){ %>
+      <div class="alert alert-success text-center w-md-25 w-75"><%= messages.success[0] %></div>
+    <% } %>
+  </div>
+  <div id="errorBox" class="errorBox w-100 d-flex justify-content-center mt-2">
+    <% if(messages && messages.error && messages.error.length > 0){ %>
+      <div class="alert alert-danger text-center w-md-25 w-75"><%= messages.error[0] %></div>
+    <% } %>
+  </div>
+
+  <!-- Main wrapper -->
+  <div class="d-flex">
+    <!-- Sidebar -->
+    <nav id="sidebar" class="p-2 d-none d-md-block" >
+      <ul class="nav flex-column mt-2 pb-2 pt-2 pe-2 rounded-3 w-100" style="background:rgb(235, 235, 235)">
+        <!-- Dashboard -->
+        <li class="nav-item mb-1">
+          <a class="btn btn-white rounded-4 d-flex align-items-center gap-2 p-3 w-100 <%= page === 'dashboard' ? 'active' : '' %>"
+             href="/admin/dashboard">
+            <i class="fa-solid fa-chart-line"></i>
+            <span>Dashboard</span>
+          </a>
+        </li>
+
+        <!-- Orders -->
+        <li class="nav-item mb-1">
+          <a class="btn btn-white rounded-4 d-flex align-items-center gap-2 p-3 w-100 <%= page === 'orders' ? 'active' : '' %>"
+             href="/admin/orders">
+            <i class="fa-solid fa-bag-shopping"></i>
+            <span>Orders</span>
+          </a>
+        </li>
+
+        <!-- Products -->
+        <li class="nav-item mb-1">
+          <a class="btn btn-white rounded-4 d-flex align-items-center gap-2 p-3 w-100 <%= page === 'products' ? 'active' : '' %>"
+             href="/admin/products?page=1">
+            <i class="fa-solid fa-boxes-stacked"></i>
+            <span>Products</span>
+          </a>
+        </li>
+
+        <!-- Sales Report -->
+        <li class="nav-item mb-1">
+          <a class="btn btn-white rounded-4 d-flex align-items-center gap-2 p-3 w-100 <%= page === 'salesReport' ? 'active' : '' %>"
+             href="/admin/salesReport">
+            <i class="fa-solid fa-newspaper"></i>
+            <span>Sales Report</span>
+          </a>
+        </li>
+
+        <!-- Customers -->
+        <li class="nav-item mb-1">
+          <a class="btn btn-white rounded-4 d-flex align-items-center gap-2 p-3 w-100 <%= page === 'customers' ? 'active' : '' %>"
+             href="/admin/customers">
+            <i class="fa-solid fa-people-group"></i>
+            <span>Customers</span>
+          </a>
+        </li>
+
+        <!-- Coupons -->
+        <li class="nav-item mb-1">
+          <a class="btn btn-white rounded-4 d-flex align-items-center gap-2 p-3 w-100 <%= page === 'coupons' ? 'active' : '' %>"
+             href="/admin/coupons">
+            <i class="fa-solid fa-ticket"></i>
+            <span>Coupons</span>
+          </a>
+        </li>
+
+        <!-- Categories -->
+        <li class="nav-item mb-1">
+          <a class="btn btn-white rounded-4 d-flex align-items-center gap-2 p-3 w-100 <%= page === 'categories' ? 'active' : '' %>"
+             href="/admin/categories">
+            <i class="fa-solid fa-layer-group"></i>
+            <span>Categories</span>
+          </a>
+        </li>
+
+        <!-- Referrals -->
+        <li class="nav-item mb-1">
+          <a class="btn btn-white rounded-4 d-flex align-items-center gap-2 p-3 w-100 <%= page === 'referrals' ? 'active' : '' %>"
+             href="/admin/referrals">
+            <i class="fa-solid fa-users-line"></i>
+            <span>Referrals</span>
+          </a>
+        </li>
+
+        <!-- Logout -->
+        <li class="nav-item mt-3">
+          <a class="btn btn-danger text-white rounded-4 d-flex align-items-center gap-2 p-3 w-100 logout"
+             href="/admin/logout">
+            <i class="fa-solid fa-arrow-right-from-bracket"></i>
+            <span>Sign Out</span>
+          </a>
+        </li>
+      </ul>
+    </nav>
+
+    <!-- Mobile overlay -->
+    <div id="sidebarOverlay" class="d-md-none"></div>
+
+
+
+  <!-- Scripts -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/js/all.min.js"></script>
+  <script>
+    const sidebar = document.getElementById('sidebar');
+    const toggleMobile = document.getElementById('sidebarToggleMobile');
+    const overlay = document.getElementById('sidebarOverlay');
+    const arrow = document.getElementById('arrow');
+
+    // Mobile toggle
+    toggleMobile.addEventListener('click', () => {
+      sidebar.classList.toggle('d-none');
+      overlay.style.display = sidebar.classList.contains('d-none') ? 'none' : 'block';
+    });
+
+    overlay.addEventListener('click', () => {
+      sidebar.classList.add('d-none');
+      overlay.style.display = 'none';
+    });
+
+    // Sidebar collapse toggle
+    arrow.addEventListener('click', () => {
+      sidebar.classList.toggle('shrink');
+      arrow.querySelector('div').classList.toggle('fa-angle-left');
+      arrow.querySelector('div').classList.toggle('fa-angle-right');
+    });
+
+    // Fade out notifications after 3 seconds
+    const successBox = document.getElementById('successBox');
+    const errorBox = document.getElementById('errorBox');
+    [successBox, errorBox].forEach(box => {
+      if (box && box.querySelector('.alert')) {
+        setTimeout(() => {
+          box.classList.add('fadeOut');
+          setTimeout(() => {
+            box.style.display = 'none';
+          }, 1000);
+        }, 3000);
+      }
+    });
+  </script>

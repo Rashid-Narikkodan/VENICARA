@@ -112,31 +112,7 @@
             </div>
           </div>
         </div>
-
-        <!-- //banner -->
-        <div class="col-md-12 mt-5">
-          <div
-            class="banner-section position-relative rounded-4 overflow-hidden d-flex align-items-center justify-content-center"
-            style="background: linear-gradient(135deg, #1a1a1a, #3d2c1a); height: 400px;">
-            <div class="overlay position-absolute w-100 h-100"
-              style="background: rgba(0,0,0,0.4); mix-blend-mode: overlay;"></div>
-            <div
-              class="banner-content position-relative text-center text-white px-3 d-flex flex-column flex-md-row align-items-center justify-content-center gap-4">
-              <div class="perfume-img flex-shrink-0">
-                <img src="https://via.placeholder.com/250x350" alt="Perfume Bottle"
-                  class="img-fluid rounded-3 shadow-lg" style="max-height: 350px;">
-              </div>
-              <div class="text-content text-md-start">
-                <h1 class="display-4 fw-bold text-gold" style="color: #FFD700;">Golden Touch Perfume</h1>
-                <p class="lead text-light mb-3">Experience luxury and elegance in every drop. The scent that defines
-                  sophistication.</p>
-                <a href="/shop" class="btn btn-warning btn-lg shadow-sm">Shop Now</a>
-              </div>
-            </div>
-          </div>
-        </div>
-
-
+        
         <div class="col-md-12 mt-5">
           <h6 class="text-uppercase">Explore</h6>
           <h2 class="fw-bold">Our Fragrance Collections</h2>
@@ -176,7 +152,7 @@
                     <div class="product-name mt-4 fs-4">
                       <%=product.name%>
                     </div>
-                    <div class="product-price">Rs.<%=Math.min(...product.variants.map(v=>v.finalDiscount))%></div>
+                    <div class="product-price">Rs.<%=Math.min(...product.variants.map(v=>v.finalAmount))%></div>
                   </div>
                 </a>
                 <% }) %>

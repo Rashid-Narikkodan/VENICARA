@@ -2,7 +2,7 @@ const router = require("express").Router();
 
 const auth=require('../../middlewares/authUser')
 
-router.use("/auth", require("./authRoutes"));
+router.use("/auth",require("./authRoutes"));
 router.use("/", require("./homeRoutes"));  // home, shop, search, etc.
 
 router.use("/profile",auth.requireLogin, require("./profileRoutes"));

@@ -36,27 +36,27 @@ const showSalesReport = async (req, res) => {
     }
 
     const delivered = {
-      createdAt: { $gte: startDate, $lte: endDate },
+      updatedAt: { $gte: startDate, $lte: endDate },
       status: "delivered",
     };
     const cancelled = {
-      createdAt: { $gte: startDate, $lte: endDate },
+      updatedAt: { $gte: startDate, $lte: endDate },
       status: "cancelled",
     };
     const returned = {
-      createdAt: { $gte: startDate, $lte: endDate },
+      updatedAt: { $gte: startDate, $lte: endDate },
       status: "returned",
     };
     const refunded = {
-      createdAt: { $gte: startDate, $lte: endDate },
+      updatedAt: { $gte: startDate, $lte: endDate },
       "payment.status": "refunded" ,
     };
     const productCancelled = {
-      createdAt: { $gte: startDate, $lte: endDate },
+      updatedAt: { $gte: startDate, $lte: endDate },
       products: { $elemMatch: { status: "cancelled" } },
     };
     const productReturned = {
-      createdAt: { $gte: startDate, $lte: endDate },
+      updatedAt: { $gte: startDate, $lte: endDate },
       products: { $elemMatch: { status: "returned" } },
     };
 
@@ -65,7 +65,7 @@ const showSalesReport = async (req, res) => {
 
     // Fetch essential data for the report
     const totalOrders = orders.length;
-    const totalRevenue = orders.reduce((sum, order) => sum + order.totalAmount,0);
+    const totalRevenue = orders.reduce((sum, order) => sum + order.finalAmount,0);
     
     const totalProductSold = orders.reduce((sum, order) => {
       const productCount = order.products.reduce((productSum, product) => productSum + product.quantity,0);
@@ -77,8 +77,12 @@ const showSalesReport = async (req, res) => {
         return sum + productDiscount;
       }, 0);
 
-    const totalDiscountPerOrder = orders.reduce((sum, order) => sum + (order.discountAmount+order.couponDiscount),0);
-    const totalRefund = await Order.find(refunded).then((refundOrders)=>refundOrders.reduce((sum, order) => sum + order.totalAmount, 0));
+
+    const totalDiscountPerOrder= orders.reduce((sum, order) => {
+      const productDiscount = order.products.reduce((discSum, product) =>discSum+(product.basePrice-product.finalAmount)*product.quantity,0);
+      const orderDiscount = (order.totalOrderPrice - order.finalAmount)+productDiscount;
+        return sum + orderDiscount;
+      }, 0);    const totalRefund = await Order.find(refunded).then((refundOrders)=>refundOrders.reduce((sum, order) => sum + order.totalAmount, 0));
     const AverageOrderValue = totalOrders ? totalRevenue / totalOrders : 0;
     const countUser = await Order.distinct("userId",delivered);
     const totalCustomers = countUser.length;
@@ -102,6 +106,11 @@ const showSalesReport = async (req, res) => {
         return sum + returnedCount;
       }, 0)
     );
+
+    orders.forEach(order => {
+     const productDisc = order.products.reduce((s,product) =>s+(product.basePrice*product.quantity)-product.subtotal, 0);
+      order.productDiscount = productDisc;
+    });
 
     const data = {
       totalOrders,

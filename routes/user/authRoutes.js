@@ -22,38 +22,42 @@ router.get(
 router
   .route("/login")
   .get(auth.loggedIn, authController.showLogin)
-  .post(authController.handleLogin);
+  .post(auth.loggedIn, authController.handleLogin);
 
 /* ------------------ FORGOT PASSWORD + OTP ------------------ */
 router
   .route("/forgot")
   .get(auth.loggedIn, authController.showForgot)
-  .post(authController.handleForgot);
+  .post(auth.loggedIn, authController.handleForgot);
 
 router
   .route("/forgot/otp")
   .get(auth.loggedIn, authController.showForgotOTP)
-  .post(authController.handleForgotOTP);
+  .post(auth.loggedIn, authController.handleForgotOTP);
 
-router.post("/forgot/resend-otp", authController.resendForgotOTP);
+router.post(
+  "/forgot/resend-otp",
+  auth.loggedIn,
+  authController.resendForgotOTP
+);
 
 router
   .route("/forgot/change-password")
   .get(auth.loggedIn, authController.showChangePass)
-  .patch(authController.handleChangePass);
+  .patch(auth.loggedIn, authController.handleChangePass);
 
 /* ------------------ SIGNUP + OTP ------------------ */
 router
   .route("/signup")
   .get(auth.loggedIn, authController.showSignup)
-  .post(authController.handleSignup);
+  .post(auth.loggedIn, authController.handleSignup);
 
 router
   .route("/signup/verify-otp")
   .get(auth.loggedIn, authController.showSignupOTP)
-  .post(authController.handleSignupOTP);
+  .post(auth.loggedIn, authController.handleSignupOTP);
 
-router.post("/signup/resend-otp", authController.resendOTP);
+router.post("/signup/resend-otp", auth.loggedIn, authController.resendOTP);
 
 /* ------------------ LOGOUT ------------------ */
 router.post("/logout", authController.handleLogout);

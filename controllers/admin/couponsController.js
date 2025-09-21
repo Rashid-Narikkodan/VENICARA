@@ -35,7 +35,7 @@ const showCoupons = async (req, res) => {
   }
 };
 
-const showCouponsAdd= async (req,res)=>{
+const addCoupon= async (req,res)=>{
   try {
     let {
       name,
@@ -51,13 +51,12 @@ const showCouponsAdd= async (req,res)=>{
       req.flash('error','Coupon is already exists')
       return res.redirect('/admin/coupons')
     }
-    if(discount>=100){
-      req.flash('error','Discount should be less than 100')
+    if(discount>=50){
+      req.flash('error','Discount should be less than 50%')
       return res.redirect('/admin/coupons')
     }
     
     const [year, month, day] = expireAt.split('-');
-    console.log(year)
 const now = new Date();
 const date = new Date(
   parseInt(year),
@@ -104,6 +103,6 @@ const deleteCoupon=async(req,res)=>{
 
 module.exports = {
   showCoupons,
-  showCouponsAdd,
+  addCoupon,
   deleteCoupon,
 };

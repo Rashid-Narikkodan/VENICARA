@@ -1,7 +1,136 @@
 <%-include('../partials/user/header.ejs')%>
 <%-include('../partials/user/sidebarProfile.ejs')%>
-<main>
-    delete account
+
+<style>
+  .deletion-card {
+    background: #ffffff;
+    border-radius: 15px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    text-align: left;
+    padding: 3rem 2rem;
+    width: 70%;
+    max-height: 80vh;
+    overflow-y: auto;
+  }
+
+  .deletion-card h3 {
+    font-weight: bold;
+    margin-bottom: 20px;
+    text-align: center;
+    color: #222;
+  }
+
+  .deletion-card h5 {
+    font-weight: 600;
+    margin-top: 20px;
+    margin-bottom: 10px;
+    color: #333;
+  }
+
+  .deletion-card p,
+  .deletion-card li {
+    font-size: 0.95rem;
+    color: #555;
+    margin-bottom: 10px;
+    line-height: 1.6;
+  }
+
+  .deletion-card ul {
+    padding-left: 18px;
+    margin-bottom: 15px;
+  }
+
+  .deletion-card a {
+    color: #c62828;
+    text-decoration: none;
+    font-weight: 500;
+  }
+
+  .deletion-card a:hover {
+    text-decoration: underline;
+  }
+
+  .btn-delete {
+    border-radius: 8px;
+    font-weight: 600;
+    background: #c62828;
+    border: none;
+    padding: 12px 0;
+    width: 100%;
+    color: #fff;
+    margin-top: 20px;
+    transition: all 0.3s ease;
+  }
+
+  .btn-delete:hover {
+    background: #a21616;
+  }
+
+  .btn-cancel {
+    border-radius: 8px;
+    font-weight: 600;
+    background: #f0f0f0;
+    border: none;
+    padding: 12px 0;
+    width: 100%;
+    margin-top: 10px;
+    transition: all 0.3s ease;
+  }
+
+  .btn-cancel:hover {
+    background: #e0e0e0;
+  }
+</style>
+
+<main class="d-flex justify-content-center w-100 h-75">
+  <div class="deletion-card shadow">
+    <h3>Account Deletion Notice</h3>
+
+    <p><strong>Is this goodbye?</strong> Are you sure you don’t want to reconsider?  
+    Once deleted, your account cannot be recovered.</p>
+
+    <h5>WHAT YOU WILL LOSE</h5>
+    <ul>
+      <li>All account benefits, credits, and offers (permanently forfeited).</li>
+      <li>Access to order history, pending exchanges, returns, or refunds.</li>
+      <li>Eligibility for New User coupons if you sign up again with the same email or mobile.</li>
+    </ul>
+
+    <h5>TRANSACTIONS</h5>
+    <p>
+      VENICARA will attempt to complete open transactions within 30 days on a best-effort basis, 
+      but tracking and updates cannot be guaranteed after deletion.
+    </p>
+
+    <h5>EXCEPTIONS</h5>
+    <ul>
+      <li>VENICARA may delay or refuse deletion if there are pending grievances regarding orders, shipments, cancellations, or other services.</li>
+      <li>Certain data may be retained for legitimate purposes, including:
+        <ul>
+          <li>Security and fraud prevention</li>
+          <li>Prevention of future abuse</li>
+          <li>Regulatory compliance</li>
+          <li>Exercising legal rights or responding to legal orders</li>
+        </ul>
+      </li>
+    </ul>
+
+    <h5>IMPORTANT</h5>
+    <p>
+      By proceeding, you confirm that you have read and understood our 
+      <a href="#">Privacy Policy</a>, and accept all consequences of account deletion.
+    </p>
+
+    <form action="/delete?_method=PATCH" method="POST">
+        <button class="btn p-3 w-100 btn-dark rounded-pill fs-5">
+            Delete My Account
+        </button>
+    </form>
+  </div>
 </main>
+</div>
+<script>
+   
+</script>
 </body>
 </html>

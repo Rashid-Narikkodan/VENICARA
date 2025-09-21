@@ -1,5 +1,4 @@
-<%- include('../partials/admin/header.ejs')%> <%-
-include('../partials/admin/sidebar.ejs')%>
+<%- include('../partials/admin/header.ejs')%>
 <main class="flex-grow-1 min-vh-100 p-3">
   <div class="container">
     <div class="row">
@@ -37,7 +36,7 @@ include('../partials/admin/sidebar.ejs')%>
             </div>
             <div class="col-md-6 p-3">
               <span class="fw-bold">Total Amount : </span>
-              <span class="fw-semibold"><%=order.totalAmount%></span>
+              <span class="fw-semibold">₹<%=order.finalAmount%></span>
             </div>
             <hr />
             <div class="col-md-6 p-3 p-2">
@@ -58,19 +57,27 @@ include('../partials/admin/sidebar.ejs')%>
               <span class="fw-bold">Status : </span>
               <span class="text-success fw-semibold"><%=order.status%></span>
             </div>
-            <%if(order.reqReason){%>
-              <div class="col-md-6 p-3 mb-3"></div>
-              <div class="col-md-6 px-3 mb-3">
+              <div class="col-md-12 px-3 mb-3 alert alert-primary text-primary d-flex justify-content-between align-items-center <%=!order.return.isRequested?'d-none':''%>">
+                <div>
+                <p class="fw-bold">New Request : <span class="fw-semibold text-dark">Customer Requested to Return Order</span></p>
                 <span class="fw-bold">Reason : </span>
-                <span class="fw-semibold"><%=order.reqReason%></span>
+                <span class="fw-semibold text-dark"><%=order.return.reason%></span>
+                </div>
+                <div>
+                  <button onclick="Approve('<%= order._id %>')" class="btn btn-sm btn-primary" >Approve</button>
+                  <button class="btn btn-sm btn-dark" onclick="openRejectModal('<%= order._id %>')">Reject</button>
+
+                </div>
               </div>
-              <%}%>
+              <div class="<%=!order.return?.adminReason?'d-none':''%> text-danger p-3">
+                Return Rejected Reason : <span class="fw-semibold text-dark"><%=order.return.adminReason%></span>
+              </div>
           </div>
         </div>
       </div>
       <div class="col-md-4">
         <div class="d-flex flex-column gap-3">
-          <div style="background:rgb(192, 192, 192)" class="p-3 rounded-4 shadow-sm mb-3">
+          <div style="background:rgb(192, 192, 192)" class="p-4 rounded-4 shadow-sm mb-3">
   <p class="fw-bold fs-5 mb-2">Shipping Address</p>
   <p class="mb-1"><strong>Name:</strong> <%=order.shippingAddress.fullName%></p>
   <p class="mb-1"><strong>Street:</strong> <%=order.shippingAddress.street%></p>
@@ -80,8 +87,26 @@ include('../partials/admin/sidebar.ejs')%>
   <p class="mb-0"><strong>Phone:</strong><%=order.shippingAddress.mobile%></p>
 </div>
 
-          <div class="p-5 rounded-4">
-
+          <div class="p-4 rounded-4" style="background:rgb(192, 192, 192)">
+            <p class="fw-bold fs-5 mb-2">Billing Summary</p>
+            <div class="d-flex justify-content-between">
+              <span>Subtotal:</span>
+              <span>₹<%=order.totalOrderPrice%></span>
+            </div>
+            <div class="d-flex justify-content-between">
+              <span>Coupon Discount:</span>
+              <span class="text-success"><%=order.couponDiscount?order.couponDiscount+'%':'No Coupon'%></span>
+            </div>
+            <div class="d-flex justify-content-between">
+              <span>Discount Amount:</span>
+              <span class="text-danger">- ₹<%=order.totalOrderPrice-order.finalAmount%></span>
+            </div>
+            
+            <hr />
+            <div class="d-flex justify-content-between fw-bold">
+              <span>Total Amount:</span>
+              <span>₹<%=order.finalAmount%></span>
+            </div>
           </div>
         </div>
       </div>
@@ -97,6 +122,7 @@ include('../partials/admin/sidebar.ejs')%>
                 <th class="text-center p-3">Status</th>
                 <th class="text-center p-3">Return</th>
                 <th class="text-center p-3">Return reason</th>
+                <th class="text-center p-3">Return Action</th>
               </tr>
             </thead>
             <tbody>
@@ -130,10 +156,18 @@ include('../partials/admin/sidebar.ejs')%>
                       <%=product.status%>
                   </td>
                   <td class="text-center">
-                    <span class="badge <%=product.isRequested?'bg-primary':product.status == "returned"?'bg-success':'bg-secondary'%>"><%=product.isRequested?'Requested':product.status == "returned"?'Approved':'No request'%></span>
+                    <span class="badge <%=product.return.isRequested?'bg-primary':product.status == "returned"?'bg-success':'bg-secondary'%>"><%=product.return.isRequested?'Requested':product.status == "returned"?'Approved':'No request'%></span>
                   </td>
                   <td class="text-center text-black">
-                    <%=product?.reqReason%>
+                    <%=product?.return.reason||'-'%>
+                </td>
+                <td class="text-center">
+                    <% if(product.return.isRequested && !product.return.adminReason){ %>
+                  <button onclick="Approve('<%= order._id %>', '<%= index %>')" class="btn btn-sm btn-primary" >Approve</button>
+                  <button class="btn btn-sm btn-dark" onclick="openRejectModal('<%= order._id %>', '<%= index %>')">Reject</button>
+                  <% }else{ %>
+                    <span>-</span>
+                  <% } %>
                 </td>
                   </tr>
                   <% }) %>
@@ -143,9 +177,67 @@ include('../partials/admin/sidebar.ejs')%>
 
     </div>
   </div>
+  <!-- Reject Reason Modal -->
+<div class="modal fade" id="rejectReturnModal" tabindex="-1" aria-labelledby="rejectReturnLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form id="rejectReturnForm" method="POST">
+        <div class="modal-header">
+          <h5 class="modal-title" id="rejectReturnLabel">Reject Return Request</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="rejectReason" class="form-label fw-semibold">Reason for Rejection</label>
+            <textarea name="rejectReason" id="rejectReason" class="form-control" rows="3" placeholder="Enter reason for rejecting this return request" required></textarea>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-danger">Reject</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
 </main>
 </div>
 <script>
+   function openRejectModal(orderId, index = null) {
+    let url = index !== null
+      ? `/admin/orders/${orderId}/return/reject?_method=PATCH&index=${index}`
+      : `/admin/orders/${orderId}/return/reject?_method=PATCH`;
+
+    document.getElementById("rejectReturnForm").action = url;
+
+    const modal = new bootstrap.Modal(document.getElementById("rejectReturnModal"));
+    modal.show();
+  }
+
+  function Approve(orderId, index = null) {
+    let url = index !== null
+      ? `/admin/orders/${orderId}/return/approve?index=${index}`
+      : `/admin/orders/${orderId}/return/approve`;
+
+    fetch(url, {
+      method: 'PATCH'
+    })
+    .then(response => {
+      if (response.ok) {
+        location.reload(); // Reload the page to reflect changes
+      } else {
+        alert('Failed to approve return request.');
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      alert('An error occurred while processing the request.');
+    });
+  }
+
   document.querySelectorAll('.order-status-form').forEach(form => {
     const select = form.querySelector('.status-select');
     const button = form.querySelector('.update-btn');
@@ -191,6 +283,7 @@ include('../partials/admin/sidebar.ejs')%>
 
     lockOptions(); // Run on page load
   });
+
 </script>
 
 <%- include('../partials/admin/footer.ejs')%>

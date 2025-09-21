@@ -65,22 +65,19 @@
             <div class="card-body d-flex align-items-center">
               <!-- Radio -->
               <div class="form-check me-3">
-                <input class="form-check-input" type="radio"
-                name="paymentMethod" id="pay_<%= method.code %>" value="<%=
-                method.code %>" <%= i === 0 ? "checked" : "" %>>
+                <input
+                  class="form-check-input" 
+                  type="radio"
+                  name="paymentMethod"
+                  id="pay_<%= method.code %>"
+                  value="<%=method.code %>" 
+                  <%=method.code=='COD'&&total>1000?'disabled':''%>
+                  <%= i==0&&total<1000 || i=== 1 ? "checked" : "" %>>
               </div>
 
-              <!-- Method icon + title -->
               <div class="flex-grow-1">
-                <h6 class="mb-0 fw-semibold">
-                  <% if(method.icon){ %>
-                  <img
-                    src="<%= method.icon %>"
-                    alt="<%= method.name %>"
-                    style="height: 20px"
-                    class="me-2"
-                  />
-                  <% } %> <%= method.name %>
+                <h6 class="mb-0 fw-semibold <%=total>1000&&method.code=='COD'?'text-secondary':''%>">
+                  <%= method.name %>
                 </h6>
               </div>
             </div>
@@ -107,14 +104,17 @@
           </div>
           <% }) %>
 
+          <div class="summary-line text-dark fs-6 fw-semibold">
+            <span>Total Amount</span><span>₹<%=total-deliveryCharge%></span>
+          </div>
           <div class="summary-line text-success">
-            <span>Delivery Charges</span><span>Free</span>
+            <span>Delivery Charges</span><span>₹<%=deliveryCharge||'Free'%></span>
           </div>
           <div class="summary-line text-success">
             <span>Coupon discount percentage</span><span id="couponDiscPerc">0%</span>
           </div>
-          <div class="summary-line text-success">
-            <span>Coupon discount</span><span id="couponDisc">0</span>
+          <div class="summary-line text-dark">
+            <span>Coupon discount</span><span id="couponDisc" class="text-danger">0</span>
           </div>
           <div class="summary-line fw-bold fs-5">
             <span>Total</span><span id="totalAmount">Rs.<%=total%></span>
@@ -127,7 +127,7 @@
               id="coupon"
               placeholder="Discount code"
             />
-            <button id="couponApplyBtn" data-cartId="" class="btn btn-dark">Apply</button>
+            <button id="couponApplyBtn" class="btn btn-dark">Apply</button>
           </div>
           <a id="cancelCoupon" class="text-decoration-none m-0" onclick="cancelCoupon()"></a>
           <div id="couponMessage" class="text-danger small mt-2"></div>
@@ -169,6 +169,7 @@
         <p id="paymentFailedMessage">Your payment could not be processed. Please try again.</p>
       </div>
       <div class="modal-footer">
+        <button type="button" id="retry" class="btn btn-outline-danger d-non" >Retry</button>
         <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
       </div>
     </div>
@@ -240,11 +241,13 @@
             return
             }
           } catch (err) {
-            showPaymentFailedModal("Payment Failed - "+err.message);
+            showPaymentFailedModal("Payment Failed - Due to Internal Error");
             return;
           }
         },
-        modal: { escape: true, ondismiss: () => alert("Payment cancelled.") },
+        modal: { escape: true, ondismiss: async() => {
+          showPaymentFailedModal("Payment failed, Retry") }
+        }
       };
 
       const rzp = new Razorpay(options);
@@ -261,6 +264,11 @@
   }
 });
 
+
+//retry payment
+document.getElementById('retry').addEventListener('click',()=>{
+  document.getElementById('continue').click()
+})
 
   // Function to show payment failed modal
 function showPaymentFailedModal(message = "Your payment could not be processed. Please try again.") {
@@ -299,7 +307,7 @@ function showPaymentFailedModal(message = "Your payment could not be processed. 
       if(data.status){
         document.getElementById('couponApplyBtn').innerHTML = `${data.message}`
         document.getElementById('coupon').readOnly=true
-        document.getElementById('couponDisc').innerHTML = `Rs.${data.discount}`
+        document.getElementById('couponDisc').innerHTML = `-₹${data.discount}`
         document.getElementById('totalAmount').innerHTML = `Rs.${data.finalAmount}`
         document.getElementById('couponDiscPerc').innerHTML = `${data.discPerc}%`
         document.getElementById('cancelCoupon').innerHTML = `Cancel coupon`
