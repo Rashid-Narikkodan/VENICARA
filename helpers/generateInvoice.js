@@ -35,7 +35,7 @@ function generateInvoicePDF(order, res) {
 
   const infoData = [
     ["Date", order.createdAt?.toISOString().split("T")[0] || "-", "TO", order.shippingAddress?.fullName || "-"],
-    ["Order ID", order.orderId, "Street", order.shippingAddress?.street || "-"],
+    ["Order ID", order.orderId, "Street", order.shippingAddress?.stree || "-"],
     ["Customer", order.userId?.name || "-", "City", order.shippingAddress?.city || "-"],
     ["Phone", order.shippingAddress?.mobile || "-", "State", order.shippingAddress?.state || "-"],
     ["Email", order.userId?.email || "-", "PIN", order.shippingAddress?.pin || "-"]
@@ -61,7 +61,8 @@ function generateInvoicePDF(order, res) {
 
   // Table Header
   doc.rect(50, tableTop - 10, 500, 20).fillAndStroke("#C8E6C9", "#2E7D32");
-  doc.fillColor("#555").font("Helvetica-Bold").text("QTY", quantityX, tableTop - 5)
+  doc.fillColor("#555").font("Helvetica-Bold")
+    .text("QTY", quantityX, tableTop - 5)
     .text("DESCRIPTION", descriptionX, tableTop - 5)
     .text("UNIT PRICE", unitPriceX, tableTop - 5)
     .text("LINE TOTAL", lineTotalX, tableTop - 5);
@@ -81,18 +82,18 @@ function generateInvoicePDF(order, res) {
     doc.fillColor("#000").font("Helvetica")
       .text(item.quantity || 0, quantityX, position)
       .text(item.productName || "-", descriptionX, position)
-      .text((item.finalDiscount || 0).toFixed(2), unitPriceX, position)
+      .text((item.finalAmount || 0).toFixed(2), unitPriceX, position)
       .text((item.subtotal || 0).toFixed(2), lineTotalX, position);
-
     position += 20;
   });
 
   // ---- Summary Table ----
   const summaryTop = position + 20;
   const summaryData = [
-    ["Subtotal", (order.totalAmount + (order.discountAmount || 0)).toFixed(2)],
-    ["Discount", (order.discountAmount || 0).toFixed(2)],
-    ["Total", (order.totalAmount || 0).toFixed(2)]
+    ["Total Amount", (order.totalOrderPrice).toFixed(2)],
+    ["Discount", `${order.couponDiscount}%` || 0],
+    ["Final Total", (order.finalAmount || 0).toFixed(2)],
+    ["Status", order.status]
   ];
 
   summaryData.forEach((row, index) => {

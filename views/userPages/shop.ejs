@@ -26,12 +26,145 @@
       transform: scale(1.05);
     }
 
+    @media (max-width: 576px) {
+  .product-card .card-title {
+    font-size: 0.8rem;
+  }
+  .product-card .product-category,
+  .product-card .product-quantity,
+  .product-card .product-price {
+    font-size: 0.6rem;
+  }
+  .product-card img {
+    height: fit-content;
+  }
+}
+
+
   </style>
-  <main class="flex-grow-1 bg-light w-100">
-    <div class="ps-3 mt-5">
-      <div class="row">
-        <!-- filtering sidebar -->
-        <div class="col-md-2 col-2 border-end px-5 py-3" style="min-height:100vh;">
+  <div class="d-flex">
+
+
+    <!-- sidebar filter for mobiles -->
+     <div id="mobileSidebar" class="position-fixed top-0 start-0 vh-100 bg-white shadow d-md-none"
+     style="width: 80%; transform: translateX(-100%); transition: transform 0.3s ease; z-index: 1050;">
+  <nav class="px-4 py-4">
+    <button id="closeSidebar" class="btn btn-sm btn-outline-dark mb-3">Close</button>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+            <h6 class="mb-0 fw-bold">Filters & Sort</h6>
+            <a id="clearAll" href="/shop" class="text-decoration-none small text-black">Clear All</a>
+          </div>
+          <hr>
+          <form action="/shop">
+            <!-- Categories -->
+            <div class="mb-3">
+              <div class="mb-3">
+                <button type="button"
+                  class="btn w-100 d-flex justify-content-between align-items-center p-2 border-0 bg-transparent"
+                  data-bs-toggle="collapse" data-bs-target="#categoryCollapse" aria-expanded="true">
+                  <span class="fw-bold">Categories</span>
+                  <i class="fa-solid fa-caret-down"></i>
+                </button>
+                <div class="collapse" id="categoryCollapse">
+                  <div class="pt-2">
+                    <div class="form-check mb-2">
+                      <input class="form-check-input" type="radio" name="category" id="allProduct" value="all" checked>
+                      <label class="form-check-label small fw-semibold ms-2" for="allProduct">All products</label>
+                    </div>
+
+                    <% categories.forEach(category=> { %>
+
+                      <div class="form-check mb-2">
+                        <input class="form-check-input" value="<%=category._id%>" type="radio" name="category"
+                          id="cat-<%=category.name%>"
+                          <%=selectedCategory&&selectedCategory.toString()===category._id.toString()?'checked':''%>>
+                        <label class="form-check-label small fw-semibold ms-2" for="cat-<%=category.name%>">
+                          <%=category.name%>
+                        </label>
+                      </div>
+                      <% }) %>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <hr>
+            <!-- Price -->
+            <div class="mb-3">
+              <div class="mb-3">
+                <button type="button"
+                  class="btn w-100 d-flex justify-content-between align-items-center p-2 border-0 bg-transparent"
+                  data-bs-toggle="collapse" data-bs-target="#priceCollapse" aria-expanded="true">
+                  <span class="fw-bold">Price</span>
+                  <i class="fa-solid fa-caret-down"></i>
+                </button>
+                <div class="collapse row justify-content-between" id="priceCollapse">
+                  <div class="mb-3 col-5 p-0">
+                    <label for="minPrice" class="form-label">Min Price</label>
+                    <input type="number" class="form-control no-arrows p-1" value="<%=minPrice%>" name="minPrice"
+                      id="minPrice" placeholder="0">
+                  </div>
+                  <div class="mb-3 col-5 p-0">
+                    <label for="maxPrice" class="form-label">Max Price</label>
+                    <input type="number" class="form-control no-arrows p-1" name="maxPrice" value="<%=maxPrice%>"
+                      id="maxPrice" placeholder="20000">
+                  </div>
+                </div>
+              </div>
+            </div>
+            <hr>
+            <!-- Sort By -->
+            <div class="mb-3">
+              <div class="mb-3">
+                <button type="button"
+                  class="btn w-100 d-flex justify-content-between align-items-center p-2 border-0 bg-transparent"
+                  data-bs-toggle="collapse" data-bs-target="#sortCollapse" aria-expanded="true">
+                  <span class="fw-bold">Sort by</span>
+                  <i class="fa-solid fa-caret-down"></i>
+                </button>
+                <div class="collapse " id="sortCollapse">
+                  <div class="pt-2">
+                    <div class="form-check mb-2">
+                      <input class="form-check-input" type="radio" name="sort" value="newest" id="sortNewest"
+                        <%=sort==='newest' ? 'checked' : 'checked' %> >
+                      <label class="form-check-label small fw-semibold ms-2" for="sortNewest">Newest</label>
+                    </div>
+                    <div class="form-check mb-2">
+                      <input class="form-check-input" type="radio" name="sort" value="asc" id="sortPriceAsc"
+                        <%=sort==='asc' ? 'checked' : '' %>>
+                      <label class="form-check-label small fw-semibold ms-2" for="sortPriceAsc">Price: Low To
+                        High</label>
+                    </div>
+                    <div class="form-check mb-2">
+                      <input class="form-check-input" type="radio" name="sort" value="desc" id="sortPriceDesc"
+                        <%=sort==='desc' ? 'checked' : '' %>>
+                      <label class="form-check-label small fw-semibold ms-2" for="sortPriceDesc">Price: High To
+                        Low</label>
+                    </div>
+                    <div class="form-check mb-2">
+                      <input class="form-check-input" type="radio" name="sort" value="az" id="sortAZ" <%=sort==='az'
+                        ? 'checked' : '' %>>
+                      <label class="form-check-label small fw-semibold ms-2" for="sortAZ">Alphabetic: A-Z</label>
+                    </div>
+                    <div class="form-check mb-2">
+                      <input class="form-check-input" type="radio" name="sort" value="za" id="sortZA" <%=sort==='za'
+                        ? 'checked' : '' %>>
+                      <label class="form-check-label small fw-semibold ms-2" for="sortZA">Alphabetic: Z-A</label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div>
+              <button type="submit" class="btn btn-dark w-100">Apply Filters</button>
+            </div>
+          </form>
+  </nav>
+</div>
+
+
+
+    <!-- filtering sidebar -->
+        <nav class="col-md-2 col-6 px-5 py-5 d-none d-md-block" style="min-height:100vh;height:fit-content">
           <div class="d-flex justify-content-between align-items-center mb-3">
             <h6 class="mb-0 fw-bold">Filters & Sort</h6>
             <a id="clearAll" href="/shop" class="text-decoration-none small text-black">Clear All</a>
@@ -140,80 +273,86 @@
               <button type="submit" class="btn btn-dark w-100">Apply Filters</button>
             </div>
           </form>
+        </nav>
+  <main class="flex-grow-1 bg-light w-100">
+      <div class="row">
+        <div id="mobileFilterBtn" class="col-12 d-md-none text-center p-2 border-bottom">
+          <span>Filter & Sort</span>
         </div>
+
         <!-- sidebar end -->
-        <div class="col-md-10">
-          <div class="text-center p-3">
-            <h4 style="font-family:Robot 'Courier New', Courier, monospace;">All Products</h4>
-            <p class="text-muted fs-5 mt-4">Fresh Arrivals. One Scent. Every Identity. Discover What’s New.</p>
+        <div class="col-md-12">
+          <div class="text-center px-3">
+            <p class="fs-3 fw-bold m-2 p-2 d-none d-md-block">All Products</p>
+            <p class="fs-5 fw-bold m-0 p-2 d-md-none">All Products</p>
+            <p class="text-muted fs-5 mb-4 mt-0 d-none d-md-block">Fresh Arrivals. One Scent. Every Identity. Discover What’s New.</p>
+            <p class="text-muted d-md-none">Fresh Arrivals. One Scent. Every Identity. Discover What’s New.</p>
           </div>
           <div class="container">
-            <div class="row gap-5 justify-content-center">
+            <div class="row gap-md-5 justify-content-center">
               <!-- open -->
               <%if(products.length===0){%>
                 <div class="text-black text-center mt-5">
                   <span class="fs-3 text-danger fw-bold">Products not found</span>
                 </div>
                 <%}%>
-                  <% products.forEach(product=> { %>
-                    <div class="col-md-3">
-                      <a href="/products/<%=product._id%>"
-                        class="card text-decoration-none shadow p-3 rounded-4 border-0 position-relative"
-                        style="max-width: 18rem;background:linear-gradient(to right, #e6cc6b, #c1a86e);">
-                        <img src="<%=product.images[0]%>" loading="eager" class="card-img-top rounded-4" alt="Product Image">
-                        <div class="position-absolute wishlist-btn p-2" 
-                            data-product-id="<%= product._id %>" 
-                            data-variant-id="<%=product.variants.reduce((min, v) => {
-                              return parseInt(v.volume) < parseInt(min.volume) ? v : min
-                            }, product.variants[0])._id %>"  
-                            style="right:1rem;bottom:6.5rem">
-                             <% if (wishlistIds.length && wishlistIds.includes(product.variants.reduce((min, v) => {
-                              return parseInt(v.volume) < parseInt(min.volume) ? v : min
-                            }, product.variants[0])._id.toString())) { %>
-                                  <i class="fa-solid fa-heart fs-5 text-dark"></i> <!-- filled black heart -->
-                                <% } else { %>
-                                  <i class="fa-regular fa-heart fs-5"></i> <!-- empty heart -->
-                                <% } %>
-                        </div>
-                        <div class="card-body p-0 pt-3">
-                          <h6 class="card-title mb-1">
-                            <%=product.name%>
-                          </h6>
-                          <p class="text-muted mb-2" style="font-size:0.85rem;">Category: <%=product.category.name%>
-                          </p>
-                          <p class="text-muted mb-2 justify-content-between d-flex align-items-center"
-                            style="font-size:0.85rem;">
-                            Quantity: <%=Math.min(...product.variants.map(v=>v.volume)) %>
-                              <!-- change to dynamic - rating average -->
-                              <span class="mb-2 text-end" style="font-size:0.85rem;">
-                                <span class="text-dark">★★★★☆</span>
-                                <span class="text-muted">(200)</span>
-                              </span>
-                          </p>
-                          <p class="mb-0 justify-content-between d-flex align-items-center">
-                            <span>
-                              <span class="text-success fw-bold">₹<%=Math.min(...product.variants.map(v=>
-                                 v.finalAmount))%></span>
-                              <span class="text-muted text-decoration-line-through">₹
-                                <%=Math.min(...product.variants.map(v=>v.basePrice))%></span>
-                                <% const perc=product.variants.reduce((min, v) => { 
+                  <% products.forEach(product => { %>
+                    <div class="col-6 col-md-4 col-lg-3 mb-4"> <!-- Responsive columns -->
+                      <a href="/products/<%= product._id %>"
+                        class="card text-decoration-none shadow p-2 rounded-4 border-0 position-relative product-card"
+                        style="background: linear-gradient(to right, #e6cc6b, #c1a86e);">
+
+                        <img src="<%= product.images[0] %>" loading="eager" class="rounded-4 img-fluid" alt="Product Image" >
+
+                        
+                        <div class="card-body p-2 pt-3">
+                          <div class="d-flex justify-content-between align-items-center">
+                            <span class="card-title mb-1 product-name">
+                              <%= product.name %>
+                            </span>
+                              <span class="wishlist-btn p-2" 
+                                  data-product-id="<%= product._id %>" 
+                                  data-variant-id="<%= product.variants.reduce((min, v) => {
+                                    return parseInt(v.volume) < parseInt(min.volume) ? v : min
+                                  }, product.variants[0])._id %>"
+                                  style="right:1rem;bottom:6.5rem">
+                                <% if (wishlistIds.length && wishlistIds.includes(product.variants.reduce((min, v) => {
                                   return parseInt(v.volume) < parseInt(min.volume) ? v : min
-                                  }, product.variants[0]).finalDiscount
-                                  %>
+                                }, product.variants[0])._id.toString())) { %>
+                                  <i class="fa-solid fa-heart fs-5 text-dark"></i>
+                                <% } else { %>
+                                  <i class="fa-regular fa-heart fs-5"></i>
+                                <% } %>
+                            </span>
+                            </div>
+                          <p class="text-muted mb-1 product-category" style="font-size:0.85rem;">Category: <%= product.category.name %></p>
 
-                              <span class="text-success fw-bold">
-                                <%=perc?perc+'%':''%>
-                              </span>
+                          <p class="text-muted mb-1 d-flex justify-content-between align-items-center product-quantity" style="font-size:0.85rem;">
+                            Quantity: <%= Math.min(...product.variants.map(v => v.volume)) %>
+                            <span class="text-end" style="font-size:0.85rem;">
+                              <!-- <span class="text-dark">★★★★☆</span>
+                              <span class="text-muted">(200)</span> -->
+                            </span>
+                          </p>
 
+                          <p class="mb-0 d-flex justify-content-between align-items-center product-price">
+                            <span>
+                              <span class="text-success fw-bold">₹<%= Math.min(...product.variants.map(v => v.finalAmount)) %></span>
+                              <span class="text-muted text-decoration-line-through">₹<%= Math.min(...product.variants.map(v => v.basePrice)) %></span>
+                              <% const perc = product.variants.reduce((min, v) => { 
+                                return parseInt(v.volume) < parseInt(min.volume) ? v : min
+                              }, product.variants[0]).finalDiscount %>
+                              <span class="text-success fw-bold"><%= perc ? perc + '%' : '' %></span>
                             </span>
                           </p>
                         </div>
                       </a>
                     </div>
-                    <% }) %>
+                  <% }) %>
                       <!-- close -->
             </div>
           </div>
+        </div>
         </div>
 
         <!-- pagination -->
@@ -279,8 +418,8 @@
     </ul>
   </nav>
 </div>
-
-  </main>
+</main>
+</div>
     <script>
   document.addEventListener("click", async (e) => {
   const btn = e.target.closest(".wishlist-btn");
@@ -313,6 +452,26 @@
   } catch (err) {
     console.error("Wishlist error:", err);
     alert("Server error while adding to wishlist");
+  }
+});
+
+//responsive filter triggering button for mobiles
+const mobileSidebar = document.getElementById('mobileSidebar');
+const mobileFilterBtn = document.getElementById('mobileFilterBtn');
+const closeSidebar = document.getElementById('closeSidebar');
+
+mobileFilterBtn.addEventListener('mousedown', () => {
+  mobileSidebar.style.transform = 'translateX(0)';
+});
+
+closeSidebar.addEventListener('mousedown', () => {
+  mobileSidebar.style.transform = 'translateX(-100%)';
+});
+
+// Optional: close sidebar if clicked outside
+document.addEventListener('mousedown', (e) => {
+  if (!mobileSidebar.contains(e.target) && !mobileFilterBtn.contains(e.target)) {
+    mobileSidebar.style.transform = 'translateX(-100%)';
   }
 });
 

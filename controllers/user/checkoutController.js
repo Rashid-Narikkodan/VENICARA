@@ -54,10 +54,10 @@ const showAddress = async (req, res) => {
       }
     });
     const totalCartAmount=items.reduce((sum,p)=>{
-      console.log(p.variant.finalAmount)
       return sum+p.variant.finalAmount
     },0)
-    req.session.order.deliveryCharge = totalCartAmount>3000?0:200
+    console.log(totalCartAmount)
+    req.session.order.deliveryCharge = totalCartAmount>7000?0:500
 
     res.render("userPages/checkoutAddress", { addresses, items,deliveryCharge:req.session.order.deliveryCharge });
   } catch (error) {
