@@ -28,19 +28,19 @@
 
     // Aggregate dashboard stats
     const totalSalesAgg = await Order.aggregate([
-      { $match: { createdAt: { $gte: startDate, $lte: endDate } } },
+      { $match: { createdAt: { $gte: startDate, $lte: endDate },'payment.status':'paid' } },
       { $group: { _id: null, total: { $sum: "$finalAmount" } } }
     ]);
     
     //aggregate total sold products count
     const productsSoldAgg = await Order.aggregate([
-      { $match: { createdAt: { $gte: startDate, $lte: endDate } } },
+      { $match: { createdAt: { $gte: startDate, $lte: endDate },'payment.status':'paid' } },
       { $unwind: "$products" },
       { $group: { _id: null, count: { $sum: "$products.quantity" } } }
     ]);
 
     const topProducts=await Order.aggregate([
-        { $match: { createdAt: { $gte: startDate, $lte: endDate } } },
+        { $match: { createdAt: { $gte: startDate, $lte: endDate },'payment.status':'paid' } },
         {$unwind:'$products'},
         { $group: { _id: '$products.productId', totalSold: { $sum: "$products.quantity" } } },
         {$lookup:{from:'products',localField:'_id',foreignField:'_id',as:'products'}},
@@ -50,10 +50,10 @@
     ])
 
     //dashbord datas
-    const totalOrders = await Order.countDocuments({ createdAt: { $gte: startDate, $lte: endDate } });
+    const totalOrders = await Order.countDocuments({ createdAt: { $gte: startDate, $lte: endDate },'payment.status':'paid' });
     const totalSales = totalSalesAgg[0]?.total || 0;
     const productsSold = productsSoldAgg[0]?.count || 0;
-    const newCustomers = await Customer.countDocuments({ createdAt: { $gte: startDate, $lte: endDate } });
+    const newCustomers = await Customer.countDocuments({ createdAt: { $gte: startDate, $lte: endDate },'payment.status':'paid' });
     
     return {
         totalOrders,

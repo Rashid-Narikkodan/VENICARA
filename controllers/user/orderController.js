@@ -51,8 +51,14 @@ const cancelOrder = async (req, res) => {
     if (["WALLET", "RAZORPAY"].includes(order.payment.method)) {
       let wallet = await Wallet.findOne({ userId });
       if (!wallet) wallet = new Wallet({ userId, balance: 0 });
+
       let refundAmount=order.finalAmount
-      wallet.balance += refundAmount;
+
+      if(order.couponApplied){
+        refundAmount=order.finalAmount
+      }
+
+      wallet.balance = Math.round((wallet.balance + refundAmount) * 100) / 100;
       await wallet.save();
 
       await WalletTransaction.create({
@@ -69,7 +75,6 @@ const cancelOrder = async (req, res) => {
       order.refundAmount += refundAmount;
       order.finalAmount = 0
     }
-
 
     order.status = "cancelled";
     await order.save();
@@ -169,7 +174,7 @@ const cancelProduct = async (req, res) => {
       product.refundAmount = refundAmount;
       order.refundAmount += refundAmount;
 
-      wallet.balance += refundAmount;
+      wallet.balance = Math.round((wallet.balance + refundAmount) * 100) / 100;;
       await wallet.save();
 
       await WalletTransaction.create({
@@ -284,8 +289,6 @@ const downloadInvoice = async (req, res) => {
     handleError(res, "downloadInvoice", error);
   }
 };
-
-module.exports = downloadInvoice;
 
 const orderDetails=async(req,res)=>{
   try{

@@ -38,6 +38,7 @@ const showSalesReport = async (req, res) => {
     const delivered = {
       updatedAt: { $gte: startDate, $lte: endDate },
       status: "delivered",
+      'payment.status': "paid"
     };
     const cancelled = {
       updatedAt: { $gte: startDate, $lte: endDate },
@@ -45,7 +46,7 @@ const showSalesReport = async (req, res) => {
     };
     const returned = {
       updatedAt: { $gte: startDate, $lte: endDate },
-      status: "returned",
+      'return.status': "approved",
     };
     const refunded = {
       updatedAt: { $gte: startDate, $lte: endDate },
@@ -82,7 +83,8 @@ const showSalesReport = async (req, res) => {
       const productDiscount = order.products.reduce((discSum, product) =>discSum+(product.basePrice-product.finalAmount)*product.quantity,0);
       const orderDiscount = (order.totalOrderPrice - order.finalAmount)+productDiscount;
         return sum + orderDiscount;
-      }, 0);    const totalRefund = await Order.find(refunded).then((refundOrders)=>refundOrders.reduce((sum, order) => sum + order.totalAmount, 0));
+      }, 0);    
+    const totalRefund = await Order.find(refunded).then((refundOrders)=>refundOrders.reduce((sum, order) => sum + order.refundAmount, 0));
     const AverageOrderValue = totalOrders ? totalRevenue / totalOrders : 0;
     const countUser = await Order.distinct("userId",delivered);
     const totalCustomers = countUser.length;

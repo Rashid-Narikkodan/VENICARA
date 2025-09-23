@@ -284,6 +284,7 @@ const handleOrderStatus = async (req, res) => {
 
     if(status==='delivered'){
       order.return.returnTimeLimit = new Date(Date.now() + 2*24*60*60*5000) // 2 days from now
+      order.payment.status = 'paid'
     }
 
     await order.save();
@@ -364,7 +365,6 @@ const approveReturn = async (req, res) => {
       product.return.isRequested = false;
       product.return.status = "approved";
 
-      if(["WALLET","RAZORPAY"].includes(order.payment.method)){
         const wallet = await Wallet.findOne({userId})
         if(!wallet) wallet = new Wallet.create({userId,balance:0})
 
@@ -385,7 +385,7 @@ const approveReturn = async (req, res) => {
         })
         order.finalAmount -= refundAmount
         order.refundAmount += refundAmount
-      }
+      
       
       
       const allReturned = order.products.every((p) => p.status === "returned");
@@ -405,8 +405,7 @@ const approveReturn = async (req, res) => {
         }
       });
 
-      //refund is pre-paid
-       if(["WALLET","RAZORPAY"].includes(order.payment.method)){
+      //refund for all COD,RAZORPAY,WALLET
         const wallet = await Wallet.findOne({userId})
         if(!wallet) wallet = new Wallet.create({userId,balance:0})
           
@@ -423,7 +422,7 @@ const approveReturn = async (req, res) => {
           })
           order.finalAmount-=refundAmount
           order.refundAmount += refundAmount
-      }
+          order.payment.status = 'refunded'
     }
     await order.save();
     return res.status(200).json({ success: true, message: "Return request approved" });

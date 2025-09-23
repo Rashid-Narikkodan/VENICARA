@@ -7,7 +7,7 @@ async function getChartData(filter, field) {
 
   // helper: build pipeline per iteration
   function buildPipeline(start, end) {
-    const pipeline = [{ $match: { createdAt: { $gte: start, $lte: end } } }];
+    const pipeline = [{ $match: { createdAt: { $gte: start, $lte: end },'payment.status':'paid' } }];
     if (field === "finalAmount") {
       pipeline.push({ $group: { _id: null, count: { $sum: `$${field}` } } });
     } else {
