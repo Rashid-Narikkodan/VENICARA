@@ -128,7 +128,6 @@ const showSalesReport = async (req, res) => {
       totalProductCancelled,
       totalProductReturned
     };
-    console.log(data)
     req.session.salesReport = { data, filter, startDate, endDate, orders };
 
     return res.render("adminPages/salesReport", {

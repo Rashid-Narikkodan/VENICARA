@@ -241,7 +241,7 @@ const applyCoupon = async (req, res) => {
     );
 
     const lineTotal = cartItems.reduce((ac, cu) => ac + (cu.lineTotal || 0), 0);
-    const discount = Math.round((lineTotal * coupon.discount) / 100);
+    const discount = parseFloat((lineTotal * coupon.discount/ 100).toFixed(2));
     const finalAmount = (lineTotal - discount) + req.session.order.deliveryCharge;
     const discPerc = coupon.discount;
     res.json({
@@ -312,7 +312,7 @@ const handlePlaceOrder = async (req, res) => {
         variantId: item.variantId,
         productName: item.productId.name,
         basePrice: Number(variant.basePrice),
-        finalAmount: Number(variant.finalAmount),
+        finalAmount: parseFloat(variant.finalAmount),
         discount: Number(variant.finalDiscount || 0),
         quantity: item.quantity,
         subtotal,
@@ -335,7 +335,7 @@ const handlePlaceOrder = async (req, res) => {
 
       if (coupon) {
         couponDiscount = coupon.discount;
-        couponAmount = Math.floor((coupon.discount / 100) * totalOrderPrice) || 0;
+        couponAmount = parseFloat(((coupon.discount / 100) * totalOrderPrice).toFixed(2)) || 0;
         finalAmount-=couponAmount;
 
         await Coupon.updateOne(
@@ -357,7 +357,7 @@ const handlePlaceOrder = async (req, res) => {
 
     if (paymentMethod === "RAZORPAY") {
       const options = {
-        amount: Math.round(finalAmount * 100),
+        amount: finalAmount * 100,
         currency: "INR",
         receipt: `rcpt_${Date.now()}`,
         payment_capture: 1,
@@ -376,7 +376,7 @@ const handlePlaceOrder = async (req, res) => {
         });
         return res.json({ status: false, message: "Insufficient balance" });
       }
-      let lastBalance = (wallet.balance -= finalAmount);
+      let lastBalance = parseFloat((wallet.balance -= finalAmount).toFixed(2));
       await wallet.save();
       await WalletTransaction.create({
         userId: req.session.user.id,
