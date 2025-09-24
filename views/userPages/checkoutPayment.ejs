@@ -197,14 +197,9 @@
       body: JSON.stringify({ paymentMethod}),
     });
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(errorText || "Failed to place order.");
-    }
-
     const data = await response.json();
 
-    if (!data.status) throw new Error(data.message || "Failed to place order.");
+    if (!data.status) return showPaymentFailedModal(`Payment Failed :- ${data.message}`);
 
     // If Razorpay, open Razorpay checkout
     if (paymentMethod === "RAZORPAY" && data.razorpayOrderId) {
@@ -258,17 +253,13 @@
     // For non-Razorpay methods, redirect to order page
     window.location.href = `/checkout/placeOrder/${data.orderId}`;
   } catch (err) {
-    console.error("Place Order Error:", err);
     showPaymentFailedModal("Payment Failed - "+err.message);
     return
   }
 });
 
 
-//retry payment
-document.getElementById('retry').addEventListener('click',()=>{
-  document.getElementById('continue').click()
-})
+
 
   // Function to show payment failed modal
 function showPaymentFailedModal(message = "Your payment could not be processed. Please try again.") {

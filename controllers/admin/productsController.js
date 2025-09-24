@@ -250,6 +250,7 @@ const editProduct = async (req, res) => {
       if (!volumes[i] && !basePrices[i] && !disc[i] && !stocks[i])
         continue;
       variants.push({
+        _id:product.variants[i]?._id,
         volume: volumes[i] || product.variants[i]?.volume || "",
         stock: Number(stocks[i] || product.variants[i]?.stock || 0),
         basePrice: Number(basePrices[i] || product.variants[i]?.basePrice || 0),

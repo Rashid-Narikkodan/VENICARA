@@ -57,7 +57,7 @@ const showHome = async (req, res) => {
 const showShop = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 6;
+    const limit = parseInt(req.query.limit) || 9;
     let { maxPrice, minPrice, sort, category } = req.query;
 
     if (Object.keys(req.query).length === 0) {

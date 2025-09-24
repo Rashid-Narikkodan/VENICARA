@@ -1,154 +1,128 @@
 <%-include('../partials/user/header.ejs')%>
 
 <style>
-  body {
-    background-color: #fff;
-    font-family: Arial, sans-serif;
-  }
-  .shopping-bag-title {
-    font-weight: bold;
-    text-align: center;
-    margin: 30px 0;
-    font-size: 1.8rem;
-    letter-spacing: 2px;
-  }
-  .card {
-    border: none;
-  }
-  .item-img {
-    max-width: 100px;
-  }
-  .order-summary {
-    background: #f5f5f5;
-    padding: 20px;
-    border-radius: 6px;
-  }
-  .order-summary h5 {
-    font-weight: bold;
-    margin-bottom: 20px;
-  }
-  .order-summary .summary-line {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: .5rem;
-  }
-  .summary-line{
-    font-size: x-small;
-  }
+body {
+  background-color: #fff;
+  font-family: Arial, sans-serif;
+}
 
-  .apply-btn {
-    background: black;
-    color: white;
-    border: none;
-  }
-  .in-stock {
-    color: green;
-    font-size: 0.9rem;
-  }
-  .remove-btn {
-    font-size: 0.85rem;
-    color: red;
-    background: none;
-    border: none;
-    padding: 0;
-    text-decoration: underline;
-    cursor: pointer;
-  }
+.shopping-bag-title {
+  font-weight: bold;
+  text-align: center;
+  margin: 30px 0;
+  font-size: 1.8rem;
+  letter-spacing: 2px;
+}
+
+.card {
+  border: none;
+}
+
+.item-img {
+  max-width: 100px;
+}
+
+.order-summary {
+  background: #f5f5f5;
+  padding: 20px;
+  border-radius: 6px;
+}
+
+.order-summary h5 {
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+.summary-line {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+  font-size: x-small;
+}
+
+.apply-btn {
+  background: black;
+  color: white;
+  border: none;
+}
+
+.in-stock {
+  color: green;
+  font-size: 0.9rem;
+}
+
+.remove-btn {
+  font-size: 0.85rem;
+  color: red;
+  background: none;
+  border: none;
+  padding: 0;
+  text-decoration: underline;
+  cursor: pointer;
+}
 </style>
 
 <main style="min-height:80vh">
   <div class="shopping-bag-title">SHOPPING BAG</div>
   <div class="px-5">
-  <div class="row">
-      <!-- Left Side: Shopping Items -->
-       <%if(items.length>0) {%>
+    <div class="row">
+      <% if(items.length>0) { %>
       <div class="col-lg-9">
-     <% items.forEach((item,index) => {%>
-        <div class="card mb-4 p-3 shadow-sm">
-          <div class="row align-items-center">
-            <div class="col-md-2">
-              <a href="/products/<%=item.product._id%>">
-              <img
-                src="<%= item.product.images[0] %>"
-                class="img-fluid item-img rounded-4"
-                alt="<%= item.product.name %>"
-              />
-              </a>
-            </div>
-            <div class="col-md-6">
-              <h6 class="mb-1"><%= item.product.name %></h6>
-              <small><%= item.variant.volume %> ML</small>
-              <p class="text-muted">Qty : <%=item.quantity%></p>
-              <p class="mt-0 mb-0">
-                <span class="text-muted">Arrives in 3–5 business days </span>
-                <% if(item.variant.stock > 0){ %>
-                <span class="in-stock">In stock</span>
-                <% } else { %>
-                <span class="text-danger">Out of stock</span>
-                <% } %>
-              </p>
-              <small class="text-muted">Free Delivery</small><br />
-            </div>
-            <div class="col-md-4 text-end">
-              <p class="fw-bold">Rs.<%= item.variant.finalAmount%></p>
-              <div class="d-flex align-items-center justify-content-end mb-3">
-                <button
-                  class="btn btn-outline-secondary btn-sm me-2 decrease"
-                  data-cart-id="<%= item._id %>"
-                >
-                  -
-                </button>
-                <span><%= item.quantity %></span>
-                <button
-                  class="btn btn-outline-secondary btn-sm ms-2 increase"
-                  data-cart-id="<%= item._id %>"
-                >
-                  +
-                </button>
+        <% items.forEach((item, index) => { %>
+          <div class="card mb-4 p-3 shadow-sm" data-stock="<%= item.variant.stock %>">
+            <div class="row align-items-center">
+              <div class="col-md-2">
+                <a href="/products/<%=item.product._id%>">
+                  <img src="<%= item.product.images[0] %>" class="img-fluid item-img rounded-4" alt="<%= item.product.name %>" />
+                </a>
               </div>
-              <p class="text-muted mb-1">Subtotal: Rs.<%= item?.lineTotal %></p>
-              <!-- Remove button -->
-              <form
-                action="/cart/remove/<%= item._id %>?_method=DELETE"
-                method="POST"
-                class="d-block"
-              >
-                <button
-                type="submit"
-                class="btn btn-dark py-1 px-2 text-end"
-                style="font-size: small"
-                >
-                  Remove
-                </button>
-              </form>
+              <div class="col-md-6">
+                <h6 class="mb-1"><%= item.product.name %></h6>
+                <small><%= item.variant.volume %> ML</small>
+                <p class="text-muted qty-text">Qty : <%=item.quantity%></p>
+                <p class="mt-0 mb-0">
+                  <span class="text-muted">Arrives in 3–5 business days </span>
+                  <span id="stock" class="<%= item.variant.stock >= item.quantity ? 'text-success' : 'text-danger' %>">
+                    <%= item.variant.stock >= item.quantity
+                        ? 'In stock'
+                        : item.variant.volume == 0
+                        ? 'Out of stock'
+                        : `Out of stock - few item${item.variant.stock > 1 ? 's' : ''} left` %>
+                  </span>
+
+                </p>
+                <small class="text-muted">Free Delivery</small><br />
+              </div>
+              <div class="col-md-4 text-end">
+                <p class="fw-bold">Rs.<%= item.variant.finalAmount || 0 %></p>
+                <div class="d-flex align-items-center justify-content-end mb-3">
+                  <button class="btn btn-outline-secondary btn-sm me-2 decrease" data-cart-id="<%= item._id %>">-</button>
+                  <span class="quantity"><%= item.quantity %></span>
+                  <button class="btn btn-outline-secondary btn-sm ms-2 increase" data-cart-id="<%= item._id %>" <% if(item.variant.stock === 0) { %> disabled <% } %>>+</button>
+                </div>
+                <p class="text-muted mb-1 subtotal">Subtotal: Rs.<%= ((item.variant.finalAmount || 0) * item.quantity).toLocaleString() %></p>
+                <form action="/cart/remove/<%= item._id %>?_method=DELETE" method="POST">
+                  <button type="submit" class="btn btn-dark py-1 px-2 text-end" style="font-size: small">Remove</button>
+                </form>
+              </div>
             </div>
           </div>
-        </div>
         <% }) %>
       </div>
 
-      <!-- Right Side: Order Summary -->
+      <!-- Order Summary -->
       <div class="col-md-3">
         <div class="order-summary shadow-sm">
           <h5>Order Summary</h5>
-
-          <% items.forEach((item)=>{ %>
-          <div class="summary-line" data-cart-id="<%= item._id %>" data-name="<%= item.product.name %>" data-volume="<%= item.variant.volume %>">
-            <span
-              ><%= item.quantity %> × <%= item.product.name %> (<%=
-              item.variant.volume %>ml)</span
-            >
-            <span
-              >Rs.<%= ((item.variant.finalAmount) *
-              item.quantity).toLocaleString() %></span
-            >
-          </div>
+          <% items.forEach(item => { %>
+            <div class="summary-line" data-cart-id="<%= item._id %>" data-name="<%= item.product.name %>" data-volume="<%= item.variant.volume %>">
+              <span><%= item.quantity %> × <%= item.product.name %> (<%= item.variant.volume %>ml)</span>
+              <span>Rs.<%= ((item.variant.finalAmount || 0) * item.quantity).toLocaleString() %></span>
+            </div>
           <% }) %>
-
           <div class="summary-line text-success">
             <span>Delivery Charges</span><span>Free</span>
           </div>
-
           <div class="summary-line fw-bold fs-5">
             <span>Total</span><span>Rs.<%= total.toLocaleString() %></span>
           </div>
@@ -156,128 +130,108 @@
             <a href="/checkout/address" class="btn fw-bold btn-dark text-decoration-none w-100">CONTINUE</a>
           </div>
         </div>
-        </div>
-          <%}else{%>
+      </div>
+
+      <% } else { %>
         <div class="col-12 text-center my-5">
-    <h4 class="mb-3">Your cart is empty</h4>
-    <p class="text-muted">Looks like you haven’t added anything to your cart yet.</p>
-    <a href="/shop" class="btn btn-dark mt-3">Start Shopping</a>
-  </div>
-      <%}%>
+          <h4 class="mb-3">Your cart is empty</h4>
+          <p class="text-muted">Looks like you haven’t added anything to your cart yet.</p>
+          <a href="/shop" class="btn btn-dark mt-3">Start Shopping</a>
+        </div>
+      <% } %>
     </div>
   </div>
 </main>
+
 <script>
-  document.querySelectorAll(".increase").forEach((btn) => {
+  document.querySelectorAll(".increase").forEach(btn => {
     btn.addEventListener("click", async () => {
       const cartId = btn.dataset.cartId;
-      const quantitySpan = btn.previousElementSibling;
-      const decBtn = btn.parentElement.querySelector(".decrease"); // find the - button
-
-      const currentQuantity = Number(quantitySpan.textContent);
-
-      // Block fetch if already max or stock is 0 or less
-      const stockElem = btn.closest(".card").querySelector(".in-stock, .text-danger");
-      const isOutOfStock = stockElem && stockElem.classList.contains("text-danger");
-      if (currentQuantity >= 5 || isOutOfStock) {
-        btn.disabled = true;
-        return;
-      }
+      const card = btn.closest(".card");
+      const quantitySpan = card.querySelector(".quantity");
+      const decBtn = card.querySelector(".decrease");
+      const stock = Number(card.dataset.stock);
 
       try {
-        const res = await fetch(`/cart/increase/${cartId}`, {
-          method: "PATCH",
-        });
+        const res = await fetch(`/cart/increase/${cartId}`, { method: "PATCH" });
         const data = await res.json();
 
         if (data.success) {
           quantitySpan.textContent = data.newQuantity;
+          decBtn.disabled = data.newQuantity <= 1;
+          const maxQty = Math.min(5, stock);
+          btn.disabled = data.newQuantity >= maxQty;
 
-          if (data.newQuantity >= 5) btn.disabled = true;
-          if (data.newQuantity > 1) decBtn.disabled = false;
+          card.querySelector(".qty-text").textContent = `Qty : ${data.newQuantity}`;
+          card.querySelector(".subtotal").textContent = `Subtotal: Rs.${data.lineTotal.toLocaleString()}`;
 
-          const qtyPElem = btn.closest(".card").querySelector("p.text-muted");
-          qtyPElem.textContent = `Qty : ${data.newQuantity}`;
-
-          // update subtotal
-          const lineTotalElem = btn
-            .closest(".col-md-4")
-            .querySelector("p.text-muted.mb-1");
-          lineTotalElem.textContent = `Subtotal: Rs.${data.lineTotal}`;
-
-          // update summary line
+          // Update summary line
           const summaryLine = document.querySelector(`.summary-line[data-cart-id="${cartId}"]`);
-          if (summaryLine) {
+          if(summaryLine){
             const spans = summaryLine.querySelectorAll("span");
             spans[0].textContent = `${data.newQuantity} × ${summaryLine.dataset.name} (${summaryLine.dataset.volume}ml)`;
             spans[1].textContent = `Rs.${data.lineTotal.toLocaleString()}`;
           }
 
-          // update total
-          document.querySelector(
-            ".summary-line.fw-bold.fs-5 span:last-child"
-          ).textContent = `Rs.${data.total.toLocaleString()}`;
-        }else{
-          alert(data.message)
+          document.querySelector(".summary-line.fw-bold.fs-5 span:last-child").textContent = `Rs.${data.total.toLocaleString()}`;
+        } else {
+          alert(data.message);
         }
-      } catch (err) {
-        console.error(err);
-      }
+      } catch(err) { console.error(err); }
     });
   });
 
-  document.querySelectorAll(".decrease").forEach((btn) => {
+  document.querySelectorAll(".decrease").forEach(btn => {
     btn.addEventListener("click", async () => {
       const cartId = btn.dataset.cartId;
-      const quantitySpan = btn.nextElementSibling;
-      const incBtn = btn.parentElement.querySelector(".increase"); // find the + button
-
-      const currentQuantity = Number(quantitySpan.textContent);
-
-      // Block fetch if already min
-      if (currentQuantity <= 1) {
-        btn.disabled = true;
-        return;
-      }
+      const card = btn.closest(".card");
+      const quantitySpan = card.querySelector(".quantity");
+      const incBtn = card.querySelector(".increase");
+      const stock = Number(card.dataset.stock);
 
       try {
-        const res = await fetch(`/cart/decrease/${cartId}`, {
-          method: "PATCH",
-        });
+        const res = await fetch(`/cart/decrease/${cartId}`, { method: "PATCH" });
         const data = await res.json();
 
         if (data.success) {
           quantitySpan.textContent = data.newQuantity;
-          if (data.newQuantity <= 1) btn.disabled = true;
-          if (data.newQuantity < 5) incBtn.disabled = false;
+          btn.disabled = data.newQuantity <= 1;
+          incBtn.disabled = data.newQuantity >= Math.min(5, stock);
 
-          // update Qty in item card
-          const qtyPElem = btn.closest(".card").querySelector("p.text-muted");
-          qtyPElem.textContent = `Qty : ${data.newQuantity}`;
+          card.querySelector(".qty-text").textContent = `Qty : ${data.newQuantity}`;
+          card.querySelector(".subtotal").textContent = `Subtotal: Rs.${data.lineTotal.toLocaleString()}`;
 
-          const lineTotalElem = btn
-            .closest(".col-md-4")
-            .querySelector("p.text-muted.mb-1");
-          lineTotalElem.textContent = `Subtotal: Rs.${data.lineTotal}`;
-
-          // update summary line
+          // Update summary line
           const summaryLine = document.querySelector(`.summary-line[data-cart-id="${cartId}"]`);
-          if (summaryLine) {
+          if(summaryLine){
             const spans = summaryLine.querySelectorAll("span");
             spans[0].textContent = `${data.newQuantity} × ${summaryLine.dataset.name} (${summaryLine.dataset.volume}ml)`;
             spans[1].textContent = `Rs.${data.lineTotal.toLocaleString()}`;
           }
 
-          document.querySelector(
-            ".summary-line.fw-bold.fs-5 span:last-child"
-          ).textContent = `Rs.${data.total.toLocaleString()}`;
+          document.querySelector(".summary-line.fw-bold.fs-5 span:last-child").textContent = `Rs.${data.total.toLocaleString()}`;
+          console.log(data.stock)
+          console.log(data.newQuantity)
+          if(Number(data.stock)>=Number(data.newQuantity)){
+            document.getElementById('stock').innerHTML = 'In Stock'
+            document.getElementById('stock').classList.remove('text-danger', 'text-success')
+            document.getElementById('stock').classList.add('text-success')
+          }else if(data.stock == 0){
+            document.getElementById('stock').innerHTML = `Out of Stock`
+            document.getElementById('stock').classList.remove('text-danger', 'text-success')
+            document.getElementById('stock').classList.add('text-danger')
+            
+          }
+          else{
+            document.getElementById('stock').innerHTML = `Out of Stock - few items left`
+            document.getElementById('stock').classList.remove('text-danger', 'text-success')
+            document.getElementById('stock').classList.add('text-danger')
+          }
+          
         }
-      } catch (err) {
-        console.error(err);
-      }
+      } catch(err){ console.error(err); }
     });
   });
 </script>
-
 
 <%-include('../partials/user/footer.ejs')%>

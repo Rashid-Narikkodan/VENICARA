@@ -1,3 +1,16 @@
+
+
+/* ===== GLOBAL STYLES ===== */
+html {
+  scroll-behavior: smooth; /* Smooth scrolling */
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+  scroll-padding-top: 70px; /* Offset for sticky header */
+  margin: 0;
+  padding: 0;
+}
+
+
 .searchForm > input{
   border-radius: 10px solid black !important;
   border:1px solid rgb(122, 122, 122) !important
