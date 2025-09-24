@@ -16,7 +16,7 @@ const isUserBlocked=async(req, res, next)=>{
     }
     res.clearCookie("connect.sid");
     req.flash('error','you are blocked')
-    res.redirect("/"); 
+    res.redirect("/login"); 
   })
   } else {
     next();

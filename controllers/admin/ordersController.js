@@ -2,10 +2,9 @@ const Order = require("../../models/Order");
 const User = require("../../models/User");
 const Wallet = require("../../models/Wallet");
 const WalletTransaction = require("../../models/WalletTransaction");
-const Product = require("../../models/Product");  // ✅ Need this for stock update
+const Product = require("../../models/Product"); // ✅ Need this for stock update
 const handleError = require("../../helpers/handleError");
-const { readJSON } = require("fs-extra");
-
+const Coupon = require("../../models/Coupon");
 // SHOW ALL ORDERS (with pagination + search)
 const showOrders = async (req, res) => {
   try {
@@ -111,7 +110,7 @@ const handleProductStatus = async (req, res) => {
     const { status } = req.body;
 
     // 1. Find order
-    const order = await Order.findById(id)
+    const order = await Order.findById(id);
     if (!order) {
       req.flash("error", "Order not found");
       return res.redirect("/admin/orders");
@@ -137,14 +136,15 @@ const handleProductStatus = async (req, res) => {
       );
 
       if (["WALLET", "RAZORPAY"].includes(order.payment.method)) {
-        let refundAmount = product.subtotal;     
-            // === Coupon Handling ===
-            let coupon = null;
-            if (order.couponApplied) {
+        let refundAmount = product.subtotal;
+        // === Coupon Handling ===
+        let coupon = null;
+        if (order.couponApplied) {
           coupon = order.couponApplied;
           // Remaining total after excluding this product
           const remainingTotal = order.products.reduce((sum, p, i) => {
-            if (i == index || ["returned", "cancelled"].includes(p.status)) return sum;
+            if (i == index || ["returned", "cancelled"].includes(p.status))
+              return sum;
             return sum + p.subtotal;
           }, 0);
 
@@ -163,7 +163,9 @@ const handleProductStatus = async (req, res) => {
             // Case 2: Coupon still valid → refund proportional share
             const orderTotalBeforeDiscount = order.products.reduce(
               (sum, p) =>
-                ["returned", "cancelled"].includes(p.status) ? sum : sum + p.subtotal,
+                ["returned", "cancelled"].includes(p.status)
+                  ? sum
+                  : sum + p.subtotal,
               0
             );
             refundAmount = Math.round(
@@ -186,15 +188,14 @@ const handleProductStatus = async (req, res) => {
         });
       }
     }
-    
-
 
     // 4. Update product status
     product.status = status;
 
     // 5. Update order status based on all products
     const allSameStatus = order.products.every(
-      (p) => p.status === status && !["returned", "cancelled"].includes(p.status)
+      (p) =>
+        p.status === status && !["returned", "cancelled"].includes(p.status)
     );
     if (allSameStatus) order.status = status;
 
@@ -203,22 +204,27 @@ const handleProductStatus = async (req, res) => {
       if (allReturned) order.status = "returned";
     }
     if (status === "cancelled") {
-      const allCancelled = order.products.every((p) => p.status === "cancelled");
+      const allCancelled = order.products.every(
+        (p) => p.status === "cancelled"
+      );
       if (allCancelled) order.status = "cancelled";
     }
-    if(status==='delivered'){
-      product.return.returnTimeLimit = new Date(Date.now() + 2*24*60*60*5000) // 2 days from now
+    if (status === "delivered") {
+      product.return.returnTimeLimit = new Date(
+        Date.now() + 2 * 24 * 60 * 60 * 5000
+      ); // 2 days from now
     }
 
-    // Save order updates   
+    // Save order updates
 
     await order.save();
 
-    if(order.status==='delivered'){
-      order.return.returnTimeLimit=new Date(Date.now()+2*24*60*60*5000)
-      await order.save()
+    if (order.status === "delivered") {
+      order.return.returnTimeLimit = new Date(
+        Date.now() + 2 * 24 * 60 * 60 * 5000
+      );
+      await order.save();
     }
-    
 
     // 6. Response
     req.flash("success", "Product status updated successfully");
@@ -228,63 +234,65 @@ const handleProductStatus = async (req, res) => {
   }
 };
 
-
 //  WHANDLEHOLE ORDER STATUS
 const handleOrderStatus = async (req, res) => {
   try {
     const { id } = req.params;
     const { status } = req.body;
-    
+
     const order = await Order.findById(id);
     if (!order) {
       req.flash("error", "Order not found");
       return res.redirect("/admin/orders");
     }
-    
-    const userId=order.userId;
+
+    const userId = order.userId;
     order.status = status;
 
-    if (status === "returned"||status==='cancelled') {
+    if (status === "returned" || status === "cancelled") {
       order.isRequested = false;
-      order.products.forEach(async(p) => {
+      order.products.forEach(async (p) => {
         await Product.findOneAndUpdate(
           { _id: p.productId, "variants._id": p.variantId },
           { $inc: { "variants.$.stock": p.quantity } }
         );
-    });
+      });
     }
     const totalToWallet = order.finalAmount;
 
     if (status === "returned") {
-      if(["WALLET","RAZORPAY"].includes(order.payment.method)){
-        const wallet=await Wallet.findOne({userId})
-        wallet.balance+=totalToWallet
-        await wallet.save()
+      if (["WALLET", "RAZORPAY"].includes(order.payment.method)) {
+        const wallet = await Wallet.findOne({ userId });
+        wallet.balance += totalToWallet;
+        await wallet.save();
         await WalletTransaction.create({
           userId,
-          type:'credit',
-          status:'success',
-          amount:100*totalToWallet,
-          lastBalance:wallet.balance
-        })
+          type: "credit",
+          status: "success",
+          amount: 100 * totalToWallet,
+          lastBalance: wallet.balance,
+        });
       }
     }
 
-        // change per product status
+    // change per product status
     order.products.forEach((p) => {
       if (p.status !== "cancelled" && p.status !== "returned") {
         p.status = status;
 
         if (status === "delivered") {
-          p.return.returnTimeLimit = new Date(Date.now() + 2 * 24 * 60 * 60 * 1000);
+          p.return.returnTimeLimit = new Date(
+            Date.now() + 2 * 24 * 60 * 60 * 1000
+          );
         }
       }
     });
 
-
-    if(status==='delivered'){
-      order.return.returnTimeLimit = new Date(Date.now() + 2*24*60*60*5000) // 2 days from now
-      order.payment.status = 'paid'
+    if (status === "delivered") {
+      order.return.returnTimeLimit = new Date(
+        Date.now() + 2 * 24 * 60 * 60 * 5000
+      ); // 2 days from now
+      order.payment.status = "paid";
     }
 
     await order.save();
@@ -308,10 +316,13 @@ const rejectReturn = async (req, res) => {
     }
 
     if (index !== undefined) {
-
       const productIndex = parseInt(index, 10);
 
-      if (isNaN(productIndex) || productIndex < 0 || productIndex >= order.products.length) {
+      if (
+        isNaN(productIndex) ||
+        productIndex < 0 ||
+        productIndex >= order.products.length
+      ) {
         req.flash("error", "Invalid product index");
         return res.redirect(`/admin/order/${orderId}`);
       }
@@ -338,25 +349,33 @@ const rejectReturn = async (req, res) => {
 const approveReturn = async (req, res) => {
   try {
     const { orderId } = req.params;
-    const { index } = req.query; 
+    const { index } = req.query;
     const order = await Order.findById(orderId);
     if (!order) {
       req.flash("error", "Order not found");
       return res.redirect("/admin/orders");
     }
 
-    const userId=order.userId
+    const userId = order.userId;
 
     if (index !== undefined) {
       const productIndex = parseInt(index, 10);
-      if (isNaN(productIndex) || productIndex < 0 || productIndex >= order.products.length) {
-        req.flash("error", "Invalid product index");
+      if (
+        isNaN(productIndex) ||
+        productIndex < 0 ||
+        productIndex >= order.products.length
+      ) {
+        req.flash("error", "Product not found");
         return res.redirect(`/admin/order/${orderId}`);
       }
 
-      const product=order.products[productIndex]
-      if(!product){
+      const product = order.products[productIndex];
+      if (!product) {
         req.flash("error", "No products exists");
+        return res.redirect(`/admin/order/${orderId}`);
+      }
+      if(product.status !== 'delivered'){
+        req.flash("error", "Delivered products can only return");
         return res.redirect(`/admin/order/${orderId}`);
       }
 
@@ -365,73 +384,118 @@ const approveReturn = async (req, res) => {
       product.return.isRequested = false;
       product.return.status = "approved";
 
-        const wallet = await Wallet.findOne({userId})
-        if(!wallet) wallet = new Wallet.create({userId,balance:0})
+      //stock restore
+      await Product.updateOne(
+        { _id: product.productId, "variants._id": product.variantId },
+        { $inc: { "variants.$.stock": product.quantity } }
+      );
 
-        let refundAmount = product.subtotal
-        if(order.couponApplied){
-          refundAmount=Math.ceil(product.subtotal - (product.subtotal*order.couponDiscount/100))
+      const wallet = await Wallet.findOne({ userId });
+      if (!wallet) wallet = new Wallet.create({ userId, balance: 0 });
+
+      let refundAmount = parseFloat(product.subtotal.toFixed(2));
+
+      //refund logic if coupon applied
+      if (order.couponApplied) {
+        const coupon = await Coupon.findById(order.couponApplied);
+        const { minPrice: minPurchase } = coupon;
+
+        const newTotalPrice =
+          order.totalOrderPrice - (order.refundAmount + product.subtotal);
+
+        if (newTotalPrice < minPurchase) {
+          const discount = (order.totalOrderPrice * order.couponDiscount) / 100;
+          refundAmount = parseFloat((product.subtotal - discount).toFixed(2));
+          order.couponApplied = null;
+          order.couponDiscount = 0;
         }
-        wallet.balance += refundAmount
-        await wallet.save()
-        await WalletTransaction.create({
-          userId,
-          orderId,
-          productId: product.productId,
-          type:'credit',
-          amount:refundAmount*100,
-          status:'success',
-          lastBalance:wallet.balance
-        })
-        order.finalAmount -= refundAmount
-        order.refundAmount += refundAmount
-      
-      
-      
+
+        order.finalAmount =
+          newTotalPrice -
+          ((newTotalPrice * order.couponDiscount) / 100).toFixed(2);
+      } else {
+        order.finalAmount -= refundAmount;
+      }
+
+      wallet.balance += parseFloat(refundAmount.toFixed(2));
+      await wallet.save();
+      await WalletTransaction.create({
+        userId,
+        orderId,
+        productId: product.productId,
+        type: "credit",
+        amount: refundAmount * 100,
+        status: "success",
+        lastBalance: wallet.balance,
+      });
+      order.refundAmount += refundAmount;
+
       const allReturned = order.products.every((p) => p.status === "returned");
       if (allReturned) order.status = "returned";
-    } 
+    }
 
     //Order level Return Approve Logics
-    else{
+    else {
       order.status = "returned";
       order.return.isRequested = false;
       order.return.status = "approved";
-      order.products.forEach((p) => {
-        if(!["cancelled","pending","shipped","returned"].includes(p.status)){
-        p.status = "returned";
-        p.return.isRequested = false;
-        p.return.status = "approved";
+      for (const p of order.products) {
+        if (p.status === "delivered") {
+          p.status = "returned";
+          p.return.isRequested = false;
+          p.return.status = "approved";
+
+          await Product.updateOne(
+            { _id: p.productId, "variants._id": p.variantId },
+            { $inc: { "variants.$.stock": p.quantity } }
+          );
         }
-      });
+      }
 
       //refund for all COD,RAZORPAY,WALLET
-        const wallet = await Wallet.findOne({userId})
-        if(!wallet) wallet = new Wallet.create({userId,balance:0})
-          
-          let refundAmount = order.finalAmount
-          wallet.balance += refundAmount
-          await wallet.save()
-          await WalletTransaction.create({
-            userId,
-            orderId,
-            type:'credit',
-            amount:refundAmount*100,
-            status:'success',
-            lastBalance:wallet.balance
-          })
-          order.finalAmount-=refundAmount
-          order.refundAmount += refundAmount
-          order.payment.status = 'refunded'
+      const wallet = await Wallet.findOne({ userId });
+      if (!wallet) wallet = new Wallet.create({ userId, balance: 0 });
+
+      let refundAmount = parseFloat(order.finalAmount.toFixed(2));
+
+      if (order.couponApplied) {
+        const totalRefund = order.refundAmount + order.finalAmount;
+        const orginalAmount =
+          order.totalOrderPrice -
+          ((order.totalOrderPrice * order.couponDiscount) / 100).toFixed(2);
+        if (totalRefund > orginalAmount) {
+          const extraMoney = totalRefund - orginalAmount;
+          refundAmount -= extraMoney;
+          order.couponApplied = null;
+          order.couponDiscount = 0;
+        }
+      }
+
+      wallet.balance += parseFloat(refundAmount.toFixed(2));
+      await wallet.save();
+      await WalletTransaction.create({
+        userId,
+        orderId,
+        type: "credit",
+        amount: refundAmount * 100,
+        status: "success",
+        lastBalance: wallet.balance,
+      });
+      order.finalAmount = 0;
+      order.refundAmount += refundAmount;
+      order.payment.status = "refunded";
     }
     await order.save();
-    return res.status(200).json({ success: true, message: "Return request approved" });
+    return res
+      .status(200)
+      .json({ success: true, message: "Return request approved" });
   } catch (error) {
-    console.log(error)
-    res.status(500).json({ success: false, message: "Error approving return request" });
+    console.log(error);
+    res
+      .status(500)
+      .json({ success: false, message: "Error approving return request" });
   }
 };
-
 
 module.exports = {
   showOrders,

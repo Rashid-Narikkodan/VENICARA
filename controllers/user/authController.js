@@ -81,8 +81,8 @@ const handleGoogleAuth = async (req, res) => {
       return res.redirect('/auth/login')
     }
     if (user.isDeleted) {
-      req.flash('error', 'User not exist')
-      return res.redirect('/auth/login')
+      user.isDeleted = false
+      user.isBlocked = false
     }
     if (!user.referralCode) {
       user.referralCode = generateRefCode(user.name)

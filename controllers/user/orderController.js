@@ -55,7 +55,14 @@ const cancelOrder = async (req, res) => {
       let refundAmount=order.finalAmount
 
       if(order.couponApplied){
-        refundAmount=order.finalAmount
+        const totalRefund = order.refundAmount + order.finalAmount
+        const orginalAmount = order.totalOrderPrice - (order.totalOrderPrice*order.couponDiscount/100).toFixed(2)
+        if(totalRefund>orginalAmount){
+          const extraMoney = totalRefund - orginalAmount
+          refundAmount-=extraMoney
+          order.couponApplied = null
+          order.couponDiscount = 0
+        }
       }
 
       wallet.balance = Math.round((wallet.balance + refundAmount) * 100) / 100;
@@ -149,25 +156,32 @@ const cancelProduct = async (req, res) => {
 
     // Wallet refund
     if (["WALLET", "RAZORPAY"].includes(order.payment.method)) {
+
       let wallet = await Wallet.findOne({ userId });
       if (!wallet) wallet = new Wallet({ userId, balance: 0 });
+
       let refundAmount = parseFloat((product.subtotal).toFixed(2));
 
       //refund logic if coupon applied
       if (order.couponApplied) {
         const coupon=await Coupon.findById(order.couponApplied)
         const {minPrice:minPurchase}=coupon;
+
         const newTotalPrice = order.totalOrderPrice - (order.refundAmount+product.subtotal)
+        
         if(newTotalPrice < minPurchase){
           const discount = order.totalOrderPrice * order.couponDiscount / 100;
           refundAmount = parseFloat((product.subtotal - discount).toFixed(2));
           order.couponApplied = null;
           order.couponDiscount = 0;
-        }   
+        }
+
         order.finalAmount = newTotalPrice - (newTotalPrice*order.couponDiscount/100).toFixed(2)
+      
       }else{
 
         order.finalAmount -= refundAmount;
+        
       }
 
       //update RefundAmount in both
