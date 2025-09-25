@@ -335,15 +335,19 @@ const addReview=async (req,res)=>{
       return res.status(400).json({ status:false, message: 'All fields are required' });
     }
 
-    const review = await Review.create({
-      name,
-      rating,
-      message,
-      userId: req.session.user.id, // make sure session has user logged in
-      productId
-    });
+      const existingReview = await Review.findOne({ userId: req.session.user.id, productId: productId });
 
-    res.status(201).json({status:true, message: 'Review added successfully', review });
+      if (existingReview) {
+        existingReview.rating = rating;
+        existingReview.message = message;
+        existingReview.name = name;
+        await existingReview.save();
+      } else {
+        await Review.create({ name, rating, message, userId: req.session.user.id, productId });
+      }
+
+
+    res.status(201).json({status:true, message: 'Review added successfully'});
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Server error' });

@@ -197,7 +197,7 @@ reviewForm.addEventListener('submit', async (e) => {
 
     const data = await response.json();
 
-    if (response.ok) {
+    if (data.status) {
 
       const reviewModalEl = document.getElementById('reviewModal');
       const reviewModal = bootstrap.Modal.getInstance(reviewModalEl) || new bootstrap.Modal(reviewModalEl);
