@@ -1,5 +1,5 @@
 const Product = require('../../models/Product');
-const Coupon = require('../../models/Coupon');
+const Review = require('../../models/Review');
 const handleError = require('../../helpers/handleError');
 
 const searchProducts = async (req, res) => {
@@ -40,6 +40,28 @@ const showProductDetails = async (req, res) => {
       return res.redirect("/shop");
     }
 
+    const reviews = await Review.find({productId:product._id})
+    let averageRating = 0;
+    let ratingCounts = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
+
+    if (reviews.length > 0) {
+      
+      const total = reviews.reduce((acc, r) => acc + r.rating, 0);
+      averageRating = total / reviews.length;
+
+      reviews.forEach(r => {
+        ratingCounts[r.rating] = (ratingCounts[r.rating] || 0) + 1;
+      });
+    } else {
+      averageRating = 0;
+    }
+
+    // Convert counts to percentages
+    const ratingPercentages = {};
+    for (let i = 5; i >= 1; i--) {
+      ratingPercentages[i] = reviews.length > 0 ? ((ratingCounts[i] / reviews.length) * 100).toFixed(0) : 0;
+    }
+
 
     const relatedProducts = await Product.find({
       category: product.category._id,
@@ -54,6 +76,9 @@ const showProductDetails = async (req, res) => {
     return res.render("userPages/productDetails", {
       product,
       relatedProducts,
+      reviews,
+      averageRating:averageRating.toFixed(1),
+      ratingPercentages,
     });
   } catch (err) {
     handleError(res, "showProductDetails", err);
