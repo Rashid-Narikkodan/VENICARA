@@ -1,4 +1,29 @@
 <%- include('../partials/user/header.ejs') %>
+<!-- Star Rating CSS -->
+<style>
+.star-rating {
+  direction: rtl;
+  display: inline-flex;
+  font-size: 3rem;
+}
+
+.star-rating input[type="radio"] {
+  display: none;
+}
+
+.star-rating label {
+  color: #ccc;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.star-rating input[type="radio"]:checked ~ label,
+.star-rating label:hover,
+.star-rating label:hover ~ label {
+  color: #ffc107; /* gold color */
+}
+</style>
+
 
 <div class="container my-5">
   <h2 class="text-center fw-bold mb-4">Order Details</h2>
@@ -13,43 +38,42 @@
              style="width: 10rem; height: 10rem; object-fit: cover;" 
              alt="Product Image"></a>
 
-        <!-- Product Info -->
+        <!-- Product Info -->     
         <div>
           <h5 class="fw-bold"><%= product.productName %></h5>
           <p class="mb-1"><%= product.volume %>ML</p>
           <p class="fw-semibold m-0">Rs.<%= product.subtotal %></p>
           <p class="fw-semibold m-0 p-0">QTY : <%= product.quantity %></p>
           <!-- Rating & Actions -->
-          <div class="d-flex align-items-center gap-2 mt-2">
-            <button class="btn btn-dark">Add review</button>
-            <button class="btn btn-outline-dark">Edit</button>
-          </div>
-        </div>
-      </div>
+          <div class="d-flex align-items-center gap-2 mt-2 <%=product.status == 'cancelled'?'d-none':''%>">
+            <button class="btn btn-dark" data-bs-toggle="modal" data-bs-target="#reviewModal" >Add review</button>
+          </div>  
+        </div>  
+      </div>  
 
       <!-- Price Details -->
       <div class="row">
         <div class="col-md-6">
-<div class="border p-3 rounded-3">
+<div class="border p-3 rounded-3">        
   <h6 class="fw-bold mb-3">Price Details</h6>
   <ul class="list-unstyled small">
     <!-- Base Details -->
     <li>Product Price (per item): 
       <span class="float-end">₹<%= product.basePrice %></span>
-    </li>
+    </li>  
     <li>Discount Percentage: 
       <span class="float-end text-success fw-semibold"><%= product.discount %>%</span>
-    </li>
+    </li>  
 
     <!-- Discount Amount (per item) -->
     <li>Discount Amount (per item): 
       <span class="float-end text-danger">-₹<%= product.basePrice - product.finalAmount %></span>
-    </li>
+    </li>  
 
     <!-- Final Unit Price -->
     <li>Final Price (per item): 
       <span class="float-end text-success">₹<%= product.finalAmount %></span>
-    </li>
+    </li>  
 
     <hr>
 
@@ -57,30 +81,30 @@
     <li>Total Price (before discount): 
       <span class="float-end">
         <%= product.quantity %> × ₹<%= product.basePrice %> = ₹<%= product.basePrice * product.quantity %>
-      </span>
-    </li>
+      </span>  
+    </li>  
     <li>Total Discount (all items): 
       <span class="float-end text-danger">
         -₹<%= (product.basePrice - product.finalAmount) * product.quantity %>
-      </span>
-    </li>
+      </span>  
+    </li>  
     <li>Total After Discount: 
       <span class="float-end fw-semibold text-success">₹<%= product.subtotal %></span>
-    </li>
+    </li>  
     
     <hr>
     
     <li class="fs-5">Total Amount: 
       <span class="float-end fw-semibold">₹<%= product.subtotal %></span>
-    </li>
+    </li>  
     
     <li class="mt-3 fw-bold alert px-3 py-1 alert-success text-success">You Saved: 
       <span class="float-end">
         ₹<%= (product.basePrice * product.quantity) - product.subtotal %>
-      </span>
-    </li>
-  </ul>
-</div>
+      </span>  
+    </li>  
+  </ul>  
+</div>  
         </div>
 
         <!-- Shipping -->
@@ -92,11 +116,107 @@
             <p class="small mb-1"><%= shippedAddress.city %></p>
             <p class="small mb-0"><%= shippedAddress.pin %></p>
             <p class="small mb-0"><%= shippedAddress.state %></p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
+          </div>  
+        </div>  
+      </div>  
+    </div>  
+  </div>  
+</div>  
+
+<!-- //modal -->
+
+<!-- Review Modal -->
+<div class="modal fade" id="reviewModal" tabindex="-1" aria-labelledby="reviewModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content shadow-lg rounded-4">
+      
+      <div class="modal-header border-0">
+        <h5 class="modal-title fw-bold" id="reviewModalLabel">Submit Your Review</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>  
+      
+      <form id="reviewForm">
+        <div class="modal-body px-4">
+          <!-- Name -->
+          <div class="mb-3">
+            <label for="reviewerName" class="form-label">Your Name</label>
+            <input type="text" name="name" class="form-control rounded-3" id="reviewerName" placeholder="Enter your name" required>
+          </div>  
+
+          <!-- Star Rating -->
+          <div class="mb-3">
+            <label class="form-label d-block">Rating</label>
+            <div class="star-rating">
+              <input type="radio" id="star5" name="rating" value="5"><label for="star5" title="5 stars">&#9733;</label>
+              <input type="radio" id="star4" name="rating" value="4"><label for="star4" title="4 stars">&#9733;</label>
+              <input type="radio" id="star3" name="rating" value="3"><label for="star3" title="3 stars">&#9733;</label>
+              <input type="radio" id="star2" name="rating" value="2"><label for="star2" title="2 stars">&#9733;</label>
+              <input type="radio" id="star1" name="rating" value="1"><label for="star1" title="1 star">&#9733;</label>
+            </div>  
+          </div>  
+
+          <!-- Review Message -->
+          <div class="mb-3">
+            <label for="reviewMessage" class="form-label">Review</label>
+            <textarea class="form-control rounded-3" data-id="<%=product.productId%>" name="review" id="reviewMessage" rows="4" placeholder="Write your review"></textarea>
+          </div>  
+        </div>  
+        
+        <div class="modal-footer border-0 px-4">
+          <button type="button" class="btn btn-secondary rounded-3" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-warning rounded-3" >Submit Review</button>
+        </div>  
+      </form>  
+
+    </div>  
+  </div>  
+</div>  
+
+<script>
+const reviewForm = document.getElementById('reviewForm');
+
+reviewForm.addEventListener('submit', async (e) => {
+  e.preventDefault(); // Prevent default form submission
+
+  const name = document.getElementById('reviewerName').value.trim();
+  const rating = document.querySelector('input[name="rating"]:checked')?.value;
+  const message = document.getElementById('reviewMessage').value.trim();
+  const id = document.getElementById('reviewMessage').getAttribute('data-id')
+  // Validation
+  if (!name || !rating || !message) {
+    alert('Please fill in all fields and select a rating!');
+    return;
+  }
+
+  try {
+    const response = await fetch(`/orders/review/${id}/add`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, rating, message })
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+
+      const reviewModalEl = document.getElementById('reviewModal');
+      const reviewModal = bootstrap.Modal.getInstance(reviewModalEl) || new bootstrap.Modal(reviewModalEl);
+      reviewModal.hide();
+
+      alert('Thank you for your review!');
+      
+      // Reset form
+      reviewForm.reset();
+    } else {
+      alert(data.message || 'Failed to submit review. Please try again.');
+    }
+  } catch (err) {
+    console.error('Error submitting review:', err);
+    alert('Something went wrong. Please try again later.');
+  }
+});
+</script>
+
+
 
 <%- include('../partials/user/footer.ejs') %>

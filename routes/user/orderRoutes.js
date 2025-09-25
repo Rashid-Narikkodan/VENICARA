@@ -16,4 +16,5 @@ router
   router.patch('/product/return/:id',orderController.returnProductRequest)
   router.get('/:orderId/invoice',orderController.downloadInvoice) 
   router.get('/details/:id',orderController.orderDetails) 
+  router.post('/review/:id/add',orderController.addReview) 
 module.exports = router

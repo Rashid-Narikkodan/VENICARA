@@ -5,6 +5,7 @@ const generateInvoice = require('../../helpers/generateInvoice')
 const Coupon=require('../../models/Coupon')
 const Wallet=require('../../models/Wallet')
 const WalletTransaction=require('../../models/WalletTransaction')
+const Review = require('../../models/Review')
 
 const showOrders = async (req, res) => {
   try {
@@ -325,6 +326,29 @@ const orderDetails=async(req,res)=>{
     handleError(res,'orderDetails',error)
   }
 }
+const addReview=async (req,res)=>{
+ try {
+  const {id:productId} = req.params
+    const { name, rating, message} = req.body;
+
+    if (!rating || !message || !name || !productId) {
+      return res.status(400).json({ status:false, message: 'All fields are required' });
+    }
+
+    const review = await Review.create({
+      name,
+      rating,
+      message,
+      userId: req.session.user.id, // make sure session has user logged in
+      productId
+    });
+
+    res.status(201).json({status:true, message: 'Review added successfully', review });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
+  }
+}
 module.exports = {
   showOrders,
   cancelOrder,
@@ -333,4 +357,5 @@ module.exports = {
   returnProductRequest,
   downloadInvoice,
   orderDetails,
+  addReview
 };

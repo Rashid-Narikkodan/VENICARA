@@ -103,10 +103,10 @@
           <div id="variantDetails" class="mt-3">
             <div class="d-flex align-items-center mb-3">
               <span class="rounded-5 me-2 text-white bg-success px-3 py-1 fw-bold d-flex align-items-center">
-                &#x2606; 4.4
+                &#x2606; <%=averageRating||'No Rating'%>
               </span>
               <span class="text-muted fw-semibold fs-5">
-                (count)
+                (<%=reviews.length%>)
               </span>
             </div>
             <div>
@@ -273,50 +273,57 @@
     //call reviews
     async function callReviews() {
       const content = document.getElementById('content')
-      content.innerHTML = `<div class="container my-4">
-  <h4 class="fw-bold">4.4</h4>
-  <div class="text-warning fs-4">★★★★★</div>
-  <p>Product Rating</p>
-  <div>
-    <div class="d-flex align-items-center">
-      <span class="me-2">5 ★</span>
-      <div class="progress flex-grow-1 me-2">
-        <div class="progress-bar bg-success" style="width:70%"></div>
-      </div>
-      <span>70%</span>
-    </div>
-    <div class="d-flex align-items-center">
-      <span class="me-2">4 ★</span>
-      <div class="progress flex-grow-1 me-2">
-        <div class="progress-bar bg-success" style="width:15%"></div>
-      </div>
-      <span>15%</span>
-    </div>
-    <!-- repeat for 3, 2, 1 stars -->
+      content.innerHTML = `
+      <div class="container my-4">
+  <h4 class="fw-bold"><%= averageRating %></h4>
+  <div class="text-warning fs-4">
+    <% for(let i=1; i<=5; i++){ %>
+      <% if(i <= Math.round(averageRating)) { %>
+        &#9733;
+      <% } else { %>
+        &#9734;
+      <% } %>
+    <% } %>
   </div>
+  <p>Product Rating</p>
+
+  <div>
+    <% for(let i=5; i>=1; i--){ %>
+      <div class="d-flex align-items-center">
+        <span class="me-2"><%= i %> ★</span>
+        <div class="progress flex-grow-1 me-2">
+          <div class="progress-bar bg-success" style="width:<%= ratingPercentages[i] %>%"></div>
+        </div>
+        <span><%= ratingPercentages[i] %>%</span>
+      </div>
+    <% } %>
+  </div>
+</div>
+
 
   <hr>
 
   <!-- Reviews -->
   <div class="mt-3">
+    <%reviews.forEach((r)=>{%>
     <div class="d-flex mb-3">
       <div class="me-2">👤</div>
       <div>
-        <strong>Rashid</strong>
-        <div class="text-warning">★★★★★</div>
-        <p>Absolutely stunning perfume 🔥</p>
-      </div>
-    </div>
+        <strong><%=r.name%></strong>
+        <div class="text-warning">
+          <% for(let i = 1; i <= 5; i++) { %>
+            <% if(i <= r.rating) { %>
+              &#9733; <!-- filled star -->
+            <% } else { %>
+              &#9734; <!-- empty star -->
+            <% } %>
+          <% } %>
+        </div>
 
-    <div class="d-flex mb-3">
-      <div class="me-2">👤</div>
-      <div>
-        <strong>Shifna</strong>
-        <div class="text-warning">★★★★☆</div>
-        <p>The product is so good. Perfect match for a casual meet.</p>
-      </div>
-    </div>
-  </div>
+        <p><%=r.message%></p>
+        </div>
+        </div>
+    <%})%>
 </div>
 `
     }
