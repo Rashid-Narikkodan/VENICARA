@@ -1,56 +1,107 @@
-<%-include('../partials/user/header.ejs')%>
-  <%-include('../partials/user/sidebarProfile.ejs')%>
-    <main class="w-100 justify-content-center d-flex">
+<%- include('../partials/user/header.ejs') %>
+<%- include('../partials/user/sidebarProfile.ejs') %>
 
-      <div style="background:rgb(241, 241, 241)" class="rounded-5 h-75 shadow px-5 pt-5">
-        <div>
-          <p class="fs-3 fw-bold text-black text-center">Profile</p>
-        </div>
-          <div class="row">
-            <div class="col-md-12 w-100 d-flex justify-content-center">
-              <div class="position-relative d-inline-block">
-                <!-- Circle -->
-                <div class="bg-secondary rounded-circle overflow-hidden"
-                  style="width:6rem;height:6rem;cursor:pointer;">
-                  <% if (user.photoUrl) { %>
-                    <img src="<%= user.photoUrl %>" alt="Profile" loading="lazy" class="w-100 h-100 rounded-circle"
-                      style="object-fit:cover;">
-                    <% } else { %>
-                      <!-- Show placeholder icon -->
-                      <div class="rounded-circle bg-dark mt-3" style="width:40%;height:40%;margin-left:1.8rem"></div>
-                      <div class="rounded-circle bg-dark mt-1" style="width:80%;height:80%;margin-left:.6rem"></div>
-                      <% } %>
-                </div>
-              </div>
-            </div>
+<main class="w-100 d-flex justify-content-center py-1">
+  <div class="container">
+    <div class="profile-card rounded-5 shadow p-4 p-md-5 bg-white">
+      
+      <!-- Header -->
+      <div class="text-center mb-5">
+        <p class="fs-2 fw-bold mb-1">Profile</p>
+        <small class="text-muted">Manage your personal information</small>
+      </div>
 
-            <div class="col-md-8 mx-auto mt-5">
-             <div class="mb-3 row">
-                <div class="fw-bold col-3 d-flex align-items-center">Name:</div>
-                <div class="rounded-2 px-3 py-2 col-8 fw-semibold" style="background:rgb(161, 175, 180)"><%=user.name%></div>
-                </div>
-              <div class="mb-3 row">
-                <span class="fw-bold col-3 d-flex align-items-center">Email:</span>
-                <span class="rounded-2 px-3 py-2 col-8 fw-semibold" style="background:rgb(161, 175, 180)"><%=user.email%></span>
-                </div>
-              <div class="mb-3 row">
-                <span class="fw-bold col-3 d-flex align-items-center">Phone:</span>
-                <span class="rounded-2 px-3 py-2 col-8 fw-semibold" style="background:rgb(161, 175, 180)"><%=user.mobile||'Mobile no. is not updated'%></span>
-                </div>
-
-              <!-- Gender -->
-              <div class="mb-3 row">
-                <span class="fw-bold col-3 d-flex align-items-center">Gender :</span>
-                <span class="rounded-2 px-3 py-2 col-8 fw-semibold" style="background:rgb(161, 175, 180)"><%=user.gender||'Gender is not specified'%></span>
-                </div>
-            </div>
-            <div class="col-md-12 d-flex justify-content-center px-5 pb-5">
-              <a href="/profile/edit" class="btn btn-dark px-4">Edit</a>
+      <!-- Profile Image -->
+      <div class="row justify-content-center mb-4">
+        <div class="col-auto">
+          <div class="position-relative">
+            <div class="profile-img bg-secondary rounded-circle overflow-hidden d-flex align-items-center justify-content-center"
+                 style="width:100px; height:100px; cursor:pointer;">
+              <% if (user.photoUrl) { %>
+                <img src="<%= user.photoUrl %>" alt="Profile" loading="lazy"
+                     class="w-100 h-100 rounded-circle" style="object-fit: cover;">
+              <% } else { %>
+                <span class="text-white fs-4 fw-bold"><%= user.name.charAt(0) %></span>
+              <% } %>
             </div>
           </div>
+        </div>
       </div>
-    </main>
+
+      <!-- Profile Details -->
+      <div class="row justify-content-center">
+        <div class="col-12 col-sm-10 col-md-8">
+          <div class="mb-3 row align-items-center">
+            <label class="col-4 col-sm-3 fw-bold">Name:</label>
+            <div class="col-8 col-sm-9 rounded-3 px-3 py-2 bg-light fw-semibold"><%= user.name %></div>
+          </div>
+          <div class="mb-3 row align-items-center">
+            <label class="col-4 col-sm-3 fw-bold">Email:</label>
+            <div class="col-8 col-sm-9 rounded-3 px-3 py-2 bg-light fw-semibold"><%= user.email %></div>
+          </div>
+          <div class="mb-3 row align-items-center">
+            <label class="col-4 col-sm-3 fw-bold">Phone:</label>
+            <div class="col-8 col-sm-9 rounded-3 px-3 py-2 bg-light fw-semibold"><%= user.mobile || 'Not updated' %></div>
+          </div>
+          <div class="mb-3 row align-items-center">
+            <label class="col-4 col-sm-3 fw-bold">Gender:</label>
+            <div class="col-8 col-sm-9 rounded-3 px-3 py-2 bg-light fw-semibold"><%= user.gender || 'Not specified' %></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Edit Button -->
+      <div class="row justify-content-center mt-4">
+        <div class="col-auto">
+          <a href="/profile/edit" class="btn btn-dark px-4 py-2">Edit Profile</a>
+        </div>
+      </div>
+
     </div>
-    <script src="/js/userHeader.js"></script>
-    </body>
-    </html>
+  </div>
+</main>
+</div>
+
+<style>
+  .profile-card {
+    max-width: 700px;
+  }
+
+  .profile-img img {
+    transition: transform 0.3s;
+  }
+
+  .profile-img:hover img {
+    transform: scale(1.05);
+  }
+
+  label {
+    font-size: 1rem;
+  }
+
+  .fw-semibold {
+    font-weight: 500;
+  }
+
+  @media (max-width: 576px) {
+    .profile-card {
+      padding: 2rem 1.5rem !important;
+    }
+    .fs-2 {
+      font-size: 1.5rem !important;
+    }
+    .profile-img {
+      width: 80px !important;
+      height: 80px !important;
+    }
+    label {
+      font-size: 0.9rem;
+    }
+    .fw-semibold {
+      font-size: 0.9rem;
+    }
+  }
+</style>
+
+<script src="/js/userHeader.js"></script>
+<%- include('../partials/user/footer.ejs') %>
