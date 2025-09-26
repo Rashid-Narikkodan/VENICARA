@@ -48,7 +48,7 @@
     }
 
     .fs-md-text{
-      font-size: 1.3rem;
+      font-size: 1rem;
     }
     @media (max-width:576px){
     .fs-md-icon{
@@ -58,6 +58,29 @@
       font-size: .75rem;
     }
     }
+
+    #searchResults {
+  scrollbar-width: thin;              /* Firefox */
+  scrollbar-color: #888 transparent;  /* Firefox */
+}
+
+  #searchResults::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  #searchResults::-webkit-scrollbar-track {
+    background: transparent; 
+  }
+
+  #searchResults::-webkit-scrollbar-thumb {
+    background-color: #888; 
+    border-radius: 10px;
+  }
+
+  #searchResults::-webkit-scrollbar-thumb:hover {
+    background-color: #555;
+  }
+
   </style>
 
   <!-- Custom JS (defer for non-blocking load) -->
@@ -120,15 +143,16 @@
               </button>
               <div
                 id="searchResults"
-                class="position-absolute d-none rounded-4"
+                class="position-absolute d-none rounded-4 p-2"
                 style="
                   top: 5rem;
-                  right: -4rem;
+                  right: -7rem;
                   left: -4rem;
-                  height: 50vh;
+                  height: 75vh;
                   overflow-y: scroll;
                   overflow-x: hidden;
                   scrollbar-width: 2px;
+                  background-color: rgb(175, 175, 175);
                 "
               ></div>
             </form>
@@ -160,8 +184,7 @@
           <%if(messages.error.length>0){%>
           <div
             id="headerError"
-            class="alert alert-danger text-center w-md-25 w-75"
-          >
+            class="alert alert-danger text-center w-md-25 w-75">
             <%=messages.error[0]%>
           </div>
           <%}%>
