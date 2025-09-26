@@ -1,4 +1,13 @@
 <%- include('../partials/user/header.ejs') %>
+<style>
+  @media (max-width: 767.98px) {
+    /* Make all text smaller on mobile */
+    .card,
+    .card * {
+      font-size: .8rem !important; /* ~12px */
+    }
+  }
+</style>
 
 <main class="container my-4">
   <% if (orders && orders.length > 0) { %> 
