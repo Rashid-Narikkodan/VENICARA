@@ -1,125 +1,125 @@
 <%- include('../partials/user/header.ejs') %>
-<%-include('../partials/user/sidebarProfile.ejs') %>
+<%- include('../partials/user/sidebarProfile.ejs') %>
 
+<main class="w-100 justify-content-center d-flex px-md-2 px-0">
+  <div class="container">
+    <!-- Header + Search -->
+    <div class="row align-items-center mb-4 g-3">
+      <div class="col-12 col-md-6">
+        <h1 class="fs-3 fw-bold">Transaction History</h1>
+      </div>
+      <div class="col-12 col-md-6">
+        <form action="/wallet/history" method="GET" class="d-flex flex-column flex-sm-row gap-2">
+          <input type="text" name="search" class="form-control flex-fill" placeholder="Search..." value="<%= search %>">
+          <button class="btn btn-dark w-100 w-sm-auto">Search</button>
+        </form>
+      </div>
+    </div>
 
-<main class="w-100 justify-content-center d-flex ">
-<div class="container">
-        <div class="row align-items-center mb-5">
-          <div class="col-md-6">
-            <h1>Transaction History</h1>
-          </div>
-          <div class="col-md-6 d-flex justify-content-end gap-2">
-            <form action="/wallet/history" method="GET" class="d-flex gap-2 w-100">
-              <input type="text" name="search" class="form-control w-50" placeholder="Search..." value="<%= search %>">
-              <button class="btn btn-dark">Search</button>
-            </form>
-          </div>
-        </div>
-        <div class="table-responsive shadow rounded-3 bg-white">
-          <table class="table table-hover align-middle mb-0">
-            <thead class="table-dark">
-              <tr>
-                <th class="text-center p-3">Transaction</th>
-                <th class="text-center p-3">Date</th>
-                <th class="text-center p-3">Status</th>
-                <th class="text-center p-3">Amount</th>
-                <th class="text-center p-3">Last Balance</th>
-              </tr>
-            </thead>
-            <tbody>
-              <% transactions.forEach(transaction=> { %>
-                <%count++%>
-                  <tr>
-                    <td class="text-center fw-semibold fs-5">
-                       <%= transaction.type.charAt(0).toUpperCase()+transaction.type.slice(1) %>
-                    </td>
-                    <td class="text-center">
-                      <%= transaction.createdAt.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) %>
-                    </td>
-                    <td class="text-center fw-bold <%= 
-                          transaction.status === 'pending' ? 'text-primary' : 
-                          (transaction.status === 'success' ? 'text-success' : 'text-danger')%>">
-                      <%= transaction.status %>
-                    </td>
+    <!-- Transactions Table -->
+    <div class="table-responsive shadow rounded-3 bg-white">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-dark">
+          <tr>
+            <th class="text-center p-2">Transaction</th>
+            <th class="text-center p-2">Date</th>
+            <th class="text-center p-2">Status</th>
+            <th class="text-center p-2">Amount</th>
+            <th class="text-center p-2">Last Balance</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% transactions.forEach(transaction=> { %>
+            <%count++%>
+            <tr>
+              <td class="text-center fw-semibold"><%= transaction.type.charAt(0).toUpperCase()+transaction.type.slice(1) %></td>
+              <td class="text-center"><%= transaction.createdAt.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) %></td>
+              <td class="text-center fw-bold <%= transaction.status === 'pending' ? 'text-primary' : (transaction.status === 'success' ? 'text-success' : 'text-danger')%>">
+                <%= transaction.status %>
+              </td>
+              <td class="text-center fw-semibold <%=transaction.type == 'credit'?'text-success':'text-danger'%>">
+                <%=transaction.type == 'credit'?'+':'-'%>₹<%= transaction.amount/100 %>
+              </td>
+              <td class="text-center">₹<%= transaction.lastBalance%></td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
 
-                    <td class="text-center fw-semibold <%=transaction.type == 'credit'?'text-success':'text-danger'%>">
-                      <%=transaction.type == 'credit'?'+':'-'%>₹<%= transaction.amount/100%>
-                    </td>
-                    
-                    <td class="text-center">
-                      ₹<%= transaction.lastBalance%>
-                    </td>
-                  </tr>
-                  <% }) %>
-            </tbody>
-          </table>
-        </div>
-      
- <!-- //pagination -->
-      <div class="d-flex justify-content-end">
-        <nav aria-label="Page navigation">
-          <ul class="pagination justify-content-end flex-wrap p-3">
+    <!-- Pagination -->
+    <div class="d-flex justify-content-center justify-content-md-end mt-3">
+      <nav aria-label="Page navigation">
+        <ul class="pagination flex-wrap p-2">
+          <!-- Previous -->
+          <% if (page> 1) { %>
+            <li class="page-item">
+              <a class="page-link bg-dark" href="?page=<%= page - 1 %>&limit=<%= limit %>">
+                <i class="fa-solid fa-caret-left text-white"></i>
+              </a>
+            </li>
+          <% } else { %>
+            <li class="page-item disabled">
+              <span class="page-link bg-dark"><i class="fa-solid fa-caret-left text-white"></i></span>
+            </li>
+          <% } %>
 
-            <!-- Previous Button -->
-            <% if (page> 1) { %>
-              <li class="page-item">
-                <a class="page-link bg-dark" href="?page=<%= page - 1 %>&limit=<%= limit %>">
-                  <i class="fa-solid fa-caret-left text-white"></i>
-                </a>
-              </li>
-              <% } else { %>
-                <li class="page-item disabled">
-                  <span class="page-link bg-dark">
-                    <i class="fa-solid fa-caret-left text-white"></i>
-                  </span>
-                </li>
-                <% } %>
+          <!-- Left Page -->
+          <% if (page - 1>= 1) { %>
+            <li class="page-item"><a class="page-link" href="?page=<%= page - 1 %>&limit=<%= limit %>"><%= page - 1 %></a></li>
+          <% } %>
 
-                  <!-- Left Page (if exists) -->
-                  <% if (page - 1>= 1) { %>
-                    <li class="page-item">
-                      <a class="page-link" href="?page=<%= page - 1 %>&limit=<%= limit %>">
-                        <%= page - 1 %>
-                      </a>
-                    </li>
-                    <% } %>
+          <!-- Current Page -->
+          <li class="page-item active">
+            <span class="page-link bg-white text-dark border-0"><%= page %></span>
+          </li>
 
-                      <!-- Current Page -->
-                      <li class="page-item active">
-                        <span class="page-link bg-white text-dark border-0">
-                          <%= page %>
-                        </span>
-                      </li>
+          <!-- Right Page -->
+          <% if (page + 1 <=totalPages) { %>
+            <li class="page-item"><a class="page-link" href="?page=<%= page + 1 %>&limit=<%= limit %>"><%= page + 1 %></a></li>
+          <% } %>
 
-                      <!-- Right Page (if exists) -->
-                      <% if (page + 1 <=totalPages) { %>
-                        <li class="page-item">
-                          <a class="page-link" href="?page=<%= page + 1 %>&limit=<%= limit %>">
-                            <%= page + 1 %>
-                          </a>
-                        </li>
-                        <% } %>
-
-                          <!-- Next Button -->
-                    <% if (page < totalPages) { %>
-                      <li class="page-item">
-                        <a class="page-link bg-dark" href="?page=<%= page + 1 %>&limit=<%= limit %>">
-                          <i class="fa-solid fa-caret-right text-white"></i>
-                        </a>
-                      </li>
-                      <% } else { %>
-                        <li class="page-item disabled">
-                          <span class="page-link bg-dark">
-                            <i class="fa-solid fa-caret-right text-white"></i>
-                          </span>
-                        </li>
-                        <% } %>
-
-          </ul>
-        </nav>
-      </div>   
-      </div>    
+          <!-- Next -->
+          <% if (page < totalPages) { %>
+            <li class="page-item">
+              <a class="page-link bg-dark" href="?page=<%= page + 1 %>&limit=<%= limit %>">
+                <i class="fa-solid fa-caret-right text-white"></i>
+              </a>
+            </li>
+          <% } else { %>
+            <li class="page-item disabled">
+              <span class="page-link bg-dark"><i class="fa-solid fa-caret-right text-white"></i></span>
+            </li>
+          <% } %>
+        </ul>
+      </nav>
+    </div>
+  </div>
 </main>
-</div>
-</body>
-</html>
+
+<style>
+  /* Default (desktop/tablet) */
+table th, table td {
+  padding: 1rem !important; /* comfortable spacing */
+  font-size: 1rem;
+}
+
+/* Mobile tweaks */
+@media (max-width: 576px) {
+  .table-responsive {
+    margin-left: -12px;  /* cancel container padding */
+    margin-right: -12px;
+  }
+  .table {
+    width: 100% !important; /* occupy full screen */
+  }
+  table th, table td {
+    font-size: 0.85rem;
+    padding: 0.4rem !important; /* tighter spacing */
+  }
+  h1 {
+    font-size: 1.4rem;
+  }
+}
+
+</style>

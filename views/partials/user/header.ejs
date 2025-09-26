@@ -42,6 +42,24 @@
     crossorigin="anonymous"
   ></script>
 
+  <style>
+    .fs-md-icon{
+      font-size: 1.75rem;
+    }
+
+    .fs-md-text{
+      font-size: 1.3rem;
+    }
+    @media (max-width:576px){
+    .fs-md-icon{
+      font-size: 1rem;
+    }
+    .fs-md-text{
+      font-size: .75rem;
+    }
+    }
+  </style>
+
   <!-- Custom JS (defer for non-blocking load) -->
   <script defer src="/js/shop.js"></script>
   <script defer src="/js/userHeader.js"></script>
@@ -63,10 +81,10 @@
           </div>
           <div class="col-4 d-flex justify-content-center align-items-center">
             <a href="/home" class="text-decoration-none text-black"
-              ><p class="d-inline mb-0 fw-semibold fs-md-4">HOME</p></a
+              ><p class="d-inline mb-0 fw-semibold fs-md-text">HOME</p></a
             >
             <a href="/shop" class="text-decoration-none text-black"
-              ><p class="d-inline ms-md-4 ms-2 mb-0 fw-semibold fs-md-4">
+              ><p class="d-inline ms-md-4 ms-2 mb-0 fw-semibold fs-md-text">
                 SHOP
               </p></a
             >
@@ -115,16 +133,16 @@
               ></div>
             </form>
             <a href="https://app.thinkstack.ai/bot/previews/iframeview.html?bot=aHR0cHM6Ly9hcHAudGhpbmtzdGFjay5haS9ib3QvaW5kZXguaHRtbD9jaGF0Ym90X2lkPTY4ZDQxYTBhNjJlOGVjMDY5OWY2NGJlOCZ0eXBlPWlubGluZQ=="
-              ><i class="fs-4 text-black fa-solid fa-comments ms-3"></i>
+              ><i class="fs-md-icon text-black fa-solid fa-comments ms-3"></i>
             </a>
             <a href="/wishlist"
-              ><i class="fs-4 text-black fa-regular fa-heart ms-3"></i
+              ><i class="text-black fs-md-icon fa-regular fa-heart ms-3"></i
             ></a>
             <a href="/cart"
-              ><i class="fa-solid fa-cart-shopping ms-3 fs-4 text-black"></i
+              ><i class="fa-solid fa-cart-shopping fs-md-icon ms-3 text-black"></i
             ></a>
             <a href="/profile"
-              ><i class="fs-4 text-black fa-regular fa-circle-user ms-3"></i
+              ><i class="fs-md-icon text-black fa-regular fa-circle-user ms-3"></i
             ></a>
           </div>
         </div>
