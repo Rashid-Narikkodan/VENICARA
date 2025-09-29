@@ -75,10 +75,14 @@ const showShop = async (req, res) => {
       });
       const totalPages = Math.ceil(totalProducts / limit);
 
-      const wishlist = await Wishlist.find({
-        userId: req.session.user?.id,
-      }).lean();
-      const wishlistIds = wishlist.map((item) => item.variantId.toString());
+      let wishlist=null;
+      let wishlistIds=null;
+      if(req.session.user.id){
+         wishlist = await Wishlist.find({
+          userId: req.session.user?.id,
+        }).lean();
+         wishlistIds = wishlist.map((item) => item.variantId.toString());
+      }
 
       return res.render("userPages/shop", {
         products,
@@ -167,10 +171,16 @@ const showShop = async (req, res) => {
       },
     ];
 
-    const wishlist = await Wishlist.find({
-      userId: req.session.user.id,
-    }).lean();
-    const wishlistIds = wishlist.map((item) => item.variantId.toString());
+    let wishlistIds = []
+    let wishlist = null
+
+    if(req.session?.user?.id){
+
+       wishlist = await Wishlist.find({
+        userId: req.session.user.id,
+      }).lean();
+       wishlistIds = wishlist.map((item) => item.variantId.toString());
+    }
 
     const result = await Product.aggregate(pipeline);
     let products = result[0].data;
