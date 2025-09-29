@@ -14,7 +14,7 @@ const adminSession = session({
     maxAge: 1000 * 60 * 60 * 24, 
     httpOnly: true,
     sameSite: 'strict',
-    secure: false
+    secure: process.env.NODE_ENV === 'production'
   }
 });
 
@@ -31,7 +31,7 @@ const userSession = session({
     maxAge: 1000 * 60 * 60 * 24,
     httpOnly: true,
     sameSite: 'lax',
-    secure: false
+    secure: process.env.NODE_ENV === 'production'
   }
 });
 
