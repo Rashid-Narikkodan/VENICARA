@@ -77,7 +77,7 @@ const showShop = async (req, res) => {
 
       let wishlist=null;
       let wishlistIds=[];
-      if(req.session.user?.id){
+      if(req.session.user){
          wishlist = await Wishlist.find({
           userId: req.session.user?.id,
         }).lean();
@@ -174,7 +174,7 @@ const showShop = async (req, res) => {
     let wishlist = null
     let wishlistIds = []
 
-    if(req.session.user?.id){
+    if(req.session.user){
        wishlist = await Wishlist.find({
         userId: req.session.user?.id,
       }).lean();
