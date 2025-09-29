@@ -76,8 +76,8 @@ const showShop = async (req, res) => {
       const totalPages = Math.ceil(totalProducts / limit);
 
       let wishlist=null;
-      let wishlistIds=null;
-      if(req.session.user.id){
+      let wishlistIds=[];
+      if(req.session.user?.id){
          wishlist = await Wishlist.find({
           userId: req.session.user?.id,
         }).lean();
@@ -171,13 +171,12 @@ const showShop = async (req, res) => {
       },
     ];
 
-    let wishlistIds = []
     let wishlist = null
+    let wishlistIds = []
 
-    if(req.session?.user?.id){
-
+    if(req.session.user?.id){
        wishlist = await Wishlist.find({
-        userId: req.session.user.id,
+        userId: req.session.user?.id,
       }).lean();
        wishlistIds = wishlist.map((item) => item.variantId.toString());
     }
