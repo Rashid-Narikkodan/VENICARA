@@ -377,12 +377,20 @@ const resendOTP = async (req, res) => {
 const handleLogout = (req, res) => {
   req.session.destroy((err) => {
     if (err) {
-      return handleError(res, 'handleLogout', err)
+      return handleError(res, 'handleLogout', err);
     }
-    res.clearCookie("connect.sid")
-    res.redirect("/")
-  })
-}
+
+    res.clearCookie('user.sid', {
+      path: '/',                // match your cookie path
+      httpOnly: true,           // same as set in session config
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax'           // or 'strict' if admin
+    });
+
+    return res.redirect('/');
+  });
+};
+
 
 module.exports = {
   showLogin,
