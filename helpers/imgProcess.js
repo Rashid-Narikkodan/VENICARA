@@ -10,7 +10,6 @@ const processImages= async (files,folder='public/upload/products') => {
     const filepath=path.join(folder,filename)
     await sharp(file.buffer).resize(600,600,{fit:'cover'}).webp({quality:80}).toFile(filepath)
     const imgPath=`/upload/profiles/${filename}`
-    console.log(imgPath)
     return imgPath
   }else{
   const imagePaths=[]

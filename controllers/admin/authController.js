@@ -65,7 +65,7 @@ const handleLogout = (req, res) => {
         console.error("Logout error:", err);
         return res.redirect("/admin/dashboard");
       }
-      res.clearCookie("connect.sid");
+      res.clearCookie("admin.sid");
       return res.redirect("/admin/login");
     });
   } catch (err) {
