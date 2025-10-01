@@ -1,5 +1,6 @@
 <%-include('../partials/user/header.ejs')%>
 <%-include('../partials/user/sidebarProfile.ejs')%>
+<<<<<<< HEAD
 
 <style>
   .reward-card {
@@ -128,6 +129,108 @@
   </div>
 </main>
 
+=======
+
+<style>
+  .referral-card, .reward-card {
+    background: #ffffff;
+    border-radius: 15px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    text-align: center;
+    padding: 2rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .referral-card p, .reward-card p {
+    margin-bottom: 0.5rem;
+  }
+
+  .referral-card small, .reward-card small {
+    color: #6c757d;
+    display: block;
+    margin-bottom: 1.5rem;
+  }
+
+  .referral-code {
+    font-weight: bold;
+    letter-spacing: 2px;
+    border: 2px dashed #aaa;
+    padding: 12px 18px;
+    border-radius: 6px;
+    margin-bottom: 25px;
+    display: inline-block;
+    background: #fafafa;
+  }
+
+  .btn-refer {
+    border-radius: 30px;
+    font-weight: 600;
+    background: #444;
+    border: none;
+    padding: 12px 0;
+    width: 100%;
+    transition: all 0.3s ease;
+  }
+
+  .btn-refer:hover {
+    background: #222;
+  }
+
+  .reward-card .list-group-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 12px;
+    margin-bottom: 0.5rem;
+    padding: 1rem;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  }
+</style>
+
+<main class="container py-4">
+  <div class="row justify-content-center g-4">
+    <!-- Referral Card -->
+    <div class="col-12 col-md-8">
+      <div class="referral-card shadow">
+        <p class="fw-bold fs-3">REFER & EARN</p>
+        <img src="/images/Screenshot 2025-09-11 153150.png" alt="Referral Icon" class="img-fluid mb-3">
+        <p>Refer now and Earn up to Rs.200</p>
+        <small>Send a referral Message to your friend, Collect your Reward</small>
+        <div class="referral-code"><%=referralCode%></div>
+        <button class="btn btn-refer text-white" onclick="copy(this)">
+          Refer Now, Click to Copy Message
+        </button>
+      </div>
+    </div>
+
+    <!-- Rewards Card -->
+    <% if(rewards && rewards.length) { %>
+      <div class="col-12 col-md-4">
+        <div class="reward-card" style="background: rgb(218,218,218);">
+          <p class="fs-3 fw-bold">Rewards</p>
+          <div id="couponList" class="list-group">
+            <% rewards.forEach(reward => { %>
+              <div class="list-group-item">
+                <div>
+                  <span class="fw-bold text-start">Referral Reward</span>
+                  <small class="d-block text-muted">Get ₹<%=reward.amount%> as Referral reward</small>
+                </div>
+                <button 
+                  class="btn btn-dark btn-sm rounded-pill claim-reward px-3" 
+                  data-id="<%= reward._id %>"
+                  <%= (reward.status === 'claimed' || reward.status === 'pending') ? 'disabled' : '' %>>
+                  <%= reward.status.charAt(0).toUpperCase() + reward.status.slice(1) %>
+                </button>
+              </div>
+            <% }) %>
+          </div>
+        </div>
+      </div>
+    <% } %>
+  </div>
+</main>
+
+>>>>>>> week11
 <script>
 function copy(btn){
   const copy='<%=referralCode%>';

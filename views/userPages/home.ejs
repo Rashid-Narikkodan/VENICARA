@@ -80,6 +80,11 @@
       background: black;
       margin: 10px auto;
     }
+    @media (max-width:576px){
+      .product-name{
+        font-size: small;
+      }
+    }
   </style>
   <main class="flex-grow-1 bg-light">
     <div class="container">
@@ -148,10 +153,10 @@
             <!-- //featured products -->
             <div class="row mt-4 g-4">
               <% products.forEach(product=> { %>
-                <a href="products/<%=product._id%>" class="col-md-4 text-decoration-none text-black col-sm-6">
+                <a href="products/<%=product._id%>" class="col-md-4 col-6 text-decoration-none text-black">
                   <div class="product-card">
-                    <img src="<%=product.images[0]%>" loading="lazy" alt="<%=product.name%>" class="img-fluid rounded-5" />
-                    <div class="product-name mt-4 fs-4">
+                    <img src="<%=product.images[0]%>" loading="lazy" alt="<%=product.name%>" class="img-fluid rounded-5 featured-img" />
+                    <div class="product-name mt-4 fs-md-4">
                       <%=product.name%>
                     </div>
                     <div class="product-price">Rs.<%=Math.min(...product.variants.map(v=>v.finalAmount))%></div>
