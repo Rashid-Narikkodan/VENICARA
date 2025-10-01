@@ -73,16 +73,16 @@
                       <%= order.orderId %>
                     </td>
                     <td class="text-center">
-                      <%= order.userId.email%>
+                      <%= order.userId?.email%>
                     </td>
                     <td class="text-center">
                         ₹<%= order.finalAmount%>
                     </td>
                     <td class="text-center">
-                      <%= order.createdAt.toLocaleDateString()%>
+                      <%= order.createdAt?.toLocaleDateString()%>
                     </td>
                     <td class="text-center">
-                      <%= order.updatedAt.toLocaleDateString()%>
+                      <%= order.updatedAt?.toLocaleDateString()%>
                     </td>
                     <td class="text-center text-success">
                       <%=order.status%>

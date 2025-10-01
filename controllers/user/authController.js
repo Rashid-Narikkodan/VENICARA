@@ -360,7 +360,7 @@ const resendOTP = async (req, res) => {
   try {
     const user = await User.findOne({ _id: req.session.userId })
 
-    const otp = generateOTP()
+    const otp = await generateOTP()
     const otpExpiry = new Date(Date.now() + 5 * 60 * 1000)
 
     user.otp = otp

@@ -5,14 +5,14 @@ const auth=require('../../middlewares/authUser')
 router.use("/auth",require("./authRoutes"));
 router.use("/", require("./homeRoutes"));  // home, shop, search, etc.
 
-router.use("/profile",auth.requireLogin, require("./profileRoutes"));
-router.use("/address",auth.requireLogin, require("./addressRoutes"));
-router.use("/cart",auth.requireLogin, require("./cartRoutes"));
-router.use("/checkout",auth.requireLogin, require("./checkoutRoutes"));
-router.use("/wishlist",auth.requireLogin, require("./wishlistRoutes"));
-router.use("/orders",auth.requireLogin, require("./orderRoutes"));
-router.use("/referEarn",auth.requireLogin, require("./referRoutes"));
-router.use("/wallet",auth.requireLogin, require("./walletRoutes"));
-router.use("/delete",auth.requireLogin, require("./deleteRoutes"));
+router.use("/profile",auth.requireLogin,auth.isUserBlocked, require("./profileRoutes"));
+router.use("/address",auth.requireLogin,auth.isUserBlocked, require("./addressRoutes"));
+router.use("/cart",auth.requireLogin,auth.isUserBlocked, require("./cartRoutes"));
+router.use("/checkout",auth.requireLogin,auth.isUserBlocked, require("./checkoutRoutes"));
+router.use("/wishlist",auth.requireLogin,auth.isUserBlocked, require("./wishlistRoutes"));
+router.use("/orders",auth.requireLogin,auth.isUserBlocked, require("./orderRoutes"));
+router.use("/referEarn",auth.requireLogin,auth.isUserBlocked, require("./referRoutes"));
+router.use("/wallet",auth.requireLogin,auth.isUserBlocked, require("./walletRoutes"));
+router.use("/delete",auth.requireLogin,auth.isUserBlocked, require("./deleteRoutes"));
 
 module.exports = router;
