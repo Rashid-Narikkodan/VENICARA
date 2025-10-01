@@ -28,18 +28,10 @@
 
     @media (max-width: 576px) {
   .product-card .card-title {
-<<<<<<< HEAD
     font-size: 0.9rem;
   }
   .product-card .product-category,
   .product-card .product-quantity{
-=======
-    font-size: 0.8rem;
-  }
-  .product-card .product-category,
-  .product-card .product-quantity,
-  .product-card .product-price {
->>>>>>> week11
     font-size: 0.6rem;
   }
   .product-card img {
@@ -335,11 +327,8 @@
                           <p class="text-muted mb-1 product-category" style="font-size:0.85rem;">Category: <%= product.category.name %></p>
 
                           <p class="text-muted mb-1 d-flex justify-content-between align-items-center product-quantity" style="font-size:0.85rem;">
-<<<<<<< HEAD
                             Volume: <%= Math.min(...product.variants.map(v => v.volume)) %>
-=======
-                            Quantity: <%= Math.min(...product.variants.map(v => v.volume)) %>
->>>>>>> week11
+
                             <span class="text-end" style="font-size:0.85rem;">
                               <!-- <span class="text-dark">★★★★☆</span>
                               <span class="text-muted">(200)</span> -->
@@ -347,11 +336,9 @@
                           </p>
 
                           <p class="mb-0 d-flex justify-content-between align-items-center product-price">
-<<<<<<< HEAD
+
                             <span >
-=======
-                            <span>
->>>>>>> week11
+
                               <span class="text-success fw-bold">₹<%= Math.min(...product.variants.map(v => v.finalAmount)) %></span>
                               <span class="text-muted text-decoration-line-through">₹<%= Math.min(...product.variants.map(v => v.basePrice)) %></span>
                               <% const perc = product.variants.reduce((min, v) => { 
