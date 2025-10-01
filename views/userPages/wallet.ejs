@@ -82,7 +82,98 @@
 
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script>
-  // existing JS logic (unchanged)...
+  // Toastr configuration
+  toastr.options = {
+    closeButton: true,
+    progressBar: true,
+    positionClass: "toast-top-center",
+    timeOut: "3000"
+  };
+
+  const input = document.getElementById("amount");
+  const form = document.getElementById("walletForm");
+
+  // Always keep ₹ prefixed and allow only numbers
+  input.addEventListener("input", () => {
+    let value = input.value.replace(/₹/g, "").replace(/[^0-9]/g, "");
+    input.value = "₹" + value;
+  });
+
+  // Preset amount buttons
+  document.querySelectorAll(".preset-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      input.value = "₹" + btn.dataset.value;
+    });
+  });
+
+  // On form submit → send only numbers (without ₹)
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const amountValue = input.value.replace("₹", "").trim();
+
+    // Basic validation
+    if (!amountValue || isNaN(amountValue) || parseInt(amountValue) <= 0) {
+      toastr.error("Please enter a valid amount.");
+      return;
+    }
+
+    try {
+      // Step 1: Create Razorpay order from backend
+      const res = await fetch("/wallet/add", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ amount: amountValue }),
+      });
+
+      const { order } = await res.json();
+
+      if (!order || !order.id || order.status !== "created") {
+        toastr.error("Failed to create order. Try again.");
+        return;
+      }
+
+      // Step 2: Razorpay Checkout
+      const options = {
+        key: "<%= process.env.RAZORPAY_KEY_ID %>", // injected from backend
+        amount: order.amount, // in paise
+        currency: "INR",
+        name: "Venicara Wallet",
+        description: "Add Money to Wallet",
+        order_id: order.id,
+        handler: async function (response) {
+          try {
+            // Step 3: Verify payment on backend
+            const verifyRes = await fetch("/wallet/verify-payment", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(response),
+            });
+
+            const verifyData = await verifyRes.json();
+
+            if (verifyData.status) {
+              document.getElementById("balance").textContent = `₹${verifyData.balance}`;
+              toastr.success("Wallet balance updated!");
+            } else {
+              toastr.error("Payment verification failed!");
+            }
+          } catch (err) {
+            console.error(err);
+            toastr.error("Verification error. Try again.");
+          }
+        },
+        theme: { color: "#121212" },
+      };
+
+      const rzp = new Razorpay(options);
+      rzp.open();
+    } catch (error) {
+      console.error(error);
+      toastr.error("Something went wrong. Try again later.");
+    }
+  });
 </script>
+
 </body>
 </html>
