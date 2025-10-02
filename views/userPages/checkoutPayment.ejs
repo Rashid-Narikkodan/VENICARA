@@ -71,7 +71,7 @@
                   name="paymentMethod"
                   id="pay_<%= method.code %>"
                   value="<%=method.code %>" 
-                  <%=method.code=='COD'&&total>1000?'disabled':''%>
+                  <%=method.code=='COD'&&total>7000?'disabled':''%>
                   <%= i==0&&total<1000 || i=== 1 ? "checked" : "" %>>
               </div>
 

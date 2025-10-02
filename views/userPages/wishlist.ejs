@@ -74,7 +74,7 @@
                 <div class="col-md-6 col-8 product-details">
                   <h6 class="fw-bold"><%= item.product.name %></h6>
                   <small class="fw-semibold"><%= item.variant?.volume || "N/A" %> ML</small>
-                  <p class="fw-bold">Rs. <%= item.variant?.finalDiscount || 0 %></p>
+                  <p class="fw-bold">Rs. <%= item.variant?.finalAmount || 0 %></p>
                   <p class="fw-bold text-muted small">Added On: <%= item.createdAt.toLocaleDateString() %></p>
                 </div>
                 

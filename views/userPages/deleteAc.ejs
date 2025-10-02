@@ -2,6 +2,9 @@
 <%-include('../partials/user/sidebarProfile.ejs')%>
 
 <style>
+  html{
+    overflow-y: hidden;
+  }
   .deletion-card {
     background: #ffffff;
     border-radius: 15px;
@@ -9,7 +12,7 @@
     text-align: left;
     padding: 3rem 2rem;
     width: 70%;
-    max-height: 80vh;
+    max-height: 75vh;
     overflow-y: auto;
   }
 
@@ -80,9 +83,15 @@
   .btn-cancel:hover {
     background: #e0e0e0;
   }
+  @media (max-width:576px){
+  .deletion-card {
+    width: 95%;
+    max-height: 70vh;
+  }
+  }
 </style>
 
-<main class="d-flex justify-content-center w-100 h-75">
+<main class="d-flex justify-content-center w-100">
   <div class="deletion-card shadow">
     <h3>Account Deletion Notice</h3>
 

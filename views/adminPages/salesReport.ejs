@@ -29,6 +29,15 @@
      vertical-align: middle;
      }
 
+#durationFilter option {
+  padding: 10px 14px;
+  font-weight: 400;
+  color: #374151;       /* dark gray */
+  background: #fff;     /* white background */
+  border: none;
+  outline: none;
+}
+
   .text-success { color: #198754 !important; }
   .text-danger { color: #dc3545 !important; }
   .text-warning { color: #ffc107 !important; }
@@ -67,9 +76,18 @@
             </select>
 
             <div id="customDateRange" class="<%= filter === 'custom' ? '' : 'd-none' %> ms-3">
-              <input name="startDate" type="date" class="form-control d-inline-block w-auto" value="<%= startDate || '' %>">
+              <input name="startDate"
+                type="date"
+                class="form-control d-inline-block w-auto"
+                max="<%= today %>"
+                value="<%= startDate || '' %>">
+
               <span class="mx-2 fw-semibold">to</span>
-              <input name="endDate" type="date" class="form-control d-inline-block w-auto" value="<%= endDate || '' %>">
+              <input name="endDate"
+                type="date"
+                class="form-control d-inline-block w-auto"
+                min="<%= today %>"
+                value="<%= endDate || '' %>">
             </div>
             <div>
               <button type="submit" class="btn btn-dark">Apply</button>
@@ -227,5 +245,17 @@
       customRange.classList.add('d-none');
     }
   });
-  
+
+    const startInput = document.querySelector('[name="startDate"]');
+  const endInput = document.querySelector('[name="endDate"]');
+
+  startInput.addEventListener("change", () => {
+    // End date cannot be earlier than chosen start date
+    endInput.min = startInput.value;
+  });
+
+  endInput.addEventListener("change", () => {
+    // Start date cannot be later than chosen end date
+    startInput.max = endInput.value;
+  });
 </script>

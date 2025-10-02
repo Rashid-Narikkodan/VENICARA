@@ -8,6 +8,7 @@ const showSalesReport = async (req, res) => {
     let filter = req.query.filter || "daily";
     let startDate, endDate;
     const now = new Date();
+    const today = new Date().toISOString().split("T")[0];
 
     //decide filteration
     switch (filter) {
@@ -137,6 +138,7 @@ const showSalesReport = async (req, res) => {
       endDate: req.query.endDate,
       orders,
       data,
+      today
     });
   } catch (err) {
     handleError(res, "showSalesReport", err);

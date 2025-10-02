@@ -15,8 +15,8 @@ const isUserBlocked=async(req, res, next)=>{
       return res.status(500).send("Logout failed :- "+err);
     }
     res.clearCookie("connect.sid");
-    req.flash('error','you are blocked')
-    res.redirect("/login"); 
+    req.flash('error','This account has been Blocked')
+    res.redirect("/"); 
   })
   } else {
     next();

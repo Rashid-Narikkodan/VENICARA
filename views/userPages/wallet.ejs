@@ -5,6 +5,7 @@
   .wallet-card {
     max-width: 600px; /* keeps it neat on large screens */
     width: 100%;      /* full width on mobile */
+    max-height: fit-content;
   }
   .add-input {
     border: none;
@@ -26,7 +27,7 @@
   }
 </style>
 
-<main class="w-100 d-flex justify-content-center px-md-2 p-0">
+<main class="w-100 min-vh-100 d-flex justify-content-center px-md-2 p-0">
   <div class="card rounded-4 p-4 shadow wallet-card">
     <div class="row g-3">
       <div class="col-12 text-center">
