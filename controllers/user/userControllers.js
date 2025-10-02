@@ -179,7 +179,7 @@ const resendProfileOTP = async (req, res) => {
 
 const showProfileChangePass = (req, res) => {
   try {
-    res.render("userPages/ProfileChangePass");
+    res.render("userPages/profileChangePass");
   } catch (err) {
     handleError(res, "showProfileChangePass", err);
   }
