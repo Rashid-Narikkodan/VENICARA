@@ -94,7 +94,7 @@ const handleGoogleAuth = async (req, res) => {
     }
     req.session.user = {
       id: req.user._id,
-      email:req.user.emaail,
+      email:req.user.email,
       isVerified: user.isVerified,
       isDeleted: user.isDeleted,
       isBlocked: user.isBlocked,
@@ -178,7 +178,7 @@ const handleForgotOTP = async (req, res) => {
 
 const resendForgotOTP = async (req, res) => {
   try {
-    const user = await User.findOne({ _id: req.session.useId })
+    const user = await User.findOne({ _id: req.session.userId })
     const otp = generateOTP()
     const otpExpiry = new Date(Date.now() + 5 * 60 * 1000)
 
@@ -360,7 +360,7 @@ const resendOTP = async (req, res) => {
   try {
     const user = await User.findOne({ _id: req.session.userId })
 
-    const otp = await generateOTP()
+    const otp = generateOTP()
     const otpExpiry = new Date(Date.now() + 5 * 60 * 1000)
 
     user.otp = otp
@@ -377,20 +377,12 @@ const resendOTP = async (req, res) => {
 const handleLogout = (req, res) => {
   req.session.destroy((err) => {
     if (err) {
-      return handleError(res, 'handleLogout', err);
+      return handleError(res, 'handleLogout', err)
     }
-
-    res.clearCookie('user.sid', {
-      path: '/',                // match your cookie path
-      httpOnly: true,           // same as set in session config
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax'           // or 'strict' if admin
-    });
-
-    return res.redirect('/');
-  });
-};
-
+    res.clearCookie("connect.sid")
+    res.redirect("/")
+  })
+}
 
 module.exports = {
   showLogin,
