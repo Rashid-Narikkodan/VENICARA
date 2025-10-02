@@ -28,11 +28,19 @@
       <!-- Form -->
       <form action="/profile/changePassword?_method=PATCH" method="POST" id="form">
        <div class="mb-2">
+                <input
+         type="password"
+         id="oldPass"
+         name="oldPassword"
+         class="form-control rounded-3 p-3"
+         placeholder=" Old password"
+        />
+        <div id="oldPassError" class="text-danger"></div>
         <input
          type="password"
          id="pass"
          name="password"
-         class="form-control rounded-3 p-3"
+         class="form-control rounded-3 p-3 mt-3"
          placeholder=" New password"
         />
         <div id="passError" class="text-danger"></div>

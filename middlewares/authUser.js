@@ -1,3 +1,6 @@
+const User = require('../models/User');
+
+
 const requireLogin = async (req, res, next) => {
   if (!req.session.user) {
     req.flash('error', 'You must be logged in to access this page')
@@ -6,7 +9,6 @@ const requireLogin = async (req, res, next) => {
   next()
 }
 const isUserBlocked=async(req, res, next)=>{
-  const User = require('../models/User');
   const user=await User.findById(req.session.user.id);
   if (!user||user.isBlocked||user.isDeleted) {
      req.logout((err) => {

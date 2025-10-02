@@ -187,7 +187,16 @@ const showProfileChangePass = (req, res) => {
 
 const handleProfileChangePass = async (req, res) => {
   try {
-    const { password, confirmPassword } = req.body;
+    const { oldPassword, password, confirmPassword } = req.body;
+
+    const user = await User.findById(req.session.user.id)
+
+     const isMatch = await bcrypt.compare(oldPassword, user.password)
+        if (!isMatch) {
+          req.flash('error', 'Incorrect old password')
+          return res.redirect('/profile/changePassword')
+        }
+
     if (password !== confirmPassword) {
       req.flash('error', 'Confirm password did not match');
       return res.redirect('/profile/changePassword');
