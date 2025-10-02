@@ -99,7 +99,7 @@
             </div>
             <div class="d-flex justify-content-between">
               <span>Discount Amount:</span>
-              <span class="text-danger">- ₹<%=order.totalOrderPrice-order.finalAmount%></span>
+              <span class="text-danger">- ₹<%=parseFloat((order.totalOrderPrice-order.finalAmount).toFixed(2))%></span>
             </div>
             
             <hr />
