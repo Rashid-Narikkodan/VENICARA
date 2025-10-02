@@ -51,9 +51,8 @@ resend.addEventListener('click', async (e) => {
   resend.style.pointerEvents = 'none';
 
   try {
-    const response = await fetch('/auth/resendProfileOTP', {
+    const response = await fetch('/profile/resentOTP', {
       method: "POST",
-      headers: { "Content-Type": "application/json" }
     });
 
     const data = await response.json(); // <-- await here
@@ -63,7 +62,7 @@ resend.addEventListener('click', async (e) => {
       startTimer(50); // start countdown from 50 seconds
     } else {
       alert(data.message || "Something went wrong");
-      resend.innerHTML = 'Resend';
+      // resend.innerHTML = 'Resend';
       resend.style.pointerEvents = 'auto';
     }
   } catch (err) {

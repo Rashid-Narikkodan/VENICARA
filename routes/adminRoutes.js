@@ -28,7 +28,6 @@ router
   .route("/customers")
   .get(auth.requireLogin, customersController.showCustomers);
 router.patch("/customers/status/:id", customersController.blockCustomer);
-router.patch("/customers/:id", customersController.deleteCustomer);
 
 router.route("/orders").get(auth.requireLogin, ordersController.showOrders);
 router.get("/order/:id", ordersController.showOrderDetails);

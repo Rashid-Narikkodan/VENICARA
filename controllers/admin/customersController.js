@@ -53,24 +53,7 @@ const blockCustomer = async (req, res) => {
   }
 };
 
-const deleteCustomer = async (req, res) => {
-  try {
-    const user = await User.findById(req.params.id);
-    if (!user) {
-      req.flash('error', 'User not found');
-      return res.redirect('/admin/customers');
-    }
-    user.isDeleted = true;
-    await user.save();
-    req.flash('success', 'One user removed successfully');
-    return res.redirect('/admin/customers');
-  } catch (err) {
-    handleError(res, "deleteCustomer", err);
-  }
-};
-
 module.exports = {
   showCustomers,
   blockCustomer,
-  deleteCustomer,
 };

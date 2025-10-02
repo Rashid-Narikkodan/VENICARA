@@ -23,7 +23,6 @@
                 <th class="text-center p-3">Verified</th>
                 <th class="text-center p-3">Created On</th>
                 <th class="text-center p-3">status</th>
-                <th class="text-center p-3">Action</th>
               </tr>
             </thead>
             <tbody>
@@ -53,13 +52,6 @@
                         class="alert px-3 py-0 <%=  user.isBlocked?'alert-danger text-danger':'alert-success text-success'%>">
                         <%= user.isBlocked? 'Blocked' : 'Active' %>
                       </button>
-                    </td>
-                    <td class="text-center">
-                      <form action="/admin/customers/<%=user._id%>?_method=PATCH" method="POST" class="d-inline">
-                        <button type="submit" class="btn btn-sm btn-outline-danger"
-                          onclick="return confirm('Are you sure you want to remove this user?')"><i
-                            class="fa fa-trash"></i></button>
-                      </form>
                     </td>
                   </tr>
                   <% }) %>

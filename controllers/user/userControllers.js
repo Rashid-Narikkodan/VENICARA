@@ -40,12 +40,16 @@ const editProfile = async (req, res) => {
       photoUrl = await processImages(req.file, 'public/upload/profiles');
     }
 
+    const user = await User.findById(req.session.user.id)
+
     const updateData = { name, email, mobile: phone, gender, photoUrl };
-    if (email !== req.session.user.email) delete updateData.email;
+    if (email !== user.email) delete updateData.email;
 
     await User.findByIdAndUpdate(req.session.user.id, updateData, { new: true });
-
-    if (email !== req.session.user.email) {
+    if (email !== user.email) {
+      req.session.changePass ={
+        email
+      } 
       const otp = generateOTP();
       await User.findByIdAndUpdate(req.session.user.id, {
         otp,
@@ -170,7 +174,7 @@ const resendProfileOTP = async (req, res) => {
     user.otpExpiry = new Date(Date.now() + 5 * 60 * 1000);
     await user.save();
 
-    sendEmail(user.email, otp, user.name);
+    sendEmail(req.session.changePass.email, otp, user.name);
     res.json({ success: true });
   } catch (err) {
     handleError(res, "resendProfileOTP", err);

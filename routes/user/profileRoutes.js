@@ -41,6 +41,5 @@ router
   .route("/changePassword")
   .get(auth.requireLogin,userController.showProfileChangePass)
   .patch(auth.requireLogin,userController.handleProfileChangePass);
-
-
+router.post('/resentOTP',userController.resendProfileOTP)
 module.exports = router
