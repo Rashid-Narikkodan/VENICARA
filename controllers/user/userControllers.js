@@ -191,6 +191,11 @@ const handleProfileChangePass = async (req, res) => {
 
     const user = await User.findById(req.session.user.id)
 
+    if(!user.password){
+      req.flash('error','Google Authenticated accounts can\'t change password')
+      return res.redirect('/profile/changePassword')
+    }
+
      const isMatch = await bcrypt.compare(oldPassword, user.password)
         if (!isMatch) {
           req.flash('error', 'Incorrect old password')
