@@ -12,9 +12,9 @@ const landingPage = async (req, res) => {
     );
 
     if (categories.length >= 3) {
-      categories[0].img = "/images/category-women.avif";
+      categories[0].img = "/images/category-MEN.avif";
       categories[1].img = "/images/category-unisex.avif";
-      categories[2].img = "/images/category-MEN.avif";
+      categories[2].img = "/images/category-women.avif";
     }
 
     const products = await Product.find({

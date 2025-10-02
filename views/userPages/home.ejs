@@ -1,173 +1,204 @@
-<%-include("../partials/user/header.ejs")%>
-  <style>
-    .hero-section {
-      margin-top: 40px;
-    }
+<%-include('../partials/user/header.ejs')%>
 
-    .hero-img {
-      width: 100%;
-      height: 450px;
-      object-fit: cover;
-      border-radius: 10px;
-    }
+<style>
+  .hero-section {
+    margin-top: 40px;
+  }
 
+  .hero-img {
+    width: 100%;
+    min-height: 250px;        /* flexible instead of fixed */
+    max-height: 450px;
+    object-fit: cover;
+    border-radius: 10px;
+  }
+
+  .hero-text h1 {
+    font-size: 2.2rem;
+    font-weight: bold;
+    font-family: 'Playfair Display', serif;
+    color: #4d3903;
+  }
+
+  .hero-text p {
+    letter-spacing: 1px;
+    font-weight: 500;
+    color: #2e2201;
+    max-width: 320px;
+  }
+
+
+  .btn {
+    background-color: rgb(255, 255, 255);
+    color: rgb(0, 0, 0);
+    border-radius: 5px;
+    padding: .6rem 1rem;
+    font-weight: 600;
+    transition: 0.3s;
+  }
+
+  .btn-shop:hover,
+  .btn:hover {
+    background-color: rgb(0, 0, 0);
+    color:white
+  }
+
+  .collection-card img,
+  .product-card img {
+    width: 100%;
+    aspect-ratio: 4/5;       /* keeps ratio */
+    object-fit: cover;
+    border-radius: 10px;
+    transition: transform 0.3s ease-in-out;
+  }
+
+  .collection-card img:hover,
+  .product-card img:hover {
+    transform: scale(1.05);
+  }
+
+  .collection-title,
+  .product-name {
+    margin-top: 15px;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+
+  .product-price {
+    font-weight: 500;
+    color: #333;
+  }
+
+  .section-title {
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+  }
+
+  .underline {
+    width: 60px;
+    height: 2px;
+    background: black;
+    margin: 10px auto;
+  }
+  /* Default desktop/tablet: normal grid */
+.featured-scroll {
+  overflow-x: visible;
+}
+
+  /* Mobile Tweaks */
+  @media (max-width: 768px) {
     .hero-text h1 {
-      font-size: 3rem;
-      font-weight: bold;
+      font-size: 1.6rem;
     }
-
-    .hero-text h1 span {
-      color: red;
-    }
-
     .hero-text p {
-      letter-spacing: 2px;
-      font-weight: 500;
+      font-size: 0.9rem;
     }
-
-    .btn-shop {
-      background-color: red;
-      color: white;
-      border-radius: 5px;
-      padding: 10px 20px;
-      font-weight: 600;
-      transition: 0.3s;
+    .btn-shop,
+    .btn {
+      padding: 8px 16px;
+      font-size: 0.9rem;
     }
+  .featured-scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch; /* smooth scrolling */
+  }
+  .featured-scroll .row {
+    flex-wrap: nowrap !important; /* keep in one row */
+  }
+  .featured-scroll::-webkit-scrollbar {
+    display: none; /* hide scrollbar for clean look */
+  }
+  .featured-scroll > div > a{
+    max-width: 250px;
+  }
+}
 
-    .btn-shop:hover {
-      background-color: darkred;
-    }
+</style>
 
-    .collection-card img,
-    .product-card img {
-      width: 100%;
-      object-fit: cover;
-      border-radius: 10px;
-      transition: transform 0.3s ease-in-out;
-    }
-
-    .collection-card img:hover,
-    .product-card img:hover {
-      transform: scale(1.05);
-    }
-
-    .collection-title,
-    .product-name {
-      margin-top: 15px;
-      font-weight: 600;
-      text-transform: uppercase;
-    }
-
-    /* Specific for product images */
-    .product-card img {
-      height: 300px;
-    }
-
-    .product-price {
-      font-weight: 500;
-      color: #333;
-    }
-
-    .section-title {
-      font-weight: bold;
-      text-transform: uppercase;
-      letter-spacing: 2px;
-    }
-
-    .underline {
-      width: 60px;
-      height: 2px;
-      background: black;
-      margin: 10px auto;
-    }
-    @media (max-width:576px){
-      .product-name{
-        font-size: small;
-      }
-    }
-  </style>
-  <main class="flex-grow-1 bg-light">
-    <div class="container">
-      <div class="row text-center">
-        <div class="col-md-12 mb-5 pt-3 pb-5">
-          <div class="container hero-section">
-            <div class="row align-items-center">
-              <!-- Left Image -->
-              <div class="col-md-4 mb-4 mb-md-0">
-                <img src="/images/hero-1.avif" alt="Left Banner" class="hero-img" />
-              </div>
-
-              <!-- Center Text -->
-              <div class="col-md-4 text-center hero-text d-flex flex-column justify-content-center align-items-center">
-                <h1 class="display-5 fw-bold mb-3" style="font-family: 'Playfair Display', serif; color: #4d3903">
-                  The Essence of Elegance
-                </h1>
-                <p class="lead mb-4" style="color: #2e2201; max-width: 320px">
-                  Discover fragrances that whisper luxury and linger with unforgettable
-                  charm. A scent crafted not just to wear, but to define your presence.
-                </p>
-                <a href="/shop" style="background-color: rgb(237, 185, 51)" class="btn btn-lg rounded-pill px-4 shadow">
-                  Shop Now
-                </a>
-              </div>
-              <!-- Right Image -->
-              <div class="col-md-4 mt-4 mt-md-0">
-                <img src="/images/hero-2.avif" alt="Right Banner" class="hero-img" />
-              </div>
-            </div>
-          </div>
-        </div>
-
-
-
-        <div class="col-md-12 mt-5">
-          <h6 class="text-uppercase">Explore</h6>
-          <h2 class="fw-bold">Our Fragrance Collections</h2>
-
-          <div class="row mt-4 g-4">
-            <!-- Men -->
-            <% categories.forEach(category=> { %>
-              <div class="col-md-4 col-sm-6">
-                <a href="/shop?category=<%=category._id%>" class="text-decoration-none text-black">
-                  <div class="collection-card overflow-hidden rounded-5">
-                    <img src="<%=category.img%>" loading="lazy" alt="<%=category.name%>" class="img-fluid rounded-5" />
-                    <div class="collection-title">
-                      <h3 class="mt-4">
-                        <%=category.name%>
-                      </h3>
-                    </div>
-                  </div>
-                </a>
-              </div>
-              <% }) %>
-          </div>
-        </div>
-        <div class="col-md-12 mt-5">
-          <div class="container text-center mt-5">
-
-            <h6 class="text-uppercase">Explore</h6>
-            <h2 class="section-title">Featured Products</h2>
-            <div class="underline"></div>
-
-
-            <!-- //featured products -->
-            <div class="row mt-4 g-4">
-              <% products.forEach(product=> { %>
-                <a href="products/<%=product._id%>" class="col-md-4 col-6 text-decoration-none text-black">
-                  <div class="product-card">
-                    <img src="<%=product.images[0]%>" loading="lazy" alt="<%=product.name%>" class="img-fluid rounded-5 featured-img" />
-                    <div class="product-name mt-4 fs-md-4">
-                      <%=product.name%>
-                    </div>
-                    <div class="product-price">Rs.<%=Math.min(...product.variants.map(v=>v.finalAmount))%></div>
-                  </div>
-                </a>
-                <% }) %>
+<main class="flex-grow-1 bg-light">
+  <div class="container">
+    <div class="row text-center">
+      <div class="col-md-12 mb-5 pt-3 pb-5">
+        <div class="container hero-section">
+          <div class="row align-items-center">
+            <!-- Left Image -->
+            <div class="col-12 col-md-4 mb-4 mb-md-0">
+              <img src="/images/hero-1.avif" alt="Left Banner" class="hero-img" />
             </div>
 
+            <!-- Center Text -->
+            <div class="col-12 col-md-4 text-center hero-text d-flex flex-column justify-content-center align-items-center mb-4 mb-md-0">
+              <h1 class="fw-bold mb-3">The Essence of Elegance</h1>
+              <p class="mb-4">
+                Discover fragrances that whisper luxury and linger with unforgettable
+                charm. A scent crafted not just to wear, but to define your presence.
+              </p>
+              <a href="/shop" style="background-color: rgb(237, 185, 51)" class="btn btn-lg rounded-pill px-4 shadow">
+                Shop Now
+              </a>
+            </div>
+
+            <!-- Right Image -->
+            <div class="col-12 col-md-4 mt-4 mt-md-0">
+              <img src="/images/hero-2.avif" alt="Right Banner" class="hero-img" />
+            </div>
           </div>
         </div>
       </div>
+
+      <!-- Categories -->
+      <div class="col-md-12 mt-5">
+        <h6 class="text-uppercase">Explore</h6>
+        <h2 class="fw-bold">Our Fragrance Collections</h2>
+
+        <div class="row mt-4 g-4 justify-content-center">
+          <% categories.forEach(category=> { %>
+            <div class="col-6 col-md-4">
+              <a href="/shop?category=<%=category._id%>" class="text-decoration-none text-black">
+                <div class="collection-card overflow-hidden rounded-5">
+                  <img src="<%=category.img%>" alt="<%=category.name%>" class="img-fluid rounded-5" />
+                  <div class="collection-title">
+                    <h3 class="mt-4">
+                      <%=category.name%>
+                    </h3>
+                  </div>
+                </div>
+              </a>
+            </div>
+          <% }) %>
+        </div>
+      </div>
+
+      <!-- Featured Products -->
+<div class="col-md-12 mt-5">
+  <div class="container text-center mt-5">
+    <h6 class="text-uppercase">Explore</h6>
+    <h2 class="section-title">Featured Products</h2>
+    <div class="underline"></div>
+
+    <!-- Scroll wrapper -->
+    <div class="featured-scroll mt-4 ">
+      <div class="row g-4 flex-md-wrap flex-nowrap">
+        <% products.forEach(product => { %>
+          <a href="products/<%=product._id%>" 
+             class="col-12 col-sm-6 col-md-4 text-decoration-none text-black flex-shrink-0">
+            <div class="product-card">
+              <img src="<%=product.images[0]%>" alt="<%=product.name%>" class="img-fluid rounded-5" />
+              <div class="product-name mt-4 fs-4"><%=product.name%></div>
+              <div class="product-price">
+                Rs.<%=Math.min(...product.variants.map(v=>v.finalAmount))%>
+              </div>
+            </div>
+          </a>
+        <% }) %>
+      </div>
     </div>
-  </main>
-  <%- include('../partials/user/footer.ejs')%>
+  </div>
+</div>
+
+    </div>
+  </div>
+</main>
+
+<%- include('../partials/user/footer.ejs')%>

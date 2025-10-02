@@ -27,11 +27,10 @@
     max-width: 320px;
   }
 
-  .btn-shop,
+
   .btn {
     background-color: rgb(255, 255, 255);
     color: rgb(0, 0, 0);
-    border: 1px solid rgb(0, 0, 0);
     border-radius: 5px;
     padding: .6rem 1rem;
     font-weight: 600;
@@ -82,6 +81,10 @@
     background: black;
     margin: 10px auto;
   }
+  /* Default desktop/tablet: normal grid */
+.featured-scroll {
+  overflow-x: visible;
+}
 
   /* Mobile Tweaks */
   @media (max-width: 768px) {
@@ -96,7 +99,21 @@
       padding: 8px 16px;
       font-size: 0.9rem;
     }
+  .featured-scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch; /* smooth scrolling */
   }
+  .featured-scroll .row {
+    flex-wrap: nowrap !important; /* keep in one row */
+  }
+  .featured-scroll::-webkit-scrollbar {
+    display: none; /* hide scrollbar for clean look */
+  }
+  .featured-scroll > div > a{
+    max-width: 250px;
+  }
+}
+
 </style>
 
 <main class="flex-grow-1 bg-light">
@@ -135,9 +152,9 @@
         <h6 class="text-uppercase">Explore</h6>
         <h2 class="fw-bold">Our Fragrance Collections</h2>
 
-        <div class="row mt-4 g-4">
+        <div class="row mt-4 g-4 justify-content-center">
           <% categories.forEach(category=> { %>
-            <div class="col-12 col-sm-6 col-md-4">
+            <div class="col-6 col-md-4">
               <a href="/shop?category=<%=category._id%>" class="text-decoration-none text-black">
                 <div class="collection-card overflow-hidden rounded-5">
                   <img src="<%=category.img%>" alt="<%=category.name%>" class="img-fluid rounded-5" />
@@ -154,30 +171,32 @@
       </div>
 
       <!-- Featured Products -->
-      <div class="col-md-12 mt-5">
-        <div class="container text-center mt-5">
-          <h6 class="text-uppercase">Explore</h6>
-          <h2 class="section-title">Featured Products</h2>
-          <div class="underline"></div>
+<div class="col-md-12 mt-5">
+  <div class="container text-center mt-5">
+    <h6 class="text-uppercase">Explore</h6>
+    <h2 class="section-title">Featured Products</h2>
+    <div class="underline"></div>
 
-          <div class="row mt-4 g-4">
-            <% products.forEach(product=> { %>
-              <a href="products/<%=product._id%>" 
-                 class="col-12 col-sm-6 col-md-4 text-decoration-none text-black">
-                <div class="product-card">
-                  <img src="<%=product.images[0]%>" alt="<%=product.name%>" class="img-fluid rounded-5" />
-                  <div class="product-name mt-4 fs-4">
-                    <%=product.name%>
-                  </div>
-                  <div class="product-price">
-                    Rs.<%=Math.min(...product.variants.map(v=>v.discount-1))%>.99
-                  </div>
-                </div>
-              </a>
-            <% }) %>
-          </div>
-        </div>
+    <!-- Scroll wrapper -->
+    <div class="featured-scroll mt-4 ">
+      <div class="row g-4 flex-md-wrap flex-nowrap">
+        <% products.forEach(product => { %>
+          <a href="products/<%=product._id%>" 
+             class="col-12 col-sm-6 col-md-4 text-decoration-none text-black flex-shrink-0">
+            <div class="product-card">
+              <img src="<%=product.images[0]%>" alt="<%=product.name%>" class="img-fluid rounded-5" />
+              <div class="product-name mt-4 fs-4"><%=product.name%></div>
+              <div class="product-price">
+                Rs.<%=Math.min(...product.variants.map(v=>v.finalAmount))%>
+              </div>
+            </div>
+          </a>
+        <% }) %>
       </div>
+    </div>
+  </div>
+</div>
+
     </div>
   </div>
 </main>

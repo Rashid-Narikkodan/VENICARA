@@ -1,73 +1,97 @@
 <%-include('../partials/user/header.ejs')%>
 
-<!-- ✅ Toastr CSS -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
 
 <style>
-  body {
-    background-color: #fff;
-    font-family: Arial, sans-serif;
+  body { background-color: #fff; font-family: Arial, sans-serif; }
+  .shopping-bag-title { font-weight: bold; text-align: center; margin: 2rem 0; font-size: 1.8rem; letter-spacing: 2px; }
+  .card { border: none; background: #f9f9f9; transition: 0.2s; }
+  .card:hover { transform: scale(1.01); }
+  .item-img { max-width: 60%; border-radius: 10px; }
+  .wishlist-item { border-radius: 16px; }
+  
+  .product-details h6 { font-size: 1rem; margin-bottom: .4rem; }
+  .product-details small { display: block; margin-bottom: .4rem; }
+  .product-details p { margin-bottom: .3rem; }
+  
+  .btn-custom, .btn-delete {
+    padding: .75rem 1.5rem;
+    font-size: .95rem;
+    border-radius: 25px;
+    width: 100%; /* ✅ same width buttons */
   }
-  .title { text-align: center; }
-  .shopping-bag-title {
-    font-weight: bold;
-    text-align: center;
-    margin: 2rem 0;
-    font-size: 1.8rem;
-    letter-spacing: 2px;
+  .btn-delete { 
+    color: #dc3545; 
+    border: 1px solid #dc3545; 
+    background: #fff;
   }
-  .card { border: none; }
-  .item-img { max-width: 100px; }
-  .remove-btn { cursor: pointer; }
+  .btn-delete:hover { background: #dc3545; color: #fff; }
+  
+  /* ✅ Desktop: Buttons stacked neatly on right */
+  .product-actions {
+    display: flex;
+    flex-direction: column;
+    gap: .6rem;
+  }
+
+  /* ✅ Mobile: Buttons below details, side by side */
+  @media (max-width: 768px) {
+    .product-actions {
+      flex-direction: row;
+      margin-top: 1rem;
+    }
+    .product-actions button {
+      flex: 1; 
+    }
+    .item-img {
+      max-width: 100%;
+    }
+  }
 </style>
 
-<main style="min-height:80vh">
-  <div class="title py-3">
-    <span class="shopping-bag-title">WISHLIST</span>
+<main style="min-height:100vh">
+  <div class="text-center py-3">
+    <h2 class="shopping-bag-title">WISHLIST</h2>
     <p>Time To Fulfill Your Wishes</p>
   </div>
-  <div class="px-5">
-    <div class="row">
-      <% if(items&&items.length) { %>
-        <div class="col-lg-12">
-          <% items.forEach(item => { %>
-          <div class="card mb-4 p-3 shadow-sm" style="background-color: #f3f3f38e;position:relative;">
-            <div class="row align-items-center rounded-4 p-3">
-              <div class="col-md-2">
-                <a href="/products/<%=item.product._id%>">
-                  <img
-                    src="<%= item.product.images[0] %>"
-                    class="img-fluid item-img rounded-4"
-                    alt="<%= item.product.name %>"
-                  />
-                </a>
+
+  <div class="px-md-5 px-2">
+    <div class="row" id="wishlist-container">
+      <% if(items && items.length) { %>
+        <% items.forEach(item => { %>
+          <div class="col-12 mb-4 wishlist-item" data-id="<%= item._id %>">
+            <div class="card p-3 shadow-sm">
+              <div class="row align-items-center">
+                
+                <!-- ✅ Product Image -->
+                <div class="col-md-3 col-4">
+                  <a href="/products/<%=item.product._id%>">
+                    <img src="<%= item.product.images[0] %>" class="img-fluid item-img" alt="<%= item.product.name %>"/>
+                  </a>
+                </div>
+                
+                <!-- ✅ Product Details -->
+                <div class="col-md-6 col-8 product-details">
+                  <h6 class="fw-bold"><%= item.product.name %></h6>
+                  <small class="fw-semibold"><%= item.variant?.volume || "N/A" %> ML</small>
+                  <p class="fw-bold">Rs. <%= item.variant?.finalDiscount || 0 %></p>
+                  <p class="fw-bold text-muted small">Added On: <%= item.createdAt.toLocaleDateString() %></p>
+                </div>
+                
+                <!-- ✅ Product Actions -->
+                <div class="col-md-3 col-12 product-actions">
+                  <button class="btn btn-outline-dark btn-custom add-cart-btn">Add To Cart</button>
+                  <button class="btn btn-delete remove-btn"><i class="fa fa-trash me-1"></i> Remove</button>
+                </div>
+
               </div>
-              <div class="col-md-6">
-                <h6 class="mb-1 fs-5 fw-bold"><%= item.product.name %></h6>
-                <small class="mb-1 fw-semibold fs-5"><%= item.variant?.volume || "N/A" %> ML</small>
-                <p class="mb-1 fw-bold fs-5">Rs. <%= item.variant?.finalDiscount || 0 %></p>
-                <p class="mb-1 fw-bold fs-5">Added On : <%= item.createdAt.toLocaleDateString()%></p>
-              </div>
-              <div class="col-md-4 text-end d-flex align-items-center justify-content-end ">
-                <button class="rounded-pill btn btn-outline-dark px-5 fs-5" 
-                data-id="<%=item._id%>" 
-                onclick="addToCart(this)">
-                Add To Cart
-              </button>
-              <button class="btn fs-5 position-absolute end-0 bottom-0" 
-                      data-id="<%=item._id%>" 
-                      onclick="removeWishlist(this)">
-                <i class="fa fa-trash"></i>
-              </button>
             </div>
           </div>
-        </div>
-          <% }) %>
-        </div>
+        <% }) %>
       <% } else { %>
-        <div class="col-12 text-center my-5">
+        <div class="col-12 text-center my-5 empty-wishlist">
           <h4 class="mb-3">Your wishlist is empty</h4>
-          <p class="text-muted">Looks like you haven’t wished anything to buy yet.</p>
+          <p class="text-muted">Looks like you haven’t wished anything yet.</p>
           <a href="/shop" class="btn btn-dark mt-3">Start Shopping</a>
         </div>
       <% } %>
@@ -78,45 +102,58 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 
 <script>
+document.addEventListener("DOMContentLoaded", () => {
+  const container = document.getElementById("wishlist-container");
 
+  container.addEventListener("click", async (e) => {
+    const card = e.target.closest(".wishlist-item");
+    if (!card) return;
+    const id = card.dataset.id;
 
-  async function addToCart(btn) {
-    try {
-      const id = btn.getAttribute('data-id');
-      const res = await fetch(`/wishlist/api/add/${id}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" }
-      });
-      const data = await res.json();
-      if (data.success) {
-        toastr.success(data.message);
-        btn.closest(".card").remove();
-      } else {
-        toastr.error(data.message);
+    if (e.target.classList.contains("add-cart-btn")) {
+      try {
+        const res = await fetch(`/wishlist/api/add/${id}`, { method: "POST" });
+        const data = await res.json();
+        if (data.success) {
+          toastr.success(data.message);
+          card.remove();
+          checkEmpty();
+        } else {
+          toastr.error(data.message);
+        }
+      } catch (err) {
+        toastr.error(err.message);
       }
-    } catch (error) {
-      toastr.error(error.message);
+    }
+
+    if (e.target.closest(".remove-btn")) {
+      try {
+        const res = await fetch(`/wishlist/api/remove/${id}`, { method: "DELETE" });
+        const data = await res.json();
+        if (data.status) {
+          toastr.success(data.message);
+          card.remove();
+          checkEmpty();
+        } else {
+          toastr.error(data.message);
+        }
+      } catch (err) {
+        toastr.error(err.message);
+      }
+    }
+  });
+
+  function checkEmpty() {
+    if (!container.querySelector(".wishlist-item")) {
+      container.innerHTML = `
+        <div class="col-12 text-center my-5 empty-wishlist">
+          <h4 class="mb-3">Your wishlist is empty</h4>
+          <p class="text-muted">Looks like you haven’t wished anything yet.</p>
+          <a href="/shop" class="btn btn-dark mt-3">Start Shopping</a>
+        </div>`;
     }
   }
-
-  async function removeWishlist(btn) {
-    try {
-      const id = btn.getAttribute('data-id');
-      const res = await fetch(`/wishlist/api/remove/${id}`, {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" }
-      });
-      const data = await res.json();
-      if (data.status) {
-        toastr.success(data.message);
-        btn.closest(".card").remove(); // remove card from DOM instantly
-      } else {
-        toastr.error("data-false"+data.message);
-      }
-    } catch (error) {
-      toastr.error(error.message);
-    }
-  }
+});
 </script>
 
 <%-include('../partials/user/footer.ejs')%>

@@ -46,6 +46,15 @@
     .relatedProducts:hover {
       transform: scale(1.1);
     }
+    .related-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch; /* smooth on iOS */
+}
+
+.related-scroll::-webkit-scrollbar {
+  display: none; /* hide scrollbar on mobile */
+}
+
      @media (min-width: 768px) { /* md breakpoint */
     .d-flex.flex-column a.btn {
       width: 50% !important;
@@ -67,7 +76,7 @@
             <div class="col-md-12">
               <div class="row justify-content-center">
                 <%product.images.forEach((image)=>{%>
-                  <div class="col-md-3">
+                  <div class="col-md-3 col-4">
                     <img src="<%=image%>" class="img-fluid rounded-4 thumb shadow" alt="<%=product.name%>">
                   </div>
                   <%})%>
@@ -188,42 +197,45 @@
           </div>
         </div>
         <hr>
-        <div class="col-md-12">
-          <h3 class="p-5 ms-5">YOU MAY ALSO LIKE</h3>
-          <div class="container">
-            <div class="row justify-content-center">
-              <% relatedProducts.forEach(product=> { %>
-                <div class="col-md-3 relatedProducts">
-                  <a href="/products/<%=product._id%>" class="card text-decoration-none p-3 rounded-4 border-0 shadow"
-                    style="max-width: 18rem;background:white">
-                    <img src="<%=product.images[0]%>" class="card-img-top rounded-4" alt="Product Image">
-                    <div class="card-body p-0 pt-3">
-                      <h6 class="card-title mb-1">
-                        <%=product.name%>
-                      </h6>
-                      <p class="text-muted mb-2" style="font-size:0.85rem;">Category: <%=product.category.name%>
-                      </p>
-                      <p class="mb-0 justify-content-between d-flex align-items-center">
-                        <span>
-                          <span class="text-success fw-bold">₹<%=Math.min(...product.variants.map(v=>
-                              v.finalAmount))%></span> <!-- 80% off -->
-                          <span class="text-muted text-decoration-line-through">₹
-                            <%=Math.min(...product.variants.map(v=>
-                              v.basePrice))%>
-                          </span>
-                          <span class="text-success fw-bold">
-            <%= product.variants.reduce((min, v) => {
-           return  parseInt(v.volume) < parseInt(min.volume) ? v : min}, product.variants[0]).finalDiscount %>% off
-                          </span>
-                        </span>
-                      </p>
-                    </div>
-                  </a>
-                </div>
-                <% }) %>
+<div class="col-md-12">
+  <h3 class="p-5 ms-5">YOU MAY ALSO LIKE</h3>
+
+  <!-- Scrollable container -->
+  <div class="related-scroll px-3 pb-5">
+    <div class="d-flex flex-row flex-nowrap">
+      <% relatedProducts.forEach(product => { %>
+        <div class="relatedProducts me-3" style="flex: 0 0 auto; width: 220px;">
+          <a href="/products/<%=product._id%>" 
+             class="card text-decoration-none p-3 rounded-4 border-0 shadow"
+             style="background:white">
+            <img src="<%=product.images[0]%>" class="card-img-top rounded-4" alt="Product Image">
+            <div class="card-body p-0 pt-3">
+              <h6 class="card-title mb-1"><%=product.name%></h6>
+              <p class="text-muted mb-2" style="font-size:0.85rem;">
+                Category: <%=product.category.name%>
+              </p>
+              <p class="mb-0 justify-content-between d-flex align-items-center">
+                <span>
+                  <span class="text-success fw-bold">
+                    ₹<%=Math.min(...product.variants.map(v => v.finalAmount))%>
+                  </span>
+                  <span class="text-muted text-decoration-line-through">
+                    ₹<%=Math.min(...product.variants.map(v => v.basePrice))%>
+                  </span>
+                  <span class="text-success fw-bold">
+                    <%= product.variants.reduce((min, v) => {
+                         return parseInt(v.volume) < parseInt(min.volume) ? v : min;
+                       }, product.variants[0]).finalDiscount %>% off
+                  </span>
+                </span>
+              </p>
             </div>
-          </div>
+          </a>
         </div>
+      <% }) %>
+    </div>
+  </div>
+</div>
       </div>
   </main>
   <script>

@@ -70,7 +70,7 @@ const showProductDetails = async (req, res) => {
       isAvailable: true,
     })
       .populate("category")
-      .limit(4)
+      .limit(8)
       .lean();
 
     return res.render("userPages/productDetails", {

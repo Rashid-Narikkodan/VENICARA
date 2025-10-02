@@ -81,13 +81,15 @@
 </main>
 
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 <script>
   // Toastr configuration
   toastr.options = {
     closeButton: true,
     progressBar: true,
     positionClass: "toast-top-center",
-    timeOut: "3000"
+    timeOut: "2000"
   };
 
   const input = document.getElementById("amount");
