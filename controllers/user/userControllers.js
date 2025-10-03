@@ -125,6 +125,7 @@ const handleProfileVerify = async (req, res) => {
       return res.redirect('/profile/verify');
     }
 
+    req.session.changePass = {email}
     const otp = generateOTP();
     user.otp = otp;
     user.otpExpiry = new Date(Date.now() + 5 * 60 * 1000);
@@ -215,7 +216,7 @@ const handleProfileChangePass = async (req, res) => {
     await User.findByIdAndUpdate(req.session.user.id, { password: passwordHash });
 
     req.flash('success', 'Password updated');
-    res.redirect("/profile");
+    res.redirect("/profi27le");
   } catch (err) {
     handleError(res, "handleProfileChangePass", err);
   }

@@ -15,12 +15,6 @@ const showOrders = async (req, res) => {
     const orders = await Order.find({ userId })
       .populate("products.productId")
       .sort({ createdAt: -1 });
-
-      for(const order of orders){
-        if(order.payment.status=='pending'&&order.payment.method=='RAZORPAY'){
-          await Order.findByIdAndDelete(order._id)
-        }
-      }
       
       res.render("userPages/orders", { orders });
   } catch (error) {

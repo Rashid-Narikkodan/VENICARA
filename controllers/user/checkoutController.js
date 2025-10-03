@@ -17,7 +17,6 @@ const crypto = require("crypto");
  */
 const showAddress = async (req, res) => {
   try {
-
     const addresses = await Address.find({
       userId: req.session.user.id,
       isDeleted: false,
@@ -28,24 +27,22 @@ const showAddress = async (req, res) => {
       status: "active",
     }).populate("productId");
 
-
     req.session.order = {};
-    let totalCartAmount=0
+    let totalCartAmount = 0;
     // Update line totals for cart items
     for (const p of cartDocs) {
       const variant = p.productId?.variants.find(
         (v) => v._id.toString() === p.variantId.toString()
       );
-      
+
       p.lineTotal = Math.round(variant.finalAmount * p.quantity);
       await p.save();
-      totalCartAmount += variant?.finalAmount*p.quantity;
+      totalCartAmount += variant?.finalAmount * p.quantity;
       if (variant.stock < p.quantity) {
-        console.log('adgaergerg')
-          req.flash('error','Remove those out of stock products from cart')
-          return res.redirect('/cart') 
+        console.log("adgaergerg");
+        req.flash("error", "Remove those out of stock products from cart");
+        return res.redirect("/cart");
       }
-      
     }
     // Calculate delivery charge based on total
     req.session.order.deliveryCharge = totalCartAmount > 7000 ? 0 : 500;
@@ -66,7 +63,6 @@ const showAddress = async (req, res) => {
         };
       })
       .filter(Boolean); // remove nulls
-
 
     res.render("userPages/checkoutAddress", {
       addresses,
@@ -94,7 +90,18 @@ const showAddAddress = (req, res) => {
  */
 const handleAddAddress = async (req, res) => {
   try {
-    const { fullName, mobile, pin, street, address, city, state, landmark, alternateMobile, type } = req.body;
+    const {
+      fullName,
+      mobile,
+      pin,
+      street,
+      address,
+      city,
+      state,
+      landmark,
+      alternateMobile,
+      type,
+    } = req.body;
 
     const newAddress = new Address({
       userId: req.session.user.id,
@@ -135,7 +142,18 @@ const showEditAddress = async (req, res) => {
  */
 const handleEditAddress = async (req, res) => {
   try {
-    const { fullName, mobile, pin, street, address, city, state, landmark, alternateMobile, type } = req.body;
+    const {
+      fullName,
+      mobile,
+      pin,
+      street,
+      address,
+      city,
+      state,
+      landmark,
+      alternateMobile,
+      type,
+    } = req.body;
     const addressById = await Address.findById(req.params.id);
     if (!addressById) {
       req.flash("error", "Address not found");
@@ -183,7 +201,7 @@ const showPaymentMethods = async (req, res) => {
     const paymentMethods = await PaymentMethod.find({ isActive: true });
     const cartDocs = await Cart.find({
       userId: req.session.user.id,
-      status: "active"
+      status: "active",
     })
       .populate("productId")
       .lean();
@@ -199,13 +217,15 @@ const showPaymentMethods = async (req, res) => {
           quantity: doc.quantity,
           product: doc.productId,
           status: doc.status,
-          variant
+          variant,
         };
       })
       .filter(Boolean);
 
     // 🔴 Check stock for all items
-    const invalidItems = items.filter((item) => item.variant.stock < item.quantity);
+    const invalidItems = items.filter(
+      (item) => item.variant.stock < item.quantity
+    );
 
     if (invalidItems.length > 0) {
       const names = invalidItems.map((i) => i.product.name).join(", ");
@@ -229,7 +249,7 @@ const showPaymentMethods = async (req, res) => {
       expireAt: { $gte: new Date() },
       usedBy: { $nin: [req.session.user.id] },
       isDeleted: false,
-      $expr: { $lt: ["$used", "$limit"] }
+      $expr: { $lt: ["$used", "$limit"] },
     });
 
     const user = await User.findById(req.session.user.id);
@@ -240,7 +260,7 @@ const showPaymentMethods = async (req, res) => {
       coupons,
       total,
       deliveryCharge,
-      user
+      user,
     });
   } catch (error) {
     handleError(res, "showPaymentMethods", error);
@@ -261,11 +281,13 @@ const applyCoupon = async (req, res) => {
     const coupon = await Coupon.findOne({
       code,
       isDeleted: false,
-      expireAt: { $gte: new Date() }
+      expireAt: { $gte: new Date() },
     });
 
     if (!coupon) {
-      return res.status(400).json({ status: false, message: "Invalid or expired coupon" });
+      return res
+        .status(400)
+        .json({ status: false, message: "Invalid or expired coupon" });
     }
 
     // store coupon in session
@@ -274,14 +296,16 @@ const applyCoupon = async (req, res) => {
     // fetch cart items
     const cartDocs = await Cart.find({
       userId: req.session.user.id,
-      status: "active"
-    }).populate("productId").lean();
+      status: "active",
+    })
+      .populate("productId")
+      .lean();
 
     let lineTotal = 0;
 
     for (const doc of cartDocs) {
       const variant = doc.productId?.variants.find(
-        v => v._id.toString() === doc.variantId.toString()
+        (v) => v._id.toString() === doc.variantId.toString()
       );
 
       if (!variant) continue;
@@ -290,7 +314,7 @@ const applyCoupon = async (req, res) => {
       if (variant.stock < doc.quantity) {
         return res.status(400).json({
           status: false,
-          message: `Some Products are Out of Stock, please check...`
+          message: `Some Products are Out of Stock, please check...`,
         });
       }
 
@@ -299,7 +323,9 @@ const applyCoupon = async (req, res) => {
     }
 
     // calculate discount & final total
-    const discount = parseFloat(((lineTotal * coupon.discount) / 100).toFixed(2));
+    const discount = parseFloat(
+      ((lineTotal * coupon.discount) / 100).toFixed(2)
+    );
     const deliveryCharge = req.session.order?.deliveryCharge || 0;
     const finalAmount = parseFloat(lineTotal - discount + deliveryCharge);
 
@@ -309,14 +335,12 @@ const applyCoupon = async (req, res) => {
       message: "Applied",
       discount,
       finalAmount,
-      discPerc: coupon.discount
+      discPerc: coupon.discount,
     });
-
   } catch (error) {
     handleError(res, "applyCoupon", error);
   }
 };
-
 
 /**
  * Cancel coupon
@@ -338,22 +362,40 @@ const handlePlaceOrder = async (req, res) => {
     const { user, address } = req.session;
     const { paymentMethod } = req.body;
 
-    if (!user?.id) return res.status(401).json({ status: false, message: "Unauthenticated" });
-    if (!address) return res.status(400).json({ status: false, message: "Shipping address not selected" });
+    if (!user?.id)
+      return res
+        .status(401)
+        .json({ status: false, message: "Unauthenticated" });
+    if (!address)
+      return res
+        .status(400)
+        .json({ status: false, message: "Shipping address not selected" });
 
-    const cartItems = await Cart.find({ userId: user.id, status: "active" }).populate("productId").lean();
-    if (!cartItems.length) return res.status(400).json({ status: false, message: "No items in cart" });
+    const cartItems = await Cart.find({ userId: user.id, status: "active" })
+      .populate("productId")
+      .lean();
+    if (!cartItems.length)
+      return res
+        .status(400)
+        .json({ status: false, message: "No items in cart" });
 
     // Prepare products
     let totalOrderPrice = 0;
     const products = [];
 
     for (const item of cartItems) {
-      const variant = item.productId?.variants?.find(v => v._id.toString() === item.variantId.toString());
+      const variant = item.productId?.variants?.find(
+        (v) => v._id.toString() === item.variantId.toString()
+      );
       if (!variant) continue;
 
       if (variant.stock < item.quantity) {
-        return res.status(400).json({ status: false, message: `Insufficient stock for ${item.productId.name} (${variant.volume}ml)` });
+        return res
+          .status(400)
+          .json({
+            status: false,
+            message: `Insufficient stock for ${item.productId.name} (${variant.volume}ml)`,
+          });
       }
 
       const subtotal = Number(variant.finalAmount) * item.quantity;
@@ -381,11 +423,16 @@ const handlePlaceOrder = async (req, res) => {
 
     if (req.session.coupon) {
       coupon = await Coupon.findById(req.session.coupon);
-      if (coupon && coupon.usedBy.includes(user.id)) return res.status(400).json({ status: false, message: "Coupon already used" });
+      if (coupon && coupon.usedBy.includes(user.id))
+        return res
+          .status(400)
+          .json({ status: false, message: "Coupon already used" });
 
       if (coupon) {
         couponDiscount = coupon.discount;
-        couponAmount = parseFloat(((coupon.discount / 100) * totalOrderPrice).toFixed(2)) || 0;
+        couponAmount =
+          parseFloat(((coupon.discount / 100) * totalOrderPrice).toFixed(2)) ||
+          0;
         finalAmount -= couponAmount;
 
         await Coupon.updateOne(
@@ -395,14 +442,25 @@ const handlePlaceOrder = async (req, res) => {
       }
     }
 
-    finalAmount = parseFloat((finalAmount + req.session.order.deliveryCharge).toFixed(2));
+    finalAmount = parseFloat(
+      (finalAmount + req.session.order.deliveryCharge).toFixed(2)
+    );
 
     // Payment handling
-    let payment = { method: paymentMethod, status: "pending", transactionId: null };
+    let payment = {
+      method: paymentMethod,
+      status: "pending",
+      transactionId: null,
+    };
     let razorpayOrderId = null;
 
     if (paymentMethod === "RAZORPAY") {
-      const options = { amount: finalAmount * 100, currency: "INR", receipt: `rcpt_${Date.now()}`, payment_capture: 1 };
+      const options = {
+        amount: finalAmount * 100,
+        currency: "INR",
+        receipt: `rcpt_${Date.now()}`,
+        payment_capture: 1,
+      };
       const razorpayOrder = await razorpay.orders.create(options);
       razorpayOrderId = razorpayOrder.id;
     } else if (paymentMethod === "WALLET") {
@@ -415,6 +473,16 @@ const handlePlaceOrder = async (req, res) => {
           status: "failed",
           lastBalance: wallet?.balance,
         });
+        if (req.session.coupon) {
+          coupon = await Coupon.findById(req.session.coupon);
+          if (coupon) {
+            await Coupon.updateOne(
+              { _id: coupon._id },
+              { $pull: { usedBy: user.id }, $inc: { used: -1 } }
+            );
+          }
+        }
+
         return res.json({ status: false, message: "Insufficient balance" });
       }
       wallet.balance = parseFloat((wallet.balance - finalAmount).toFixed(2));
@@ -457,7 +525,8 @@ const handlePlaceOrder = async (req, res) => {
     }
 
     // Clear cart (if not Razorpay)
-    if (paymentMethod !== "RAZORPAY") await Cart.deleteMany({ userId: user.id });
+    if (paymentMethod !== "RAZORPAY")
+      await Cart.deleteMany({ userId: user.id });
 
     delete req.session.coupon;
 
@@ -478,7 +547,12 @@ const handlePlaceOrder = async (req, res) => {
  */
 const handleRazorpaySuccess = async (req, res) => {
   try {
-    const { orderId, razorpay_payment_id, razorpay_order_id, razorpay_signature } = req.body;
+    const {
+      orderId,
+      razorpay_payment_id,
+      razorpay_order_id,
+      razorpay_signature,
+    } = req.body;
 
     // Verify signature
     const expectedSignature = crypto
@@ -486,10 +560,16 @@ const handleRazorpaySuccess = async (req, res) => {
       .update(`${razorpay_order_id}|${razorpay_payment_id}`)
       .digest("hex");
 
-    if (expectedSignature !== razorpay_signature) return res.status(400).json({ status: false, message: "Payment verification failed" });
+    if (expectedSignature !== razorpay_signature)
+      return res
+        .status(400)
+        .json({ status: false, message: "Payment verification failed" });
 
     const order = await Order.findOne({ orderId });
-    if (!order) return res.status(404).json({ status: false, message: "Order not found" });
+    if (!order)
+      return res
+        .status(404)
+        .json({ status: false, message: "Order not found" });
 
     order.payment.status = "paid";
     order.payment.transactionId = razorpay_payment_id;
@@ -523,6 +603,42 @@ const handleRazorpaySuccess = async (req, res) => {
   }
 };
 
+const handleRazorpayFailed = async (req, res) => {
+  try {
+    const { orderId } = req.body;
+    const userId = req.session.user.id;
+
+    const order = await Order.findOne({ orderId });
+    console.log(order);
+
+    for (const prod of order.products) {
+      await Product.updateOne(
+        { _id: prod.productId, "variants._id": prod.variantId },
+        { $inc: { "variants.$.stock": prod.quantity } }
+      );
+    }
+    await Coupon.updateOne(
+      { _id: order.couponApplied },
+      { $pull: { usedBy: userId }, $inc: { used: -1 } }
+    );
+
+    await Order.deleteOne({ orderId });
+
+    res.json({
+      status: true,
+      message: "Payment failed due to unexpected action in razorpay",
+    });
+  } catch (error) {
+    console.log(error);
+    res
+      .status(500)
+      .json({
+        status: false,
+        message: "Server error in handling razorpay failed",
+      });
+  }
+};
+
 /**
  * Show place order page
  */
@@ -545,7 +661,8 @@ module.exports = {
   showPaymentMethods,
   applyCoupon,
   cancelCoupon,
-  handleRazorpaySuccess,
   handlePlaceOrder,
+  handleRazorpaySuccess,
+  handleRazorpayFailed,
   showPlaceOrder,
 };

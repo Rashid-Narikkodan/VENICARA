@@ -169,7 +169,7 @@
         <p id="paymentFailedMessage">Your payment could not be processed. Please try again.</p>
       </div>
       <div class="modal-footer">
-        <a href="/cart" type="button" id="retry" class="btn btn-outline-danger" >Retry</a>
+        <button type="button" id="retry" class="btn btn-outline-danger" >Retry</button>
         <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
       </div>
     </div>
@@ -241,7 +241,19 @@
           }
         },
         modal: { escape: true, ondismiss: async() => {
-          showPaymentFailedModal("Payment failed, Retry") }
+          try{
+            const response = await fetch('/checkout/api/razorpay/failed', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ orderId: data.orderId })
+            });
+            const result = await response.json();
+            showPaymentFailedModal(result.message) 
+
+          }catch(error){
+            console.log('razorpay ondismiss'+error)
+          }
+        }
         }
       };
 
@@ -249,6 +261,7 @@
       rzp.open();
       return; // Stop further redirect
     }
+
 
     // For non-Razorpay methods, redirect to order page
     window.location.href = `/checkout/placeOrder/${data.orderId}`;
@@ -260,6 +273,9 @@
 
 
 
+    document.getElementById('retry').addEventListener('click',()=>{
+      window.location.replace('/checkout/paymentMethod')
+    })
 
   // Function to show payment failed modal
 function showPaymentFailedModal(message = "Your payment could not be processed. Please try again.") {

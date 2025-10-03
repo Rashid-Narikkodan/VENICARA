@@ -25,6 +25,7 @@ router.post("/address/selectAddress", checkoutController.handleSelectAddress);
 
 router.get("/paymentMethod", checkoutController.showPaymentMethods);
 router.post("/api/razorpay/success", checkoutController.handleRazorpaySuccess);
+router.post("/api/razorpay/failed", checkoutController.handleRazorpayFailed);
 
 router.patch('/api/coupon/apply',checkoutController.applyCoupon)
 router.patch('/api/coupon/cancel',checkoutController.cancelCoupon)
