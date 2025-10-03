@@ -126,9 +126,9 @@ function exportSalesPDF(req, res, data, orders, filter, startDate, endDate) {
         order.payment?.method || "-",
         order.status ? order.status.charAt(0).toUpperCase() + order.status.slice(1) : "-",
         subtotal.toFixed(2),
-        (order.discountAmount || 0).toFixed(2),
-        order.couponDiscount ? order.couponDiscount.toFixed(2) : "No Coupon",
-        (order.totalAmount || 0).toFixed(2),
+        (order.finalAmount || 0).toFixed(2),
+        order.discount ? order.discount.toFixed(2) : "No Coupon",
+        (order.finalAmount || 0).toFixed(2),
       ];
 
       if (rowIndex % 2 === 0) {

@@ -97,10 +97,34 @@
               <span>Coupon Discount:</span>
               <span class="text-success"><%=order.couponDiscount?order.couponDiscount+'%':'No Coupon'%></span>
             </div>
-            <div class="d-flex justify-content-between">
-              <span>Discount Amount:</span>
-              <span class="text-danger">- ₹<%=parseFloat((order.totalOrderPrice-order.finalAmount).toFixed(2))%></span>
-            </div>
+            <%if(order.deliveryCharge){%>
+              <div class="d-flex justify-content-between">
+                  <span>Delivery Charge:</span>
+                  <span class="text-success">
+                    ₹<%=parseFloat(order.deliveryCharge.toFixed(2))%>
+                  </span>
+                </div>
+              <div class="d-flex justify-content-between">
+                  <span>Total:</span>
+                  <span class="text-dark fw-semibold">
+                    ₹<%=parseFloat((order.deliveryCharge+order.totalOrderPrice).toFixed(2))%>
+                  </span>
+                </div>
+
+                <div class="d-flex justify-content-between">
+                  <span>Discount Amount:</span>
+                  <span class="text-danger">
+                    - ₹<%=parseFloat(((order.totalOrderPrice+order.deliveryCharge)-order.finalAmount).toFixed(2))%>
+                  </span>
+                </div>
+              <%}else{%>
+                <div class="d-flex justify-content-between">
+                  <span>Discount Amount:</span>
+                  <span class="text-danger">
+                    - ₹<%=parseFloat((order.totalOrderPrice-order.finalAmount).toFixed(2))%>
+                  </span>
+                </div>
+                  <%}%>
             
             <hr />
             <div class="d-flex justify-content-between fw-bold">

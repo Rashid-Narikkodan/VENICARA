@@ -60,6 +60,9 @@ const showShop = async (req, res) => {
     const limit = parseInt(req.query.limit) || 9;
     let { maxPrice, minPrice, sort, category } = req.query;
 
+
+
+    //if queries not exists
     if (Object.keys(req.query).length === 0) {
       const [products, categories] = await Promise.all([
         Product.find({ isDeleted: false, isAvailable: true })
@@ -103,6 +106,8 @@ const showShop = async (req, res) => {
         },
       });
     }
+    //////////////////////////////////////////////////////////////////////////
+
 
     const selectedCategory =
       category && category !== "all" && mongoose.isValidObjectId(category)
@@ -110,7 +115,7 @@ const showShop = async (req, res) => {
         : null;
 
     const selectedMinPrice = Number(minPrice) || 0;
-    const selectedMaxPrice = Number(maxPrice) || 20000;
+    const selectedMaxPrice = Number(maxPrice) || Infinity;
 
     const sortOptions = {
       az: { name: 1 },
@@ -125,6 +130,7 @@ const showShop = async (req, res) => {
       {
         $match: {
           isDeleted: false,
+          isAvailable: true,
           ...(selectedCategory ? { category: selectedCategory } : {}),
         },
       },
@@ -134,17 +140,7 @@ const showShop = async (req, res) => {
             $map: {
               input: "$variants",
               as: "v",
-              in: {
-                $subtract: [
-                  "$$v.basePrice",
-                  {
-                    $multiply: [
-                      "$$v.basePrice",
-                      { $divide: ["$$v.finalDiscount", 100] },
-                    ],
-                  },
-                ],
-              },
+              in: "$$v.finalAmount",
             },
           },
         },
