@@ -52,13 +52,13 @@
                       <%= product.totalStock %>
                     </td>
                     <td>
-                      <span class="badge bg-primary">
+                      <span class="alert alert-info py-1 text-primary">
                         <%=product.variantLabel%>
                       </span>
                     </td>
                     <td>
                       <button type="button" onclick="toggleProductActive('<%=product._id%>')"
-                        class="badge <%= product.isAvailable?'bg-success':'bg-danger'%>">
+                        class="alert py-1 m-0 <%= product.isAvailable?'alert-success text-success':'alert-danger text-danger'%>">
                         <%= product.isAvailable? 'Available' : 'Not Available' %>
                       </button>
                     </td>
