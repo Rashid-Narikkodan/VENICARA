@@ -11,11 +11,11 @@ const showOrders = async (req, res) => {
   try {
     const userId = req.session?.user?.id;
     if (!userId) return res.redirect("/login");
-
+    
     const orders = await Order.find({ userId })
-      .populate("products.productId")
-      .sort({ createdAt: -1 });
-      
+    .populate("products.productId")
+    .sort({ createdAt: -1 });
+    
       res.render("userPages/orders", { orders });
   } catch (error) {
     handleError(res, "showOrders", error);
@@ -246,15 +246,15 @@ const downloadInvoice = async (req, res) => {
 
     // Fetch order and populate required fields
     const order = await Order.findOne({ _id: orderId, userId })
-      .populate("userId", "name email")           // Get user details
-      .populate("shippingAddress")                // Get full shipping address
-      .lean();
-
+    .populate("userId", "name email")           // Get user details
+    .populate("shippingAddress")                // Get full shipping address
+    .lean();
+    
     if (!order) {
       req.flash("error", "Order not found");
       return res.redirect("/orders");
     }
-
+    
     const discountAmount = order.products.reduce((acc, p) => acc + (p.discountAmount || 0), 0);
 
     // Ensure all necessary fields exist for the PDF
@@ -280,7 +280,7 @@ const downloadInvoice = async (req, res) => {
         discountPrice: p.finalDiscount || 0,
         subtotal: p.subtotal || 0,
         createdAt: order.createdAt || new Date(),
-        finalDiscount: p.finalDiscount || 0,
+        finalAmount: p.finalAmount || 0,
         discountAmount: p.discountAmount || 0.
         
       })),
@@ -290,7 +290,8 @@ const downloadInvoice = async (req, res) => {
       },
       status: order.status || "N/A"
     };
-
+    
+    console.log(populatedOrder)
     // Generate the invoice PDF
     generateInvoice(populatedOrder, res);
 
