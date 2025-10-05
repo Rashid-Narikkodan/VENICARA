@@ -82,10 +82,6 @@ router.patch("/categories/active/:id", categoriesController.activeCategory);
 router.patch("/categories/:id", categoriesController.deleteCategory);
 
 router
-  .route("/returnRefund")
-  .get(auth.requireLogin, returnRefundController.showReturnRefund);
-
-router
   .route("/referrals")
   .get(auth.requireLogin, referralsController.showReferrals);
 router.patch(
