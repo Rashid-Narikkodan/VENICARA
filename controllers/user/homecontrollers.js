@@ -58,7 +58,7 @@ const showShop = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 9;
-    let { maxPrice, minPrice, sort, category } = req.query;
+    let { maxPrice, minPrice, sort, category, search} = req.query;
 
 
 
@@ -93,6 +93,7 @@ const showShop = async (req, res) => {
         minPrice,
         maxPrice,
         sort,
+        search,
         selectedCategory: category,
         currentPage: page,
         totalPages,
@@ -167,6 +168,17 @@ const showShop = async (req, res) => {
       },
     ];
 
+if (search && search.trim().length > 0) {
+  const sanitizedSearch = search.trim();
+
+  // Ensure $match exists
+  if (!pipeline[0].$match) pipeline[0].$match = {};
+
+  // Add regex search
+  pipeline[0].$match.name = { $regex: sanitizedSearch, $options: "i" };
+}
+
+
     let wishlist = null
     let wishlistIds = []
 
@@ -195,6 +207,7 @@ const showShop = async (req, res) => {
       minPrice,
       maxPrice,
       sort,
+      search,
       selectedCategory: category,
       currentPage: page,
       totalPages,

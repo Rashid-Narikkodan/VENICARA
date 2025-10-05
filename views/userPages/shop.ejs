@@ -268,6 +268,9 @@
                 </div>
               </div>
             </div>
+            <%if(search&&search.length>0){%>
+            <input type="hidden" name="search" value="<%=search%>">
+              <%}%>
             <div>
               <button type="submit" class="btn btn-dark w-100">Apply Filters</button>
             </div>
@@ -299,7 +302,7 @@
                     <div class="col-6 col-md-4 col-lg-3 mb-4"> <!-- Responsive columns -->
                       <a href="/products/<%= product._id %>"
                         class="card text-decoration-none shadow p-2 rounded-4 border-0 position-relative product-card"
-                        style="background: linear-gradient(to right, #e6cc6b, #c1a86e);">
+                        style="background: linear-gradient(to right, #c2ab59, #c1b36e);">
 
                         <img src="<%= product.images[0] %>" loading="eager" class="rounded-4 img-fluid" alt="Product Image" >
 

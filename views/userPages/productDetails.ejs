@@ -54,10 +54,21 @@
 .related-scroll::-webkit-scrollbar {
   display: none; /* hide scrollbar on mobile */
 }
+    #imageZoom{
+      width:60%
+    }
+  
+    
 
      @media (min-width: 768px) { /* md breakpoint */
     .d-flex.flex-column a.btn {
       width: 50% !important;
+    }
+ 
+  }
+  @media (max-width:576px){
+    #imageZoom{
+      width:100%
     }
   }
   </style>
@@ -67,7 +78,7 @@
       <div class="row">
         <div class="col-md-7 text-center p-4">
           <div class="row">
-            <div id="imageZoom" class="col-md-12 p-4 mx-auto small-container" style="width:60%">
+            <div id="imageZoom" class="col-12 p-4 mx-md-auto small-container">
               <img id="mainImg" src="<%= product.images[0]%>" class="img-fluid rounded-4 shadow" alt="Product Image" />
               <div id="lens"></div>
             </div>

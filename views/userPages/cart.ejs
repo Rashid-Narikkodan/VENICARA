@@ -69,44 +69,43 @@ body {
       <% if(items.length>0) { %>
       <div class="col-lg-9">
         <% items.forEach((item, index) => { %>
-          <div class="card mb-4 p-3 shadow-sm" data-stock="<%= item.variant.stock %>">
-            <div class="row align-items-center">
-              <div class="col-md-2">
-                <a href="/products/<%=item.product._id%>">
-                  <img src="<%= item.product.images[0] %>" class="img-fluid item-img rounded-4" alt="<%= item.product.name %>" />
-                </a>
-              </div>
-              <div class="col-md-6">
-                <h6 class="mb-1"><%= item.product.name %></h6>
-                <small><%= item.variant.volume %> ML</small>
-                <p class="text-muted qty-text">Qty : <%=item.quantity%></p>
-                <p class="mt-0 mb-0">
-                  <span class="text-muted">Arrives in 3–5 business days </span>
-                  <span id="stock" class="<%= item.variant.stock >= item.quantity ? 'text-success' : 'text-danger' %>">
-                    <%= item.variant.stock >= item.quantity
-                        ? 'In stock'
-                        : item.variant.volume == 0
-                        ? 'Out of stock'
-                        : `Out of stock - few item${item.variant.stock > 1 ? 's' : ''} left` %>
-                  </span>
-
-                </p>
-                <small class="text-muted">Free Delivery</small><br />
-              </div>
-              <div class="col-md-4 text-end">
-                <p class="fw-bold">Rs.<%= item.variant.finalAmount || 0 %></p>
-                <div class="d-flex align-items-center justify-content-end mb-3">
-                  <button class="btn btn-outline-secondary btn-sm me-2 decrease" data-cart-id="<%= item._id %>">-</button>
-                  <span class="quantity"><%= item.quantity %></span>
-                  <button class="btn btn-outline-secondary btn-sm ms-2 increase" data-cart-id="<%= item._id %>" <% if(item.variant.stock === 0) { %> disabled <% } %>>+</button>
-                </div>
-                <p class="text-muted mb-1 subtotal">Subtotal: Rs.<%= ((item.variant.finalAmount || 0) * item.quantity).toLocaleString() %></p>
-                <form action="/cart/remove/<%= item._id %>?_method=DELETE" method="POST">
-                  <button type="submit" class="btn btn-dark py-1 px-2 text-end" style="font-size: small">Remove</button>
-                </form>
-              </div>
-            </div>
-          </div>
+<div class="card mb-4 p-3 shadow-sm" data-stock="<%= item.variant.stock %>">
+  <div class="row align-items-center g-2">
+    <div class="col-12 col-sm-4 col-md-2 text-center text-sm-start">
+      <a href="/products/<%=item.product._id%>">
+        <img src="<%= item.product.images[0] %>" class="img-fluid item-img rounded-4" alt="<%= item.product.name %>" style="max-height:120px; width:auto;" />
+      </a>
+    </div>
+    <div class="col-12 col-sm-8 col-md-6">
+      <h6 class="mb-1"><%= item.product.name %></h6>
+      <small><%= item.variant.volume %> ML</small>
+      <p class="text-muted qty-text mb-1">Qty : <%=item.quantity%></p>
+      <p class="mb-1">
+        <span class="text-muted">Arrives in 3–5 business days </span>
+        <span id="stock" class="<%= item.variant.stock >= item.quantity ? 'text-success' : 'text-danger' %>">
+          <%= item.variant.stock >= item.quantity
+              ? 'In stock'
+              : item.variant.volume == 0
+              ? 'Out of stock'
+              : `Out of stock - few item${item.variant.stock > 1 ? 's' : ''} left` %>
+        </span>
+      </p>
+      <small class="text-muted">Free Delivery</small>
+    </div>
+    <div class="col-12 col-md-4 text-md-end mt-3 mt-md-0">
+      <p class="fw-bold mb-2">Rs.<%= item.variant.finalAmount || 0 %></p>
+      <div class="d-flex align-items-center justify-content-md-end justify-content-start mb-3 gap-2">
+        <button class="btn btn-outline-secondary btn-sm decrease" data-cart-id="<%= item._id %>">-</button>
+        <span class="quantity px-2"><%= item.quantity %></span>
+        <button class="btn btn-outline-secondary btn-sm increase" data-cart-id="<%= item._id %>" <% if(item.variant.stock === 0) { %> disabled <% } %>>+</button>
+      </div>
+      <p class="text-muted mb-2 subtotal">Subtotal: Rs.<%= ((item.variant.finalAmount || 0) * item.quantity).toLocaleString() %></p>
+      <form action="/cart/remove/<%= item._id %>?_method=DELETE" method="POST">
+        <button type="submit" class="btn btn-dark py-1 px-2" style="font-size: small;">Remove</button>
+      </form>
+    </div>
+  </div>
+</div>
         <% }) %>
       </div>
 

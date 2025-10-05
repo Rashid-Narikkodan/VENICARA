@@ -14,23 +14,23 @@
   <div class="card rounded-3 px-3 px-md-4 py-3 mb-4 shadow">
     <!-- Order Header -->
     <div
-      class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-2"
+      class="d-flex justify-content-between align-items-center mb-2 mb-md-3"
     >
-      <span class="fw-semibold fs-6 fs-md-5"
+      <span class="fw-semibold"
         >Order ID : <%=order.orderId%></span
       >
-      <span class="badge bg-primary mt-1 mt-md-0"><%=order.status%></span>
+      <span class="alert alert-primary py-0 px-2 text-primery m-0"><%=order.status.charAt(0).toUpperCase() + order.status.slice(1)%></span>
     </div>
 
     <!-- Products Section -->
     <div class="row">
       <div
-        class="col-12 col-md-9 px-2 px-md-3 py-2 rounded-2 my-2"
+        class="col-12 col-md-9 px-2 px-md-3 py-2 rounded-2"
         style="background-color: rgb(230, 230, 230)"
       >
         <% order.products.forEach((product,index)=>{ %>
         <div
-          class="row py-2 mb-2 border-bottom <%=product.status === 'cancelled'?'text-secondary':''%>"
+          class="row py-2 border-bottom <%=product.status === 'cancelled'?'text-secondary':''%>"
         >
           <!-- Product Image -->
           <a
@@ -48,20 +48,15 @@
           <!-- Product Info -->
           <div class="col-9 col-md-4">
             <h6 class="fw-semibold mb-1 fs-6 fs-md-5">
-              <%=product?.productName%>
+              <%=product?.productName%>(<%=product?.volume%> ML)
             </h6>
-            <p
-              class="mb-1 <%=product.status === 'cancelled'?'text-secondary':'text-muted'%> fs-7 fs-md-6"
-            >
-              Volume: <%=product?.volume%> ML
+            <p class="fw-normal m-0 fs-7 fs-md-6">
+              Price : ₹<%=product.finalAmount%>
             </p>
             <p
-              class="mb-1 <%=product.status === 'cancelled'?'text-secondary':'text-muted'%> fs-7 fs-md-6"
+              class="mb-0 <%=product.status === 'cancelled'?'text-black':'text-muted'%> fs-7 fs-md-6"
             >
               Qty: <%=product.quantity%>
-            </p>
-            <p class="fw-normal mb-0 fs-7 fs-md-6">
-              Price : ₹<%=product.finalAmount%>
             </p>
             <p class="fw-bold mb-0 fs-7 fs-md-6">
               Total : ₹<%=product.subtotal%>
@@ -69,7 +64,7 @@
           </div>
 
           <!-- Status -->
-          <div class="col-12 col-md-3 mb-2 mb-md-0">
+          <div class="col-9 col-md-3">
             <p class="small mb-1">
               <strong>Ordered On :</strong> <%=
               order.createdAt.toLocaleString('en-IN', { dateStyle: 'medium' })
@@ -95,11 +90,11 @@
 
           <!-- Actions -->
           <div
-            class="col-12 col-md-3 d-flex flex-wrap gap-2 justify-content-start justify-content-md-end align-items-center mt-2 mt-md-0"
+            class="col-3 col-md-3 d-flex gap-2 justify-content-end align-items-center"
           >
             <% if(!["shipped","Out of delivery","delivered","cancelled","returned"].includes(product.status)) { %>
             <button
-              class="btn btn-sm btn-danger fs-7 fs-md-6"
+              class="btn btn-danger fs-7 fs-md-6"
               onclick="cancelOrderProduct('<%=order._id%>','<%=index%>')"
             >
               Cancel
@@ -107,7 +102,7 @@
             <% } %>
             <% if(product.status === 'delivered'&&product.return?.returnTimeLimit>Date.now()) { %>
             <button
-              class="btn btn-sm btn-secondary fs-7 fs-md-6"
+              class="btn btn-secondary fs-7 fs-md-6"
               data-bs-toggle="modal"
               data-bs-target="#returnModal"
               onclick="openReturnModal('<%= order._id %>', '<%= index %>')"
@@ -118,13 +113,13 @@
 
             <a
               href="/orders/details/<%=order._id%>?index=<%=index%>"
-              class="btn btn-sm btn-dark fs-7 fs-md-6"
+              class="btn btn-dark fs-7 fs-md-6"
               >Details</a
             >
           </div>
 
           <div
-            class="col-12 <%=!product.return?.adminReason?'d-none':''%> mt-1"
+            class="col-12 <%=!product.return?.adminReason?'d-none':''%> "
           >
             <span class="text-danger fw-normal small fw-semibold"
               >Return Rejected Reason :
@@ -137,7 +132,7 @@
 
       <!-- Price Details -->
       <div
-        class="col-12 col-md-3 d-flex justify-content-center p-2 pe-0 mt-3 mt-md-0"
+        class="col-12 col-md-3 d-flex justify-content-center mt-2 mt-md-0 p-0 ps-md-2"
       >
         <div class="row rounded-3 gap-2 w-100">
           <div
@@ -199,19 +194,19 @@
 
     <!-- Order-level actions -->
     <div
-      class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mt-3 gap-2"
+      class="d-flex justify-content-between align-items-center mt-md-3 mt-2 gap-2"
       style="max-height: fit-content !important"
     >
       <% if(!["delivered","cancelled","returned"].includes(order.status)) { %>
       <button
-        class="btn btn-outline-dark btn-sm fw-semibold fs-7 fs-md-6"
+        class="btn btn-outline-dark btn-sm fw-semibold"
         onclick="cancelOrder('<%=order._id%>')"
       >
         Cancel Order
       </button>
       <% } %> <%if(order.status=='delivered'){%>
       <button
-        class="btn btn-sm btn-secondary fs-7 fs-md-6"
+        class="btn btn-sm btn-secondary"
         data-bs-toggle="modal"
         data-bs-target="#returnModal"
         onclick="openReturnModal('<%= order._id %>')"
@@ -221,10 +216,10 @@
       </button>
       <%}%>
 
-      <div class="text-start text-md-end mt-2 mt-md-0">
+      <div class="text-start">
         <a
           href="/orders/<%=order._id%>/invoice"
-          class="btn btn-outline-primary btn-sm fw-bold fs-7 fs-md-6"
+          class="btn btn-outline-primary btn-sm fw-bold"
           >Invoice</a
         >
       </div>
