@@ -7,7 +7,5 @@ module.exports={
   customersController:require('./customersController'),
   couponsController:require('./couponsController.js'),
   categoriesController:require('./categoriesController'),
-  returnRefundController:require('./returnRefundController'),
-  bannersController:require('./bannersController'),
   referralsController:require('./referralsController'),
 }

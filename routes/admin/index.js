@@ -9,8 +9,6 @@ router.use("/salesReport",auth.requireLogin, require("./salesReportRoutes"));
 router.use("/customers",auth.requireLogin, require("./customersRoutes"));
 router.use("/coupons",auth.requireLogin, require("./couponRoutes"));
 router.use("/categories",auth.requireLogin, require("./categroiesRoutes"));
-router.use("/banners",auth.requireLogin, require("./bannersRoutes"));
-router.use("/returnRefund",auth.requireLogin, require("./returnRefundRoutes"));
 router.use("/referrals",auth.requireLogin, require("./referralsRoutes"));
 
 module.exports = router;

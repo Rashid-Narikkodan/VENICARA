@@ -9,8 +9,6 @@ const {
   customersController,
   couponsController,
   categoriesController,
-  returnRefundController,
-  bannersController,
   referralsController,
 } = require("../controllers/admin/index");
 
@@ -86,8 +84,6 @@ router.patch("/categories/:id", categoriesController.deleteCategory);
 router
   .route("/returnRefund")
   .get(auth.requireLogin, returnRefundController.showReturnRefund);
-
-router.route("/banners").get(auth.requireLogin, bannersController.showBanners);
 
 router
   .route("/referrals")

@@ -1,45 +1,53 @@
 
 ```
 VENICARA
-├─ A-test
-│  └─ selectAddress.html
 ├─ app.js
 ├─ config
 │  ├─ cloudinary.js
 │  ├─ db.js
 │  ├─ mailer.js
-│  └─ passport.js
+│  ├─ passport.js
+│  └─ payment.js
 ├─ controllers
 │  ├─ admin
 │  │  ├─ authController.js
-│  │  ├─ bannersController.js
 │  │  ├─ categoriesController.js
-│  │  ├─ coupensController.js
+│  │  ├─ couponsController.js
 │  │  ├─ customersController.js
 │  │  ├─ dashboardController.js
 │  │  ├─ index.js
 │  │  ├─ ordersController.js
 │  │  ├─ productsController.js
 │  │  ├─ referralsController.js
-│  │  ├─ returnRefundController.js
 │  │  └─ salesReportController.js
 │  └─ user
 │     ├─ addressController.js
 │     ├─ authController.js
 │     ├─ cartController.js
 │     ├─ checkoutController.js
+│     ├─ deleteController.js
 │     ├─ homecontrollers.js
 │     ├─ index.js
 │     ├─ orderController.js
 │     ├─ productControllers.js
 │     ├─ referController.js
 │     ├─ userControllers.js
-│     └─ walletController.js
+│     ├─ walletController.js
+│     └─ wishlistController.js
 ├─ helpers
 │  ├─ discPercent.js
+│  ├─ finalPercentage.js
+│  ├─ finalPrice.js
+│  ├─ generateInvoice.js
 │  ├─ generateOTP.js
+│  ├─ getChartData.js
+│  ├─ getDashboardData.js
+│  ├─ handleError.js
 │  ├─ imgProcess.js
+│  ├─ orderID.js
 │  ├─ referralCode.js
+│  ├─ salesExcel.js
+│  ├─ salesPDF.js
 │  ├─ sendMail.js
 │  └─ uploadToCloudinary.js
 ├─ middlewares
@@ -51,17 +59,18 @@ VENICARA
 ├─ models
 │  ├─ Address.js
 │  ├─ Admin.js
-│  ├─ Banner.js
 │  ├─ Cart.js
 │  ├─ Category.js
 │  ├─ Coupon.js
 │  ├─ Order.js
-│  ├─ Payment.js
 │  ├─ PaymentMethod.js
 │  ├─ Product.js
+│  ├─ Referrals.js
+│  ├─ Review.js
 │  ├─ User.js
+│  ├─ Wallet.js
 │  ├─ WalletTransaction.js
-│  └─ Whishlist.js
+│  └─ Wishlist.js
 ├─ package-lock.json
 ├─ package.json
 ├─ public
@@ -79,18 +88,19 @@ VENICARA
 │  │  ├─ Dolce & Gabbana (1).avif
 │  │  ├─ f76be7b5-3b78-43fb-a0a6-b0543c1f2b5a.png
 │  │  ├─ featuredProduct.avif
+│  │  ├─ fevicon.png
 │  │  ├─ Gentleman Givenchy (1).avif
 │  │  ├─ hero-1.avif
 │  │  ├─ hero-2.avif
 │  │  ├─ login.avif
 │  │  ├─ logo.avif
 │  │  ├─ manwithperfume.avif
+│  │  ├─ Screenshot 2025-09-11 153150.png
 │  │  ├─ sitwithperfume.avif
 │  │  └─ womenwithperfume.avif
 │  ├─ js
 │  │  ├─ adminHeader.js
 │  │  ├─ adminLogin.js
-│  │  ├─ adminSidebar.js
 │  │  ├─ forgotOTP.js
 │  │  ├─ forgotPass.js
 │  │  ├─ forgotPassChange.js
@@ -267,31 +277,60 @@ VENICARA
 │     │  ├─ product-1756443088543-Fogg  (1).avif
 │     │  ├─ product-1756443088816-Fogg  (2).avif
 │     │  ├─ product-1756443089059-Fogg  (3).avif
-│     │  └─ product-1756445841190-Fogg  (1).avif
+│     │  ├─ product-1756445841190-Fogg  (1).avif
+│     │  ├─ product-1757945407576-Screenshot 2025-09-01 230051.png
+│     │  ├─ product-1757950395177-Screenshot 2025-09-02 124403.png
+│     │  ├─ product-1758433500233-Fogg  (1).avif
+│     │  ├─ product-1758433541518-Fogg  (1).avif
+│     │  ├─ product-1758433664866-Fogg  (1).avif
+│     │  ├─ product-1758433925660-Fogg  (2).avif
+│     │  ├─ product-1758434016838-Fogg  (1).avif
+│     │  ├─ product-1758434082169-Fogg  (2).avif
+│     │  ├─ product-1759213856046-IMG_20250531_112731.jpg
+│     │  ├─ product-1759213856228-IMG_20250531_112910.jpg
+│     │  ├─ product-1759219707778-WhatsApp Image 2025-06-14 at 19.46.17_68f48de7.jpg
+│     │  ├─ product-1759219736251-WhatsApp Image 2025-06-14 at 19.46.17_68f48de7.jpg
+│     │  ├─ product-1759219751735-WhatsApp Image 2025-06-14 at 19.46.17_68f48de7.jpg
+│     │  ├─ product-1759219797178-category-MEN.avif
+│     │  ├─ product-1759219797334-1754024488724.jpeg
+│     │  ├─ product-1759219797405-The-best-4K-Programming-Wallpaper-HD.jpg
+│     │  └─ product-1759220192190-Screenshot 2025-06-23 175355.png
 │     └─ profiles
-│        ├─ User-1756747073128-WIN_20250504_08_50_48_Pro.jpg
-│        ├─ User-1756747563079-WIN_20250504_08_51_27_Pro.jpg
-│        ├─ User-1756747571828-WIN_20250504_08_50_48_Pro.jpg
-│        ├─ User-1756747620976-WIN_20250504_08_50_48_Pro.jpg
-│        └─ User-1756926408188-WIN_20250504_08_50_48_Pro.jpg
+│        ├─ User-1757904501329-Screenshot 2025-09-11 153150.png
+│        ├─ User-1759213159595-IMG_20250913_115119.jpg
+│        ├─ User-1759219632051-WhatsApp Image 2025-06-14 at 19.46.17_68f48de7.jpg
+│        └─ User-1759402476947-IMG_20251001_150229.jpg
 ├─ routes
 │  ├─ admin
-│  ├─ adminRoutes.js
-│  ├─ user
-│  │  ├─ addressRoutes.js
 │  │  ├─ authRoutes.js
-│  │  ├─ cartRoutes.js
-│  │  ├─ checkoutRoutes.js
-│  │  ├─ homeRoutes.js
+│  │  ├─ categroiesRoutes.js
+│  │  ├─ couponRoutes.js
+│  │  ├─ customersRoutes.js
+│  │  ├─ dashboardRoutes.js
 │  │  ├─ index.js
 │  │  ├─ orderRoutes.js
-│  │  └─ profileRoutes.js
-│  └─ userRoutes.js
+│  │  ├─ productsRoutes.js
+│  │  ├─ referralsRoutes.js
+│  │  ├─ returnRefundRoutes.js
+│  │  └─ salesReportRoutes.js
+│  ├─ adminRoutes.js
+│  └─ user
+│     ├─ addressRoutes.js
+│     ├─ authRoutes.js
+│     ├─ cartRoutes.js
+│     ├─ checkoutRoutes.js
+│     ├─ deleteRoutes.js
+│     ├─ homeRoutes.js
+│     ├─ index.js
+│     ├─ orderRoutes.js
+│     ├─ profileRoutes.js
+│     ├─ referRoutes.js
+│     ├─ walletRoutes.js
+│     └─ wishlistRoutes.js
 └─ views
    ├─ adminPages
    │  ├─ addCategory.ejs
    │  ├─ addProduct.ejs
-   │  ├─ banners.ejs
    │  ├─ categories.ejs
    │  ├─ coupons.ejs
    │  ├─ customers.ejs
@@ -299,17 +338,16 @@ VENICARA
    │  ├─ editCategory.ejs
    │  ├─ editProduct.ejs
    │  ├─ login.ejs
+   │  ├─ orderDetails.ejs
    │  ├─ orders.ejs
    │  ├─ products.ejs
    │  ├─ profle.ejs
    │  ├─ referrals.ejs
-   │  ├─ returnRefund.ejs
    │  └─ salesReport.ejs
    ├─ partials
    │  ├─ admin
    │  │  ├─ footer.ejs
-   │  │  ├─ header.ejs
-   │  │  └─ sidebar.ejs
+   │  │  └─ header.ejs
    │  └─ user
    │     ├─ footer.ejs
    │     ├─ header-landing.ejs
@@ -317,11 +355,14 @@ VENICARA
    │     └─ sidebarProfile.ejs
    └─ userPages
       ├─ 404.ejs
+      ├─ 500.ejs
       ├─ address.ejs
       ├─ cart.ejs
       ├─ changePass.ejs
+      ├─ checkoutAddress.ejs
       ├─ checkoutAddressAdd.ejs
       ├─ checkoutAddressEdit.ejs
+      ├─ checkoutPayment.ejs
       ├─ deleteAc.ejs
       ├─ editAddress.ejs
       ├─ forgot.ejs
@@ -330,22 +371,24 @@ VENICARA
       ├─ landing.ejs
       ├─ login.ejs
       ├─ newAddress.ejs
+      ├─ newEmailOTP.ejs
+      ├─ orderDetails.ejs
       ├─ orders.ejs
-      ├─ payment.ejs
       ├─ placeOrder.ejs
       ├─ privacyPolicy.ejs
       ├─ productDetails.ejs
       ├─ profile.ejs
       ├─ profileChangePass.ejs
+      ├─ profileEdit.ejs
       ├─ profileOTP.ejs
       ├─ profileVerifyOTP.ejs
       ├─ refer.ejs
-      ├─ selectAddress.ejs
       ├─ shop.ejs
       ├─ signup.ejs
       ├─ terms&conditions.ejs
       ├─ verify-otp.ejs
       ├─ wallet.ejs
-      └─ whishlist.ejs
+      ├─ walletTransaction.ejs
+      └─ wishlist.ejs
 
 ```

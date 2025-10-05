@@ -9,8 +9,6 @@ const {
   customersController,
   couponsController,
   categoriesController,
-  returnRefundController,
-  bannersController,
   referralsController,
 } = require("../controllers/admin/index");
 
