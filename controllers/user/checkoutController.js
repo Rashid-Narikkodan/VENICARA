@@ -455,6 +455,13 @@ const handlePlaceOrder = async (req, res) => {
     let razorpayOrderId = null;
 
     if (paymentMethod === "RAZORPAY") {
+      const MAX_AMOUNT = 50000000; // In paise, for ₹5,00,000
+if (finalAmount > MAX_AMOUNT) {
+  return res.status(400).json({
+    error: "Amount exceeds maximum allowed in Razorpay Test Mode."
+  });
+}
+
       const options = {
         amount: finalAmount * 100,
         currency: "INR",
