@@ -26,6 +26,9 @@ const add = async (req, res) => {
   try {
     const productId = req.params.id;
     const {variantId,source} = req.body
+
+    if(!req.session.user?.id) res.status(400).json({status:false,message:'User should login to wish thing'})
+
     const userId = req.session.user.id;
     redirectUrl=source=='details'?`/products/${productId}`:'/shop'
     if (!userId) {

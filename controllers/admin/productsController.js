@@ -217,7 +217,7 @@ const showEditProduct = async (req, res) => {
   }
 };
 
-const editProduct = async (req, res) => {
+const  editProduct = async (req, res) => {
   try {
     const productId = req.params.id;
     const product = await Product.findById(productId);
