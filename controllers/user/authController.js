@@ -83,6 +83,7 @@ const handleGoogleAuth = async (req, res) => {
     if (user.isDeleted) {
       user.isDeleted = false
       user.isBlocked = false
+      await user.save()
     }
     if (!user.referralCode) {
       user.referralCode = await generateRefCode(user.name)
