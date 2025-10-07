@@ -4,7 +4,7 @@ const handleError = require('../../helpers/handleError');
 const showCustomers = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 7;
+    const limit = parseInt(req.query.limit) || 9;
     const search = req.query.search || "";
 
     let filter = { isDeleted: false };
