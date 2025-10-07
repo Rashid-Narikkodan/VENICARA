@@ -61,7 +61,7 @@
       <div class="col-lg-9">
         <div class="p-3 bg-light rounded-3">
           <% paymentMethods.forEach((method, i) => { %>
-          <div class="card mb-2 border-0 shadow-sm">
+          <div class="card mb-2 border-0 shadow-sm" onclick="selectMethod(this)">
             <div class="card-body d-flex align-items-center">
               <!-- Radio -->
               <div class="form-check me-3">
@@ -71,12 +71,12 @@
                   name="paymentMethod"
                   id="pay_<%= method.code %>"
                   value="<%=method.code %>" 
-                  <%=method.code=='COD'&&total>7000?'disabled':''%>
-                  <%= i==0&&total<1000 || i=== 1 ? "checked" : "" %>>
+                  <%=method.code=='COD'&&Number(total)>7000?'disabled':''%>
+                  <%= i==0&&total<7000 || i=== 1 ? "checked" : "" %>>
               </div>
 
               <div class="flex-grow-1">
-                <h6 class="mb-0 fw-semibold <%=total>1000&&method.code=='COD'?'text-secondary':''%>">
+                <h6 class="mb-0 fw-semibold <%=total>7000&&method.code=='COD'?'text-secondary':''%>">
                   <%= method.name %>
                 </h6>
               </div>
@@ -359,6 +359,13 @@ function showPaymentFailedModal(message = "Your payment could not be processed. 
     const data=await res.json()
     if(data.status){
       window.location.reload()      
+    }
+  }
+
+  function selectMethod(card){
+    const input = card.querySelector('input[type="radio"]');
+    if(input && !input.disabled){
+      input.checked = true
     }
   }
 </script>
