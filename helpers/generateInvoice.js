@@ -12,7 +12,7 @@ function generateInvoicePDF(order, res) {
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader(
       "Content-Disposition",
-      `inline; filename=invoice-${order.orderId}.pdf`
+      `attachment; filename=invoice-${order.orderId}.pdf`
     );
     doc.pipe(res);
   } else {
