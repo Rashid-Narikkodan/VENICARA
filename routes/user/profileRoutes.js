@@ -24,22 +24,9 @@ router.route("/edit")
 );
 
 router.post('/edit/otp',userController.handleNewEmailOTP)
-
-router
-  .route("/verify")
-  .get(auth.requireLogin,userController.showProfileVerify)
-  .post(userController.handleProfileVerify);
-
-router
-  .route("/OTP")
-  .get(auth.requireLogin,userController.showProfileOTP)
-  .post(auth.requireLogin,userController.handleProfileOTP);
-
-router.post("/resendProfileOTP", userController.resendProfileOTP);
-
+router.post('/resendOTP',userController.resendNewEmailOTP)
 router
   .route("/changePassword")
   .get(auth.requireLogin,userController.showProfileChangePass)
   .patch(auth.requireLogin,userController.handleProfileChangePass);
-router.post('/resentOTP',userController.resendProfileOTP)
 module.exports = router

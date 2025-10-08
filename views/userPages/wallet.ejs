@@ -166,7 +166,17 @@
             toastr.error("Verification error. Try again.");
           }
         },
+
         theme: { color: "#121212" },
+        ondismiss:async function() {
+          // Called when user closes the Razorpay modal without completing payment
+          toastr.warning("Payment was not completed. Please try again.");
+          const res=await fetch('/wallet/addMoneyFailed',{
+            method:'PATCH',
+            
+          })
+        }
+
       };
 
       const rzp = new Razorpay(options);

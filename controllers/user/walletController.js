@@ -39,7 +39,7 @@ const addToWallet = async (req, res) => {
       razorpayId: order.id,
       amount: options.amount,
       type: "credit",
-      status: "pending",
+      status: "failed",
     });
 
     res.json({ success: true, order });

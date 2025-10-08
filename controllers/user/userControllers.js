@@ -47,13 +47,10 @@ const editProfile = async (req, res) => {
 
     await User.findByIdAndUpdate(req.session.user.id, updateData, { new: true });
     if (email !== user.email) {
-      req.session.changePass ={
-        email
-      } 
       const otp = generateOTP();
       await User.findByIdAndUpdate(req.session.user.id, {
         otp,
-        otpExpiry: new Date(Date.now() + 5 * 60 * 1000)
+        otpExpiry: new Date(Date.now() + 50 * 1000)
       });
       sendEmail(email, otp);
       req.flash('success', `New OTP sent to your email: ${email}`);
@@ -68,12 +65,15 @@ const editProfile = async (req, res) => {
   }
 };
 
+
 const handleNewEmailOTP = async (req, res) => {
   try {
     const { otp, email } = req.body;
     const user = await User.findById(req.session.user.id);
 
-    if (user.otp === otp && user.otpExpiry > Date.now()) {
+    if (user.otp !== otp || user.otpExpiry < Date.now()) {
+      return res.render('userPages/newEmailOTP',{email,messages:{error:['Invalid or expired OTP']}});
+    }
       user.isVerified = true;
       user.otp = null;
       user.otpExpiry = null;
@@ -81,10 +81,7 @@ const handleNewEmailOTP = async (req, res) => {
       await user.save();
       req.flash('success', 'New email updated');
       return res.redirect('/profile');
-    }
 
-    req.flash('error', 'Invalid or expired OTP');
-    res.redirect('/profile/edit');
   } catch (err) {
     handleError(res, "handleNewEmailOTP", err);
   }
@@ -94,7 +91,7 @@ const resendNewEmailOTP = async (req, res) => {
   try {
     const user = await User.findById(req.session.user.id);
     const otp = generateOTP();
-    const otpExpiry = new Date(Date.now() + 5 * 60 * 1000);
+    const otpExpiry = new Date(Date.now() + 50 * 1000);
 
     user.otp = otp;
     user.otpExpiry = otpExpiry;
@@ -104,81 +101,6 @@ const resendNewEmailOTP = async (req, res) => {
     res.json({ success: true });
   } catch (err) {
     handleError(res, "resendNewEmailOTP", err);
-  }
-};
-
-const showProfileVerify = (req, res) => {
-  try {
-    res.render('userPages/profileVerifyOTP');
-  } catch (err) {
-    handleError(res, "showProfileVerify", err);
-  }
-};
-
-const handleProfileVerify = async (req, res) => {
-  try {
-    const { email } = req.body;
-    const user = await User.findOne({ email });
-
-    if (!user) {
-      req.flash('error', 'User not existing');
-      return res.redirect('/profile/verify');
-    }
-
-    req.session.changePass = {email}
-    const otp = generateOTP();
-    user.otp = otp;
-    user.otpExpiry = new Date(Date.now() + 5 * 60 * 1000);
-    await user.save();
-
-    sendEmail(email, otp, user.name);
-    res.redirect('/profile/OTP');
-  } catch (err) {
-    handleError(res, "handleProfileVerify", err);
-  }
-};
-
-const showProfileOTP = (req, res) => {
-  try {
-    res.render("userPages/profileOTP");
-  } catch (err) {
-    handleError(res, "showProfileOTP", err);
-  }
-};
-
-const handleProfileOTP = async (req, res) => {
-  try {
-    const { otp } = req.body;
-    const user = await User.findById(req.session.user.id);
-
-    if (user.otp !== otp) {
-      req.flash('error', 'OTP does not match');
-      return res.redirect('/profile/OTP');
-    }
-    if (user.otpExpiry < Date.now()) {
-      req.flash('error', 'OTP expired');
-      return res.redirect('/profile/OTP');
-    }
-
-    req.flash('success', 'OTP verified');
-    res.redirect("/profile/changePassword");
-  } catch (err) {
-    handleError(res, "handleProfileOTP", err);
-  }
-};
-
-const resendProfileOTP = async (req, res) => {
-  try {
-    const user = await User.findById(req.session.user.id);
-    const otp = generateOTP();
-    user.otp = otp;
-    user.otpExpiry = new Date(Date.now() + 5 * 60 * 1000);
-    await user.save();
-
-    sendEmail(req.session.changePass.email, otp, user.name);
-    res.json({ success: true });
-  } catch (err) {
-    handleError(res, "resendProfileOTP", err);
   }
 };
 
@@ -216,7 +138,7 @@ const handleProfileChangePass = async (req, res) => {
     await User.findByIdAndUpdate(req.session.user.id, { password: passwordHash });
 
     req.flash('success', 'Password updated');
-    res.redirect("/profi27le");
+    res.redirect("/profile");
   } catch (err) {
     handleError(res, "handleProfileChangePass", err);
   }
@@ -246,11 +168,6 @@ module.exports = {
   editProfile,
   handleNewEmailOTP,
   resendNewEmailOTP,
-  showProfileVerify,
-  handleProfileVerify,
-  showProfileOTP,
-  handleProfileOTP,
-  resendProfileOTP,
   showProfileChangePass,
   handleProfileChangePass,
   showDeleteAc,
