@@ -13,13 +13,11 @@
   <% if (orders && orders.length > 0) { %> <% orders.forEach(order => { %>
   <div class="card rounded-3 px-3 px-md-4 py-3 mb-4 shadow">
     <!-- Order Header -->
-    <div
-      class="d-flex justify-content-between align-items-center mb-2 mb-md-3"
-    >
-      <span class="fw-semibold"
-        >Order ID : <%=order.orderId%></span
+    <div class="d-flex justify-content-between align-items-center mb-2 mb-md-3">
+      <span class="fw-semibold">Order ID : <%=order.orderId%></span>
+      <span class="alert alert-primary py-0 px-2 text-primary m-0"
+        ><%=order.status.charAt(0).toUpperCase() + order.status.slice(1)%></span
       >
-      <span class="alert alert-primary py-0 px-2 text-primery m-0"><%=order.status.charAt(0).toUpperCase() + order.status.slice(1)%></span>
     </div>
 
     <!-- Products Section -->
@@ -66,14 +64,10 @@
           <!-- Status -->
           <div class="col-9 col-md-3">
             <p class="small mb-1">
-              <strong>Ordered On :</strong> <%=
-              order.createdAt.toLocaleString('en-IN', { dateStyle: 'medium' })
-              %>
+              <strong>Ordered On :</strong> <%=order.createdAt.toLocaleString('en-IN', { dateStyle: 'medium' })%>
             </p>
             <p class="small mb-1">
-              <strong>Expected :</strong> <%= new Date(order.createdAt.getTime()
-              + 1000*60*60*24*3).toLocaleString('en-IN', { dateStyle: 'medium'
-              }) %>
+              <strong>Expected :</strong> <%= new Date(order.createdAt.getTime()+ 1000*60*60*24*3).toLocaleString('en-IN', { dateStyle: 'medium'}) %>
             </p>
             <p class="small mb-0">
               <strong>Status : </strong>
@@ -92,20 +86,18 @@
           <div
             class="col-3 col-md-3 d-flex gap-2 justify-content-end align-items-center"
           >
-            <% if(!["shipped","Out of delivery","delivered","cancelled","returned"].includes(product.status)) { %>
+            <% if(!["shipped","Out ofdelivery","delivered","cancelled","returned"].includes(product.status)){ %>
             <button
               class="btn btn-danger fs-7 fs-md-6"
-              onclick="cancelOrderProduct('<%=order._id%>','<%=index%>')"
+              onclick="showConfirmModal('<%=order._id%>','cancelProduct','<%=index%>')"
             >
               Cancel
             </button>
-            <% } %>
-            <% if(product.status === 'delivered'&&product.return?.returnTimeLimit>Date.now()) { %>
+            <% } %> 
+            <% if(product.status ==='delivered'&&product.return?.returnTimeLimit>Date.now()) { %>
             <button
               class="btn btn-secondary fs-7 fs-md-6"
-              data-bs-toggle="modal"
-              data-bs-target="#returnModal"
-              onclick="openReturnModal('<%= order._id %>', '<%= index %>')"
+              onclick="showConfirmModal('<%= order._id %>','returnProduct','<%= index %>')"
             >
               <%= product.return?.isRequested ? "Requested" : "Return" %>
             </button>
@@ -118,9 +110,7 @@
             >
           </div>
 
-          <div
-            class="col-12 <%=!product.return?.adminReason?'d-none':''%> "
-          >
+          <div class="col-12 <%=!product.return?.adminReason?'d-none':''%>">
             <span class="text-danger fw-normal small fw-semibold"
               >Return Rejected Reason :
               <span><%=product.return.adminReason%></span></span
@@ -200,16 +190,15 @@
       <% if(!["delivered","cancelled","returned"].includes(order.status)) { %>
       <button
         class="btn btn-outline-dark btn-sm fw-semibold"
-        onclick="cancelOrder('<%=order._id%>')"
+        onclick="showConfirmModal('<%=order._id%>','cancelOrder')"
       >
         Cancel Order
       </button>
       <% } %> <%if(order.status=='delivered'){%>
       <button
         class="btn btn-sm btn-secondary"
-        data-bs-toggle="modal"
-        data-bs-target="#returnModal"
-        onclick="openReturnModal('<%= order._id %>')"
+
+        onclick="showConfirmModal('<%= order._id %>','returnOrder')"
       >
         <%= order.return?.isRequested ? "Return Requested" :
         order.return?.adminReason ? "Return Rejected" : "Return Order" %>
@@ -292,14 +281,106 @@
       </div>
     </div>
   </div>
+
+  <!-- //payment failed modal -->
+  <div
+    class="modal fade"
+    id="confirmModal"
+    tabindex="-1"
+    aria-labelledby="confirmLabel"
+    aria-hidden="true"
+  >
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-dark">
+        <div class="modal-header bg-dark text-white">
+          <h5 class="modal-title" id="confirmLabel">Are you sure?</h5>
+          <button
+            type="button"
+            class="btn-close btn-close-white"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+          ></button>
+        </div>
+        <div class="modal-body">
+          <p id="confirmMessage">
+            Be carefull while return or cancel after use a cupon
+          </p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" data-bs-dismiss="modal" class="btn btn-outline-dark">
+            No
+          </button>
+          <button
+          type="button"
+          class="btn btn-dark"
+          id="yes"
+          data-orderId = ""
+          data-operation = ""
+          data-index = ""
+          >
+          Yes
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
 </main>
 
 <script>
   let currentReturnId = null;
   let currentReturnIndex = null;
+  
+  function showConfirmModal(orderId,operation,index=null){
+    const modalEl = document.getElementById("confirmModal");
+    const messageEl = document.getElementById("confirmMessage");
+    const yesBtn = document.getElementById('yes');
+    if(index&&operation=='cancelProduct'){
+      messageEl.textContent = 'Are you sure you want to Cancel this Product';
+    }
+    if(!index&&operation=='cancelOrder'){
+      messageEl.textContent = 'Are you sure you want to Cancel this Order';
+    }
+    if(index&&operation=='returnProduct'){
+      messageEl.textContent = 'Are you sure you want to Return this Product';
+    }
+    if(!index&&operation=='returnOrder'){
+      messageEl.textContent = 'Are you sure you want to Return this Order';
+    }
+    yesBtn.setAttribute('data-orderId', orderId); 
+    yesBtn.setAttribute('data-operation', operation); 
+    yesBtn.setAttribute('data-index', index); 
+  
+    const modal = new bootstrap.Modal(modalEl);
+    modal.show();
+  }
+
+  document.getElementById('yes').addEventListener('click',(e)=>{
+    const operation = document.getElementById('yes').getAttribute('data-operation')
+    const orderId = document.getElementById('yes').getAttribute('data-orderId')
+    const index = document.getElementById('yes').getAttribute('data-index')
+     if(operation=='cancelProduct'){
+      cancelProduct(orderId,index)
+    }
+    if(operation=='cancelOrder'){
+      cancelOrder(orderId)
+    }
+    if(operation=='returnProduct'){
+      openReturnModal(orderId,index)
+      const modalEl = document.getElementById('confirmModal');
+      const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+      modal.hide();
+    }
+    if(operation=='returnOrder'){
+      openReturnModal(orderId)
+      const modalEl = document.getElementById('confirmModal');
+      const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+      modal.hide();
+    }
+  })
+
 
   function openReturnModal(id, index = null) {
-      if(!confirm('Are you sure you want to Return')) return
+
     currentReturnId = id;
     currentReturnIndex = index;
 
@@ -340,9 +421,8 @@
       }
     });
 
-  async function cancelOrderProduct(id, index) {
+  async function cancelProduct(id, index) {
     try {
-      if(!confirm('Are you sure you want to Cancel')) return
       const res = await fetch(`/orders/product/cancel/${id}?index=${index}`, {
         method: "PATCH",
       });
@@ -356,7 +436,6 @@
 
   async function cancelOrder(id) {
     try {
-      if(!confirm('Are you sure you want to Cancel')) return
       const res = await fetch(`/orders/cancel/${id}`, { method: "PATCH" });
       const data = await res.json();
       if (data.status) location.reload();
@@ -365,6 +444,7 @@
       alert("Unable to cancel order");
     }
   }
+
 </script>
 
 <%- include('../partials/user/footer.ejs') %>

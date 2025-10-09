@@ -79,113 +79,182 @@
       </div>
     </div>
   </div>
+
+
+  <!-- //payment failed modal -->
+  <div class="modal fade" id="paymentFailedModal" tabindex="-1" aria-labelledby="paymentFailedLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-danger">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title" id="paymentFailedLabel">Payment Failed</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p id="paymentFailedMessage">Your payment could not be processed. Please try again.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" id="retry" class="btn btn-outline-danger" >Retry</button>
+        <button type="button" class="btn btn-danger" onclick="window.location.reload()">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 </main>
-
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 <script>
-  // Toastr configuration
-  toastr.options = {
-    closeButton: true,
-    progressBar: true,
-    positionClass: "toast-top-center",
-    timeOut: "2000"
-  };
-
-  const input = document.getElementById("amount");
-  const form = document.getElementById("walletForm");
-
-  // Always keep ₹ prefixed and allow only numbers
-  input.addEventListener("input", () => {
-    let value = input.value.replace(/₹/g, "").replace(/[^0-9]/g, "");
-    input.value = "₹" + value;
-  });
-
-  // Preset amount buttons
-  document.querySelectorAll(".preset-btn").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      input.value = "₹" + btn.dataset.value;
+  // #1: Setup Input Formatting (₹ prefix + numeric only)
+  function setupAmountInput() {
+    const input = document.getElementById("amount");
+    input.addEventListener("input", () => {
+      const value = input.value.replace(/₹/g, "").replace(/[^0-9]/g, "");
+      input.value = "₹" + value;
     });
-  });
+  }
 
-  // On form submit → send only numbers (without ₹)
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
+    // Function to show payment failed modal
+function showPaymentFailedModal(message = "Your payment could not be processed. Please try again.") {
+  const modalEl = document.getElementById("paymentFailedModal");
+  const messageEl = document.getElementById("paymentFailedMessage");
+  messageEl.textContent = message;
 
-    const amountValue = input.value.replace("₹", "").trim();
+  const modal = new bootstrap.Modal(modalEl);
+  modal.show();
+}
 
-    // Basic validation
-    if (!amountValue || isNaN(amountValue) || parseInt(amountValue) <= 0) {
-      toastr.error("Please enter a valid amount.");
-      return;
+  // #2: Setup Preset Amount Buttons (e.g., ₹100, ₹200)
+  function setupPresetButtons() {
+    const input = document.getElementById("amount");
+    document.querySelectorAll(".preset-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        input.value = "₹" + btn.dataset.value;
+      });
+    });
+  }
+
+  // #3: Validate Amount Field
+  function validateAmount(value) {
+    if (!value || isNaN(value) || parseInt(value) <= 0) {
+      showPaymentFailedModal("Please enter a valid amount.");
+      return false;
     }
+    return true;
+  }
 
+  // #4: Create Razorpay Order (Backend API)
+  async function createRazorpayOrder(amountValue) {
     try {
-      // Step 1: Create Razorpay order from backend
       const res = await fetch("/wallet/add", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ amount: amountValue }),
       });
-
       const { order } = await res.json();
-
       if (!order || !order.id || order.status !== "created") {
-        toastr.error("Failed to create order. Try again.");
-        return;
+        showPaymentFailedModal("Failed to create order. Try again.");
+        return null;
       }
-
-      // Step 2: Razorpay Checkout
-      const options = {
-        key: "<%= process.env.RAZORPAY_KEY_ID %>", // injected from backend
-        amount: order.amount, // in paise
-        currency: "INR",
-        name: "Venicara Wallet",
-        description: "Add Money to Wallet",
-        order_id: order.id,
-        handler: async function (response) {
-          try {
-            // Step 3: Verify payment on backend
-            const verifyRes = await fetch("/wallet/verify-payment", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify(response),
-            });
-
-            const verifyData = await verifyRes.json();
-
-            if (verifyData.status) {
-              document.getElementById("balance").textContent = `₹${verifyData.balance}`;
-              toastr.success("Wallet balance updated!");
-            } else {
-              toastr.error("Payment verification failed!");
-            }
-          } catch (err) {
-            console.error(err);
-            toastr.error("Verification error. Try again.");
-          }
-        },
-
-        theme: { color: "#121212" },
-        ondismiss:async function() {
-          // Called when user closes the Razorpay modal without completing payment
-          toastr.warning("Payment was not completed. Please try again.");
-          const res=await fetch('/wallet/addMoneyFailed',{
-            method:'PATCH',
-            
-          })
-        }
-
-      };
-
-      const rzp = new Razorpay(options);
-      rzp.open();
-    } catch (error) {
-      console.error(error);
-      toastr.error("Something went wrong. Try again later.");
+      return order;
+    } catch (err) {
+      console.error(err);
+      showPaymentFailedModal("Error creating order. Try again later.");
+      return null;
     }
-  });
+  }
+
+  // #5: Verify Payment After Razorpay Success
+  async function verifyPayment(response) {
+    try {
+      const res = await fetch("/wallet/verify-payment", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(response),
+      });
+      const data = await res.json();
+      if (data.status) {
+        document.getElementById("balance").textContent = `₹${data.balance}`;
+        showPaymentFailedModal("Wallet balance updated successfully!");
+      } else {
+        showPaymentFailedModal("Payment verification failed!");
+      }
+    } catch (err) {
+      console.error(err);
+      showPaymentFailedModal("Verification error. Try again.");
+    }
+  }
+
+
+  // #7: Initialize Razorpay Checkout
+  function initializeRazorpay(order) {
+    const options = {
+      key: "<%= process.env.RAZORPAY_KEY_ID %>",
+      amount: order.amount,
+      currency: "INR",
+      name: "Venicara Wallet",
+      description: "Add Money to Wallet",
+      order_id: order.id,
+      handler: verifyPayment,
+      theme: { color: "#121212" },
+      modal: {escape: true,
+  ondismiss: async () => {
+    try{
+            console.log('sukdcgh')
+            const response = await fetch('/wallet/api/addMoneyFailed', {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ razorpayId:order.id})
+            });
+            const result = await response.json();
+            showPaymentFailedModal(result.message) 
+            
+          }catch(error){
+            console.log('razorpay ondismiss'+error)
+            showPaymentFailedModal(result.message) 
+          }
+  }
+}
+    };
+    const rzp = new Razorpay(options);
+    rzp.open();
+    return 
+  }
+
+  async function retryPayment(){
+    const input = document.getElementById("amount");
+    const amountValue = input.value.replace("₹", "").trim();
+    if (!validateAmount(amountValue)) return;
+
+    const order = await createRazorpayOrder(amountValue);
+    if (order) initializeRazorpay(order);
+  }
+
+  // #8: Handle Form Submission
+  async function handleFormSubmit(e) {
+    e.preventDefault();
+    const input = document.getElementById("amount");
+    const amountValue = input.value.replace("₹", "").trim();
+    if (!validateAmount(amountValue)) return;
+
+    const order = await createRazorpayOrder(amountValue);
+    if (order) initializeRazorpay(order);
+  }
+
+  // #9: Initialize Everything on Page Load
+  function initWalletPage() {
+    setupAmountInput();
+    setupPresetButtons();
+    document
+      .getElementById("walletForm")
+      .addEventListener("submit", handleFormSubmit);
+    document
+      .getElementById('retry')
+      .addEventListener('click', retryPayment)
+  }
+
+
+
+  // #10: Start Script
+  document.addEventListener("DOMContentLoaded", initWalletPage);
 </script>
 
 </body>

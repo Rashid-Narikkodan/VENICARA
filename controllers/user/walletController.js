@@ -39,7 +39,7 @@ const addToWallet = async (req, res) => {
       razorpayId: order.id,
       amount: options.amount,
       type: "credit",
-      status: "failed",
+      status: "pending",
     });
 
     res.json({ success: true, order });
@@ -106,9 +106,29 @@ const verifyPayment = async (req, res) => {
     });
   } catch (err) {
     console.error("verifyPayment error:", err);
-    res.status(500).json({ status: false, message: "Server error" });
+    res.status(500).json({ status: false, message: "Server error Occured" });
   }
 };
+
+const paymentFailed= async (req,res)=>{
+  try{
+    console.log('entered to payment failed')
+    const {razorpayId} = req.body
+    const userId = req.session.user.id
+
+    const txn = await WalletTransaction.findOne({userId,razorpayId})
+    const wallet = await Wallet.findOne({userId})
+    console.log(txn)
+    txn.status='failed'
+    txn.lastBalance = wallet.balance
+    txn.save()
+
+    res.status(200).json({status:true,message:"You closed the payment window before completing the transaction. Please try again to add money to your wallet."})
+  }catch(error){
+    console.log(error)
+    res.status(500).json({status:false, message:'The payment window was closed before completing the transaction. Please try again.'})
+  }
+}
 
 const showTransactionHistory = async (req, res) => {
   try {
@@ -148,5 +168,6 @@ module.exports = {
   showWallet,
   addToWallet,
   verifyPayment,
+  paymentFailed,
   showTransactionHistory,
 };
