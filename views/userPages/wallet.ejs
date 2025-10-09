@@ -100,6 +100,26 @@
   </div>
 </div>
 
+
+<!-- ///payment Success -->
+<div class="modal fade" id="paymentSuccessModal" tabindex="-1" aria-labelledby="paymentSuccessLabel" aria-hidden="true">
+<div class="modal-dialog modal-dialog-centered">
+  <div class="modal-content border-success">
+    <div class="modal-header bg-success text-white">
+      <h5 class="modal-title" id="paymentSuccessLabel">Payment Successful</h5>
+      <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+    </div>
+    <div class="modal-body">
+      <p id="paymentSuccessMessage"></p>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-success" onclick="window.location.reload()">OK</button>
+    </div>
+  </div>
+</div>
+</div>
+
+
 </main>
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script>
@@ -122,6 +142,14 @@ function showPaymentFailedModal(message = "Your payment could not be processed. 
   modal.show();
 }
 
+function showPaymentSuccessModal(message = "Payment successfully completed") {
+  const modalEl = document.getElementById("paymentSuccessModal");
+  const messageEl = document.getElementById("paymentSuccessMessage");
+  messageEl.textContent = message;
+
+  const modal = new bootstrap.Modal(modalEl);
+  modal.show();
+}
   // #2: Setup Preset Amount Buttons (e.g., ₹100, ₹200)
   function setupPresetButtons() {
     const input = document.getElementById("amount");
@@ -173,7 +201,7 @@ function showPaymentFailedModal(message = "Your payment could not be processed. 
       const data = await res.json();
       if (data.status) {
         document.getElementById("balance").textContent = `₹${data.balance}`;
-        showPaymentFailedModal("Wallet balance updated successfully!");
+        showPaymentSuccessModal("Wallet balance updated successfully!");
       } else {
         showPaymentFailedModal("Payment verification failed!");
       }
