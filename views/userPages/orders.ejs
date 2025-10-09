@@ -52,7 +52,7 @@
               Price : ₹<%=product.finalAmount%>
             </p>
             <p
-              class="mb-0 <%=product.status === 'cancelled'?'text-black':'text-muted'%> fs-7 fs-md-6"
+              class="mb-0 <%=product.status === 'cancelled'?'text-muted':'text-black'%> fs-7 fs-md-6"
             >
               Qty: <%=product.quantity%>
             </p>
@@ -181,20 +181,26 @@
         </div>
       </div>
     </div>
-
+    
     <!-- Order-level actions -->
     <div
-      class="d-flex justify-content-between align-items-center mt-md-3 mt-2 gap-2"
-      style="max-height: fit-content !important"
+    class="d-flex justify-content-between align-items-center mt-md-3 mt-2 gap-2"
+    style="max-height: fit-content !important"
     >
-      <% if(!["delivered","cancelled","returned"].includes(order.status)) { %>
+    <%if(order.status=='pending'){%>
+      <div>
+        <button class="btn btn-sm btn-dark" onclick="RetryPayment('<%=order._id%>')">Retry Payment</button>
+        <button class="btn btn-sm btn-outline-dark" onclick="showConfirmModal('<%=order._id%>','cancelOrderNoRefund')">Order Cancel</button>
+      </div>
+        <%}%>
+        <% if(!["pending","delivered","cancelled","returned"].includes(order.status)) { %>
       <button
         class="btn btn-outline-dark btn-sm fw-semibold"
-        onclick="showConfirmModal('<%=order._id%>','cancelOrder')"
-      >
+        onclick="showConfirmModal('<%=order._id%>','cancelOrder')">
         Cancel Order
       </button>
-      <% } %> <%if(order.status=='delivered'){%>
+      <% } %> 
+      <%if(order.status=='delivered'){%>
       <button
         class="btn btn-sm btn-secondary"
 
@@ -204,6 +210,7 @@
         order.return?.adminReason ? "Return Rejected" : "Return Order" %>
       </button>
       <%}%>
+      
 
       <div class="text-start">
         <a
@@ -325,7 +332,7 @@
   </div>
 </div>
 </main>
-
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script>
   let currentReturnId = null;
   let currentReturnIndex = null;
@@ -339,6 +346,10 @@
     }
     if(!index&&operation=='cancelOrder'){
       messageEl.textContent = 'Are you sure you want to Cancel this Order';
+    }
+    if(operation=='cancelOrderNoRefund'){
+      messageEl.textContent = 'Since you havn\'t paid the Amount, you will not get Refund, Thank You...';
+      operation='cancelOrder'
     }
     if(index&&operation=='returnProduct'){
       messageEl.textContent = 'Are you sure you want to Return this Product';
@@ -444,6 +455,71 @@
       alert("Unable to cancel order");
     }
   }
+
+ async function RetryPayment(orderId){
+
+    const response = await fetch("/orders/api/retryPayment", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({orderId}),
+    });
+    
+    const data = await response.json();
+    
+    if (!data.status) return alert(`Payment Failed :- ${data.message}`);
+    const options = {
+        key: "<%= process.env.RAZORPAY_KEY_ID %>", // Razorpay key
+        amount: data.finalAmount * 100, // paise
+        currency: "INR",
+        name: "VENICARA",
+        order_id: data.razorpayOrderId,
+        prefill: {
+          name: "<%= user.name %>",
+          email: "<%= user.email %>",
+          contact: "<%= user.mobile %>",
+        },
+        theme: { color: "#3399cc" },
+        handler: async function (response) {
+          try {
+            console.log('ntered')
+            const res = await fetch("/orders/api/retryPaymentSuccess", {
+              method: "PATCH",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                orderId: data.orderId,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_signature: response.razorpay_signature,
+              }),
+            });
+
+            const result = await res.json();
+            if (result.status) {
+
+            } else {
+            alert("Payment Failed - "+result.message);
+            return
+            }
+          } catch (err) {
+            alert("Payment Failed - Due to Internal Error");
+            return;
+          }
+        },
+        modal: { escape: true, ondismiss: async() => {
+          try{
+            alert('Payment Failed due to Unexpected Action in Razorpay, Try again...') 
+          }catch(error){
+            console.log('razorpay ondismiss'+error)
+          }
+        }
+        }
+      };
+
+      const rzp = new Razorpay(options);
+      rzp.open();
+      return; // Stop further redirect
+    }
+  
 
 </script>
 

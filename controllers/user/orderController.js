@@ -6,17 +6,21 @@ const Coupon=require('../../models/Coupon')
 const Wallet=require('../../models/Wallet')
 const WalletTransaction=require('../../models/WalletTransaction')
 const Review = require('../../models/Review')
+const User = require('../../models/User')
+const razorpay = require("../../config/payment");
 
 const showOrders = async (req, res) => {
   try {
     const userId = req.session?.user?.id;
     if (!userId) return res.redirect("/login");
+
+    const user = await User.findById(userId)
     
     const orders = await Order.find({ userId })
     .populate("products.productId")
     .sort({ createdAt: -1 });
     
-      res.render("userPages/orders", { orders });
+      res.render("userPages/orders", { orders , user});
   } catch (error) {
     handleError(res, "showOrders", error);
   }
@@ -44,6 +48,13 @@ const cancelOrder = async (req, res) => {
   
     // Refund to wallet if prepaid
     if (["WALLET", "RAZORPAY"].includes(order.payment.method)) {
+
+      if(order.payment.status==='pending'){
+          order.status = "cancelled";
+          await order.save();
+          return res.status(200).json({ status: true, message: "Order cancelled successfully, No refunds since you didn\'t paid Amount" });
+      }
+
       let wallet = await Wallet.findOne({ userId });
       if (!wallet) wallet = new Wallet({ userId, balance: 0 });
 
@@ -345,7 +356,101 @@ const addReview=async (req,res)=>{
     res.status(201).json({status:true, message: 'Review added successfully'});
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'Server error' });
+    res.status(500).json({ status:false,message: 'Server error' });
+  }
+}
+
+const retryPayment= async (req,res)=>{
+  try{
+    const {orderId}=req.body
+    const order=await Order.findById(orderId)
+
+    const MAX_AMOUNT = 50000000; // In paise, for ₹5,00,000
+    if (order.finalAmount*100 > MAX_AMOUNT) {
+      return res.status(400).json({status: false,
+          message: "Amount exceeds maximum allowed in Razorpay."
+        });
+      }
+
+      const options = {
+        amount: order.finalAmount * 100,
+        currency: "INR",
+        receipt: `rcpt_${Date.now()}`,
+        payment_capture: 1,
+      };
+      const razorpayOrder = await razorpay.orders.create(options);
+      const razorpayOrderId = razorpayOrder.id;
+
+      res.status(200).json({
+        status:true,
+        orderId:order.orderId,
+        razorpayOrderId,
+        finalAmount:order.finalAmount,
+      })
+    }catch(error){
+      console.log(error)
+      res.status(500).json({ status:false, message: 'Server error' });
+    }
+}
+
+const retryPaymentSuccess=  async (req,res)=>{
+  try{
+    const {
+      orderId,
+      razorpay_payment_id,
+      razorpay_order_id,
+      razorpay_signature
+    } = req.body
+
+     // Verify signature
+        const expectedSignature = crypto
+          .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
+          .update(`${razorpay_order_id}|${razorpay_payment_id}`)
+          .digest("hex");
+    
+        if (expectedSignature !== razorpay_signature)
+          return res
+            .status(400)
+            .json({ status: false, message: "Payment verification failed" });
+    
+        const order = await Order.findOne({ orderId });
+        if (!order)
+          return res
+            .status(404)
+            .json({ status: false, message: "Order not found" });
+    
+        order.payment.status = "paid";
+        order.payment.transactionId = razorpay_payment_id;
+        order.payment.paidAt = new Date();
+        order.status = "confirmed";
+        await order.save();
+    
+        // Reduce stock
+        for (const prod of order.products) {
+          prod.status = 'confirmed'
+          await Product.updateOne(
+            { _id: prod.productId, "variants._id": prod.variantId },
+            { $inc: { "variants.$.stock": -prod.quantity } }
+          );
+          await order.save();
+    
+        }
+    
+        // Mark coupon as used
+        if (order.couponApplied) {
+          await Coupon.updateOne(
+            { _id: order.couponApplied, usedBy: { $ne: order.userId } },
+            { $push: { usedBy: order.userId }, $inc: { used: 1 } }
+          );
+        }
+    
+        // Clear cart
+        await Cart.deleteMany({ userId: order.userId, status: "active" });
+        
+        res.json({ status: true, message: "Payment verified and order completed" });
+
+  }catch(error){
+    res.status(500).json({status:false,message:'Internal error'})
   }
 }
 module.exports = {
@@ -356,5 +461,7 @@ module.exports = {
   returnProductRequest,
   downloadInvoice,
   orderDetails,
-  addReview
+  addReview,
+  retryPayment,
+  retryPaymentSuccess,
 };

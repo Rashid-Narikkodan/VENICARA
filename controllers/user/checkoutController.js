@@ -411,6 +411,7 @@ const handlePlaceOrder = async (req, res) => {
         quantity: item.quantity,
         subtotal,
         volume: variant.volume,
+        status:paymentMethod==="RAZORPAY"?'pending':'confirmed',
         image: item.productId.images[0],
       });
     }
@@ -519,7 +520,7 @@ const handlePlaceOrder = async (req, res) => {
       couponDiscount,
       deliveryCharge: req.session.order.deliveryCharge,
       finalAmount,
-      status: "pending",
+      status: paymentMethod==='RAZORPAY'?'pending':'confirmed',
       razorpayOrderId,
     });
 
@@ -581,15 +582,18 @@ const handleRazorpaySuccess = async (req, res) => {
     order.payment.status = "paid";
     order.payment.transactionId = razorpay_payment_id;
     order.payment.paidAt = new Date();
-    order.status = "pending";
+    order.status = "confirmed";
     await order.save();
 
     // Reduce stock
     for (const prod of order.products) {
+      prod.status = 'confirmed'
       await Product.updateOne(
         { _id: prod.productId, "variants._id": prod.variantId },
         { $inc: { "variants.$.stock": -prod.quantity } }
       );
+      await order.save();
+
     }
 
     // Mark coupon as used
@@ -602,7 +606,7 @@ const handleRazorpaySuccess = async (req, res) => {
 
     // Clear cart
     await Cart.deleteMany({ userId: order.userId, status: "active" });
-
+    
     res.json({ status: true, message: "Payment verified and order completed" });
   } catch (err) {
     console.error("Razorpay success handler error:", err);
@@ -614,26 +618,13 @@ const handleRazorpayFailed = async (req, res) => {
   try {
     const { orderId } = req.body;
     const userId = req.session.user.id;
-
+    
     const order = await Order.findOne({ orderId });
-    console.log(order);
-
-    for (const prod of order.products) {
-      await Product.updateOne(
-        { _id: prod.productId, "variants._id": prod.variantId },
-        { $inc: { "variants.$.stock": prod.quantity } }
-      );
-    }
-    await Coupon.updateOne(
-      { _id: order.couponApplied },
-      { $pull: { usedBy: userId }, $inc: { used: -1 } }
-    );
-
-    await Order.deleteOne({ orderId });
-
+    await Cart.deleteMany({ userId: order.userId, status: "active" });
+    
     res.json({
       status: true,
-      message: "Payment failed due to unexpected action in razorpay",
+      message: "Payment failed, Order placed as pending, Pleas Retry....",
     });
   } catch (error) {
     console.log(error);
