@@ -1,5 +1,8 @@
-<%-include("../partials/user/header.ejs")%>
-
+<%if(wishlistIds && wishlistIds.length){%>
+  <%-include("../partials/user/header.ejs")%>
+<%}else{%>
+    <%-include("../partials/user/header-landing.ejs")%>
+<%}%>
 
   <style>
     .form-check-input {
