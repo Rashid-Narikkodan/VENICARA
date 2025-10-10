@@ -86,7 +86,7 @@
           <div
             class="col-3 col-md-3 d-flex gap-2 justify-content-end align-items-center"
           >
-            <% if(!["shipped","Out ofdelivery","delivered","cancelled","returned"].includes(product.status)){ %>
+            <% if(!["pending","shipped","Out ofdelivery","delivered","cancelled","returned"].includes(product.status)){ %>
             <button
               class="btn btn-danger fs-7 fs-md-6"
               onclick="showConfirmModal('<%=order._id%>','cancelProduct','<%=index%>')"
@@ -289,7 +289,7 @@
     </div>
   </div>
 
-  <!-- //payment failed modal -->
+  <!-- //confirm modal -->
   <div
     class="modal fade"
     id="confirmModal"
@@ -331,6 +331,25 @@
     </div>
   </div>
 </div>
+
+  <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-success">
+      <div class="modal-header bg-success text-white">
+        <h5 class="modal-title" id="successLabel">Payment Success</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p id="successMessage"></p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-success" data-bs-dismiss="modal" onclick="window.location.reload()">OK</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
 </main>
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script>
@@ -360,7 +379,16 @@
     yesBtn.setAttribute('data-orderId', orderId); 
     yesBtn.setAttribute('data-operation', operation); 
     yesBtn.setAttribute('data-index', index); 
+    
+    const modal = new bootstrap.Modal(modalEl);
+    modal.show();
+  }
   
+  
+  function showSuccessModal(message){
+    const modalEl = document.getElementById("successModal");
+    const messageEl = document.getElementById("successMessage");
+    messageEl.textContent = message;
     const modal = new bootstrap.Modal(modalEl);
     modal.show();
   }
@@ -495,7 +523,7 @@
 
             const result = await res.json();
             if (result.status) {
-
+              showSuccessModal(result.message)
             } else {
             alert("Payment Failed - "+result.message);
             return
