@@ -1,6 +1,5 @@
 <%-include('../partials/user/header.ejs')%>
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
 
 <style>
   body { background-color: #fff; font-family: Arial, sans-serif; }
@@ -99,7 +98,6 @@
   </div>
 </main>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 
 <script>
 document.addEventListener("DOMContentLoaded", () => {
@@ -115,14 +113,14 @@ document.addEventListener("DOMContentLoaded", () => {
         const res = await fetch(`/wishlist/api/add/${id}`, { method: "POST" });
         const data = await res.json();
         if (data.success) {
-          toastr.success(data.message);
+          showAlert('success',data.message);
           card.remove();
           checkEmpty();
         } else {
-          toastr.error(data.message);
+          showAlert('error',data.message);
         }
       } catch (err) {
-        toastr.error(err.message);
+        showAlert('error',err.message);
       }
     }
 
@@ -131,14 +129,14 @@ document.addEventListener("DOMContentLoaded", () => {
         const res = await fetch(`/wishlist/api/remove/${id}`, { method: "DELETE" });
         const data = await res.json();
         if (data.status) {
-          toastr.success(data.message);
+          showAlert('success',data.message);
           card.remove();
           checkEmpty();
         } else {
-          toastr.error(data.message);
+          showAlert('error',data.message);
         }
-      } catch (err) {
-        toastr.error(err.message);
+      } catch (error) {
+        showAlert('error',error.message);
       }
     }
   });

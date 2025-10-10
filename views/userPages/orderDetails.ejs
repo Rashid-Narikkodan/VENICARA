@@ -185,7 +185,7 @@ reviewForm.addEventListener('submit', async (e) => {
   const id = document.getElementById('reviewMessage').getAttribute('data-id')
   // Validation
   if (!name || !rating || !message) {
-    alert('Please fill in all fields and select a rating!');
+    showAlert('error','Please fill in all fields and select a rating!');
     return;
   }
 
@@ -204,16 +204,16 @@ reviewForm.addEventListener('submit', async (e) => {
       const reviewModal = bootstrap.Modal.getInstance(reviewModalEl) || new bootstrap.Modal(reviewModalEl);
       reviewModal.hide();
 
-      alert('Thank you for your review!');
+      showAlert('success','Thank you for your review!');
       
       // Reset form
       reviewForm.reset();
     } else {
-      alert(data.message || 'Failed to submit review. Please try again.');
+      showAlert('error',data.message || 'Failed to submit review. Please try again.');
     }
   } catch (err) {
     console.error('Error submitting review:', err);
-    alert('Something went wrong. Please try again later.');
+    shpwAlert('error','Something went wrong. Please try again later.');
   }
 });
 </script>

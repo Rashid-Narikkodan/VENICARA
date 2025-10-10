@@ -122,7 +122,7 @@
         e.target.innerText = data.message
         e.target.disabled=true
       }else{
-        toastr.error(data.message || "Failed to claim");
+        showAlert('error',data.message || "Failed to claim");
       }
     }
   })

@@ -436,7 +436,7 @@
       e.preventDefault();
       const reason = document.getElementById("returnReason").value.trim();
       if (!reason) {
-        alert("Please provide a return reason.");
+        showAlert('error',"Please provide a return reason.");
         return;
       }
 
@@ -453,10 +453,10 @@
         });
         const data = await res.json();
         if (data.status) location.reload();
-        else alert(data.message || "Return request failed");
+        else showAlert('error',data.message || "Return request failed");
       } catch (err) {
         console.error(err);
-        alert("Unable to return");
+        showAlert('error',"Unable to return");
       }
     });
 
@@ -469,7 +469,7 @@
       if (data.status) location.reload();
     } catch (err) {
       console.error(err);
-      alert("Unable to cancel product");
+      showAlert('error',"Unable to cancel product");
     }
   }
 
@@ -480,7 +480,7 @@
       if (data.status) location.reload();
     } catch (err) {
       console.error(err);
-      alert("Unable to cancel order");
+      showAlert('error',"Unable to cancel order");
     }
   }
 
@@ -494,7 +494,7 @@
     
     const data = await response.json();
     
-    if (!data.status) return alert(`Payment Failed :- ${data.message}`);
+    if (!data.status) return showAlert('error',`Payment Failed :- ${data.message}`);
     const options = {
         key: "<%= process.env.RAZORPAY_KEY_ID %>", // Razorpay key
         amount: data.finalAmount * 100, // paise
@@ -525,17 +525,17 @@
             if (result.status) {
               showSuccessModal(result.message)
             } else {
-            alert("Payment Failed - "+result.message);
+            showAlert('error',"Payment Failed - "+result.message);
             return
             }
           } catch (err) {
-            alert("Payment Failed - Due to Internal Error");
+            showAlert('error',"Payment Failed - Due to Internal Error");
             return;
           }
         },
         modal: { escape: true, ondismiss: async() => {
           try{
-            alert('Payment Failed due to Unexpected Action in Razorpay, Try again...') 
+            showAlert('error','Payment Failed due to Unexpected Action in Razorpay, Try again...') 
           }catch(error){
             console.log('razorpay ondismiss'+error)
           }

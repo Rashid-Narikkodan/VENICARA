@@ -1,4 +1,4 @@
-<%if(wishlistIds && wishlistIds.length){%>
+<%if(user){%>
   <%-include("../partials/user/header.ejs")%>
 <%}else{%>
     <%-include("../partials/user/header-landing.ejs")%>
@@ -457,11 +457,11 @@
       icon.classList.toggle("fa-solid");
       icon.classList.toggle("text-dark");
     } else {
-      alert(data.message || "Something went wrong");
+      showAlert('error',data.message || "Something went wrong");
     }
   } catch (err) {
     console.error("Wishlist error:", err);
-    alert("Server error while adding to wishlist");
+    showAlert('error',"Server error while adding to wishlist");
   }
 });
 

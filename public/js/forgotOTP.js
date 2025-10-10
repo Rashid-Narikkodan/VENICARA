@@ -52,7 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (data.success) {
         startTimer(50); // restart 50s countdown
       } else {
-        alert(data.message || "Something went wrong");
+        showAlert('error',data.message || "Something went wrong");
         resend.innerHTML = 'Resend';
         resend.style.pointerEvents = 'auto';
       }

@@ -17,3 +17,14 @@ setTimeout(() => {
   }
 }, 3000);
 
+
+  const notyf = new Notyf({
+    duration: 3000,           // Toast display duration
+    position: { x: 'center', y: 'top' },
+    dismissible: true,        // Users can close manually
+    ripple: true              // Optional ripple animation
+  });
+
+  function showAlert(type, message) {
+    notyf[type](message);
+  }

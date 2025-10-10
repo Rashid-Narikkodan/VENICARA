@@ -81,7 +81,8 @@ const showShop = async (req, res) => {
 
       let wishlist=null;
       let wishlistIds=[];
-      if(req.session.user){
+      let user = req.session.user.id || null
+      if(user){
          wishlist = await Wishlist.find({
           userId: req.session.user?.id,
         }).lean();
@@ -100,6 +101,7 @@ const showShop = async (req, res) => {
         totalPages,
         limit,
         wishlistIds,
+        user,
         buildQuery: (extra) => {
           const params = { ...req.query, ...extra };
           return Object.entries(params)

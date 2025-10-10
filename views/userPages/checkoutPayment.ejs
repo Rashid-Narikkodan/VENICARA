@@ -322,7 +322,7 @@ function showPaymentFailedModal(message = "Your payment could not be processed. 
         document.getElementById('couponMessage').innerHTML = `${data.message}`
       }
     }catch(error){
-      alert(error)
+      showAlert('error',error.message)
     }
   })
 
@@ -347,7 +347,7 @@ function showPaymentFailedModal(message = "Your payment could not be processed. 
         document.getElementById('couponMessage').innerHTML = `${data.message}`
       }
     }catch(error){
-      alert(error)
+      showAlert('error',error.message)
     }
   })
 

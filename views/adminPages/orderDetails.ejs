@@ -253,12 +253,12 @@
       if (response.ok) {
         location.reload(); // Reload the page to reflect changes
       } else {
-        alert('Failed to approve return request.');
+        showAlert('error','Failed to approve return request.');
       }
     })
     .catch(error => {
       console.error('Error:', error);
-      alert('An error occurred while processing the request.');
+      showAlert('error','An error occurred while processing the request.');
     });
   }
 

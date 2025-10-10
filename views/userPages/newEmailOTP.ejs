@@ -108,7 +108,7 @@
           resend.innerHTML = 'Resend';
           startTimer(50);
         } else {
-          alert(data.message || "Something went wrong");
+          showAlert('error',data.message || "Something went wrong");
           resend.innerHTML = 'Resend';
           resend.style.pointerEvents = 'auto';
         }

@@ -43,10 +43,11 @@ document.addEventListener('DOMContentLoaded', () => {
       const data = await response.json();
 
       if (data.success) {
+        showAlert('success',data.message)
         resend.innerHTML = 'Resend';
         startTimer(50); // restart 50s timer
       } else {
-        alert(data.message || "Something went wrong");
+        showAlert('error',data.message || "Something went wrong");
         resend.innerHTML = 'Resend';
         resend.style.pointerEvents = 'auto';
       }

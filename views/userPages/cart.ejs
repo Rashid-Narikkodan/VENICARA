@@ -174,7 +174,7 @@ body {
 
           document.querySelector(".summary-line.fw-bold.fs-5 span:last-child").textContent = `Rs.${data.total.toLocaleString()}`;
         } else {
-          alert(data.message);
+          shoeAlert('error',data.message);
         }
       } catch(err) { console.error(err); }
     });

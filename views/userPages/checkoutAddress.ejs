@@ -155,7 +155,7 @@
     const selectedAddress = document.querySelector('input[name="selectedAddress"]:checked')?.value;
 
     if (!selectedAddress) {
-      alert("Please select an address.");
+      showAlert('error',"Please select an address.");
       return;
     }
 
@@ -174,11 +174,11 @@
       if (data.status) {
         window.location.href = "/checkout/paymentMethod";
       } else {
-        alert(data.message || "Something went wrong.");
+        showAlert('error',data.message || "Something went wrong.");
       }
     } catch (err) {
       console.error(err);
-      alert("Server error.");
+      showAlert('error',"Server error.");
     }
   });
 </script>
