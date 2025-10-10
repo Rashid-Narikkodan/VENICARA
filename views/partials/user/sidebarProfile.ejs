@@ -82,19 +82,56 @@
       </ul>
     </div>
   </div>
+
+ <div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-dark">
+      <div class="modal-header bg-dark text-white">
+        <h5 class="modal-title" id="confirmLabel">Are you sure You want to Log-Out?</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p id="confirmMessage">Be careful while return or cancel after using a coupon</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" data-bs-dismiss="modal" class="btn btn-outline-dark">No</button>
+        <button type="button" class="btn btn-dark" id="yes" data-device="">Yes</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
   <script>
     const logoutForm=document.getElementById('logoutForm')
     const logoutFormMob=document.getElementById('logoutFormMob')
+    const yes=document.getElementById('yes')
+
+    function showConfirmModal(device){
+    const modalEl = document.getElementById("confirmModal");
+    const messageEl = document.getElementById("confirmMessage");
+    messageEl.textContent = 'Are you sure you want to Logout. We perefer to Stay for new updations. Thank You for your support!';
+    yes.setAttribute('data-device',device)
+    const modal = new bootstrap.Modal(modalEl);
+    modal.show();
+    }
+
     logoutForm.addEventListener('submit',(e)=>{
       e.preventDefault()
-      const isSure=confirm('Are you sure you want to Logout')
-      if(isSure)logoutForm.submit()
+      showConfirmModal('desktop')
     })
+
     logoutFormMob.addEventListener('submit',(e)=>{
       e.preventDefault()
-      const isSure=confirm('Are you sure you want to Logout')
-      if(isSure)logoutFormMob.submit()
+      showConfirmModal('mobile')
     })
+
+    yes.addEventListener('click',(e)=>{
+      const device = yes.getAttribute('data-device')
+      if(device === 'mobile') logoutFormMob.submit()
+      if(device === 'desktop') logoutForm.submit()
+    })
+
   </script>
 
 

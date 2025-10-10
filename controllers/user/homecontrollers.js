@@ -3,6 +3,7 @@ const Category = require("../../models/Category");
 const mongoose = require("mongoose");
 const handleError = require("../../helpers/handleError");
 const Wishlist = require("../../models/Wishlist");
+const Cart = require("../../models/Cart");
 
 const landingPage = async (req, res) => {
   try {
@@ -226,8 +227,18 @@ if (search && search.trim().length > 0) {
   }
 };
 
+const cartCount = async (req,res)=>{
+  try{
+    const count = await Cart.countDocuments({userId:req.session.user?.id})
+    res.json({count})
+  }catch(error){
+    res.json({count:0})
+  }
+}
+
 module.exports = {
   landingPage,
   showHome,
   showShop,
+  cartCount
 };

@@ -148,6 +148,7 @@ const exportSalesPDF = async (req, res) => {
   try {
 
     const { data, filter, startDate, endDate, orders } = req.session.salesReport;
+    console.log(orders[0])
     // Create a new PDF document
     generatePDF(req, res, data, orders, filter, startDate, endDate);
 

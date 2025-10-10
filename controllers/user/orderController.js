@@ -8,6 +8,7 @@ const WalletTransaction=require('../../models/WalletTransaction')
 const Review = require('../../models/Review')
 const User = require('../../models/User')
 const razorpay = require("../../config/payment");
+const crypto = require("crypto");
 
 const showOrders = async (req, res) => {
   try {
@@ -428,12 +429,7 @@ const retryPaymentSuccess=  async (req,res)=>{
         // Reduce stock
         for (const prod of order.products) {
           prod.status = 'confirmed'
-          await Product.updateOne(
-            { _id: prod.productId, "variants._id": prod.variantId },
-            { $inc: { "variants.$.stock": -prod.quantity } }
-          );
           await order.save();
-    
         }
     
         // Mark coupon as used
@@ -443,13 +439,10 @@ const retryPaymentSuccess=  async (req,res)=>{
             { $push: { usedBy: order.userId }, $inc: { used: 1 } }
           );
         }
-    
-        // Clear cart
-        await Cart.deleteMany({ userId: order.userId, status: "active" });
-        
         res.json({ status: true, message: "Payment verified and order completed" });
 
   }catch(error){
+    console.log(error)
     res.status(500).json({status:false,message:'Internal error'})
   }
 }

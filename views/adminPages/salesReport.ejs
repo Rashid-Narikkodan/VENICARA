@@ -64,7 +64,7 @@
     <!-- Filters + Export -->
     <div class="row align-items-center mb-4 g-3">
       <div class="col-lg-8 col-md-7">
-        <form action="/admin/salesReport" method="GET">
+        <form id="formDate" action="/admin/salesReport" method="GET">
           <div class="d-flex flex-wrap gap-2 align-items-center w-100">
             <label for="durationFilter" class="form-label fw-semibold me-2 mb-0">Filter:</label>
             <select class="form-select w-auto" id="durationFilter" name="filter">
@@ -116,6 +116,7 @@
       </div>
 
     </div>
+    <div class="text-danger" id="dateError"></div>
 
     <!-- Sales Report Cards -->
     <div class="row g-3 mb-4">
@@ -221,9 +222,9 @@
               <td class="text-center <%= order.status === 'delivered' ? 'text-success' : (order.status === 'cancelled' ? 'text-danger' : 'text-warning') %>">
                 <%= order.status.charAt(0).toUpperCase()+order.status.slice(1) %>
               </td>
-              <td class="text-center">₹<%= order.products.reduce((s,p)=>s+p.basePrice*p.quantity,0) %></td>
+              <td class="text-center">₹<%= order.products.reduce((s,p)=>s+p.basePrice*p.quantity,0) %> <%=order.deliveryCharge?`+${order.deliveryCharge}`:''%></td>
               <td class="text-center">₹<%= order.productDiscount.toFixed(2) %></td>
-              <td class="text-center"><%= (order.totalOrderPrice-order.finalAmount).toFixed(2)||'No Coupon'%></td>
+              <td class="text-center"><%=order.couponDiscount? ((order.totalOrderPrice*order.couponDiscount)/100).toFixed(2):'No Coupon'%></td>
               <td class="text-center">₹<%= order.finalAmount.toFixed(2) %></td>
             </tr>
           <% }) %>
@@ -246,16 +247,66 @@
     }
   });
 
-    const startInput = document.querySelector('[name="startDate"]');
+function validateDate() {
+  const durationFilter = document.getElementById("durationFilter");
+  
+  // Only validate dates if "custom" is selected
+  if (durationFilter.value !== "custom") return true;
+
+  const startInput = document.querySelector('[name="startDate"]');
+  const endInput = document.querySelector('[name="endDate"]');
+  const error = document.getElementById('dateError');
+
+  const startDate = startInput.value;
+  const endDate = endInput.value;
+
+  // Check if either date is empty
+  if (!startDate || !endDate) {
+    error.textContent = 'Please select both a start and an end date.';
+    return false;
+  }
+
+  // Optional: check for invalid ordering
+  if (startDate > endDate) {
+    error.textContent = 'Start date cannot be later than end date.';
+    return false;
+  }
+
+  // Clear error if valid
+  error.textContent = '';
+  return true;
+}
+
+  
+   document.addEventListener("DOMContentLoaded", () => {
+  const startInput = document.querySelector('[name="startDate"]');
   const endInput = document.querySelector('[name="endDate"]');
 
+  // today's date in YYYY-MM-DD format
+  const today = new Date().toISOString().split("T")[0];
+
+  // set default limits
+  startInput.max = today;
+  endInput.max = today;
+
+  // when start date changes
   startInput.addEventListener("change", () => {
-    // End date cannot be earlier than chosen start date
-    endInput.min = startInput.value;
+    const startDate = startInput.value;
+    endInput.min = startDate || "";
+    endInput.max = today;
   });
 
+  // when end date changes
   endInput.addEventListener("change", () => {
-    // Start date cannot be later than chosen end date
-    startInput.max = endInput.value;
+    const endDate = endInput.value;
+    startInput.max = endDate || today;
   });
+});
+
+document.getElementById('formDate').addEventListener('submit',(e)=>{
+  e.preventDefault()
+  const valid = validateDate()
+  if(valid) document.getElementById('formDate').submit()
+})
+
 </script>

@@ -14,5 +14,5 @@ router.get("/:orderId/invoice", orderController.downloadInvoice);
 router.get("/details/:id", orderController.orderDetails);
 router.post("/review/:id/add", orderController.addReview);
 router.post("/api/retryPayment", orderController.retryPayment);
-router.post("/api/retryPaymentSuccess", orderController.retryPaymentSuccess);
+router.patch("/api/retryPaymentSuccess", orderController.retryPaymentSuccess);
 module.exports = router;

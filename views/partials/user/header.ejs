@@ -55,6 +55,17 @@
     .fs-md-text{
       font-size: 1.3rem;
     }
+    .cart-dot{
+      padding:.3rem .4rem;
+      border-radius: 30px;
+      position: absolute;
+      top:-.6rem;
+      right:-.6rem;
+      background:rgb(52, 55, 5);
+      color:white;
+      font-size: .6rem;
+    }
+
     @media (max-width:576px){
     .fs-md-icon{
       font-size: 1.25rem;
@@ -173,7 +184,9 @@
               ><i class=" fs-md-icon fa-regular fa-heart ms-3" style="color:rgb(100, 80, 5)"></i
             ></a>
             <a href="/cart"
-              ><i class="fa-solid fa-cart-shopping fs-md-icon ms-3" style="color:rgb(100, 80, 5)"></i
+              ><i class="fa-solid fa-cart-shopping fs-md-icon ms-3 position-relative" style="color:rgb(100, 80, 5)">
+                  <div class="cart-dot" id="cart-count">0</div>
+                </i
             ></a>
             <a href="/profile"
               ><i class="fs-md-icon fa-regular fa-circle-user ms-3" style="color:rgb(100, 80, 5)"></i
@@ -200,5 +213,13 @@
           <%}%>
         </div>
       </div>
+      <script>
+        fetch('/api/cart/count')
+        .then(res => res.json())
+        .then(data => {
+          document.getElementById('cart-count').textContent = data.count;
+        });
+
+      </script>
     </header>
    
