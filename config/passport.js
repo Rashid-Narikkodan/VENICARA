@@ -16,11 +16,13 @@ passport.use(new GoogleStrategy({
       user=await User.create({
         name: profile.displayName,
         email: profile.emails[0].value,
+        photoUrl:profile.photos[0].value,
         googleId: profile.id,
         isVerified:true
       })
     }else if (!user.googleId) {
         user.googleId = profile.id;
+        user.photoUrl=profile.photos[0].value,
         await user.save();
       }
     return done(null,user)

@@ -62,6 +62,15 @@ const showShop = async (req, res) => {
     let { maxPrice, minPrice, sort, category, search} = req.query;
 
 
+    let wishlist=null;
+    let wishlistIds=[];
+    let user = req.session.user.id || null
+    if(user){
+       wishlist = await Wishlist.find({
+        userId: req.session.user?.id,
+      }).lean();
+       wishlistIds = wishlist.map((item) => item.variantId.toString());
+    }
 
     //if queries not exists
     if (Object.keys(req.query).length === 0) {
@@ -78,16 +87,6 @@ const showShop = async (req, res) => {
         isDeleted: false,
       });
       const totalPages = Math.ceil(totalProducts / limit);
-
-      let wishlist=null;
-      let wishlistIds=[];
-      let user = req.session.user.id || null
-      if(user){
-         wishlist = await Wishlist.find({
-          userId: req.session.user?.id,
-        }).lean();
-         wishlistIds = wishlist.map((item) => item.variantId.toString());
-      }
 
       return res.render("userPages/shop", {
         products,
@@ -113,10 +112,8 @@ const showShop = async (req, res) => {
     //////////////////////////////////////////////////////////////////////////
 
 
-    const selectedCategory =
-      category && category !== "all" && mongoose.isValidObjectId(category)
-        ? new mongoose.Types.ObjectId(category)
-        : null;
+    const selectedCategory = category !== "all" ? category : null;
+
 
     const selectedMinPrice = Number(minPrice) || 0;
     const selectedMaxPrice = Number(maxPrice) || Infinity;
@@ -182,16 +179,6 @@ if (search && search.trim().length > 0) {
 }
 
 
-    let wishlist = null
-    let wishlistIds = []
-
-    if(req.session.user){
-       wishlist = await Wishlist.find({
-        userId: req.session.user?.id,
-      }).lean();
-       wishlistIds = wishlist.map((item) => item.variantId.toString());
-    }
-
     const result = await Product.aggregate(pipeline);
     let products = result[0].data;
     products = await Product.populate(products, { path: "category" });
@@ -217,6 +204,7 @@ if (search && search.trim().length > 0) {
       limit,
       query: req.query,
       wishlistIds,
+      user,
       buildQuery: (extra) => {
         const params = { ...req.query, ...extra };
         return Object.entries(params)

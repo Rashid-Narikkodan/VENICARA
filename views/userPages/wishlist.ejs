@@ -65,7 +65,7 @@
                 <!-- ✅ Product Image -->
                 <div class="col-md-3 col-4">
                   <a href="/products/<%=item.product._id%>">
-                    <img src="<%= item.product.images[0] %>" class="img-fluid item-img" alt="<%= item.product.name %>"/>
+                    <img src="<%= item.product.images[0]?.url %>" class="img-fluid item-img" alt="<%= item.product.name %>"/>
                   </a>
                 </div>
                 

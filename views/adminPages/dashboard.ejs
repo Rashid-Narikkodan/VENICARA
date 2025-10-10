@@ -101,7 +101,7 @@
       <%dashboardData.topProducts.forEach((product)=>{%>
         <div class="row py-2 rounded-4 mb-2" style="background:rgb(230, 230, 230)">
           <span class="col-3">
-          <img src="<%=product.img[0]%>" alt="products" class="img-fluid rounded-circle" style="width:100%">
+          <img src="<%=product.img[0]?.url%>" alt="products" class="img-fluid rounded-circle" style="width:100%">
            </span>
            <span class="fw-semibold col-9">
             <span><%=product.name%></span> <br>

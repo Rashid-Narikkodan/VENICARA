@@ -40,7 +40,7 @@
                       <%= product.name %>
                     </td>
                     <td class="text-center">
-                      <img src="<%=product.image%>" alt="product img" width="50">
+                          <img src="<%=product.image?.url||product.image%>" alt="product img" width="50">
                     </td>
                     <td class="text-center">
                       <%= product.basePrice%>₹

@@ -412,7 +412,7 @@ const handlePlaceOrder = async (req, res) => {
         subtotal,
         volume: variant.volume,
         status:paymentMethod==="RAZORPAY"?'pending':'confirmed',
-        image: item.productId.images[0],
+        image: item.productId.images[0].url,
       });
     }
 

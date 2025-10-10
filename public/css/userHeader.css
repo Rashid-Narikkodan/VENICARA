@@ -56,37 +56,3 @@ header{
 top: 0;
 z-index: 1020;
 }
-
-
-:root {
-  --notyf-background: #1e1e2f;
-  --notyf-text-color: #fff;
-  --notyf-font-family: 'Poppins', sans-serif;
-  --notyf-border-radius: 12px;
-  --notyf-box-shadow: 0 6px 18px rgba(0,0,0,0.5);
-}
-
-.notyf__toast--success {
-  background: #4caf50;
-}
-
-.notyf__toast--error {
-  background: #f44336;
-}
-
-.notyf__icon {
-  margin-right: 8px;
-  font-size: 16px;
-}
-
-.notyf__toast {
-  width: 360px;
-  text-align: left;
-  animation: fadeSlide 0.5s ease forwards;
-}
-
-@keyframes fadeSlide {
-  from { opacity: 0; transform: translateY(-40px); }
-  to { opacity: 1; transform: translateY(0); }
-
-}

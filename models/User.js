@@ -31,6 +31,10 @@ const userSchema=new Schema({
     type:String,
     default:''
   },
+  public_id:{
+    type:String,
+    default:''
+  },
   googleId:{
     type:String,
     unique:true,

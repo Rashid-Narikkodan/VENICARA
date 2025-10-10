@@ -216,7 +216,7 @@
             <tr>
               <td class="text-center"><%= order.orderId %></td>
               <td class="text-center"><%= order.createdAt.toLocaleDateString("en-US", {day: "2-digit",month: "short",year: "numeric"});%></td>
-              <td class="text-center"><%= order.userId.name %></td>
+              <td class="text-center"><%= order.userId?.name %></td>
               <td class="text-center"><%= order.products.reduce((s,p)=>s+p.quantity,0) %></td>
               <td class="text-center"><%= order.payment.method %></td>
               <td class="text-center <%= order.status === 'delivered' ? 'text-success' : (order.status === 'cancelled' ? 'text-danger' : 'text-warning') %>">

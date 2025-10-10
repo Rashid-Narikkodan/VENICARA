@@ -14,6 +14,7 @@
                 <div id="addImg" class="bg-secondary rounded-circle overflow-hidden"
                   style="width:6rem;height:6rem;cursor:pointer;">
                   <input name="userProfile" id="userProfile" type="file" hidden>
+                  <input name="oldImg" id="oldImg" value="<%=user.public_id%>" type="hidden">
 
                   <% if (user.photoUrl) { %>
                     <!-- Show uploaded profile picture -->
@@ -82,10 +83,13 @@
       const userProfile = document.getElementById("userProfile");
       const deleteBtn = document.getElementById("deleteBtn");
 
-      function restorePlaceholder() {
+      async function restorePlaceholder() {
         [...addImg.children].forEach((child) => {
           if (child.tagName !== "INPUT") child.remove();
         });
+
+        const public_id = document.getElementById('oldImg').value
+        console.log(public_id)
 
         const iconSmall = document.createElement("div");
         iconSmall.className = "rounded-circle bg-dark mt-3";
@@ -98,8 +102,19 @@
         addImg.appendChild(iconSmall);
         addImg.appendChild(iconLarge);
 
-        userProfile.value = "";
-        deleteBtn.classList.add("d-none");
+        const res = await fetch('/profile/api/deleteProfile',{
+          method:'PATCH',
+          headers:{"Content-Type":'application/json'},
+          body:JSON.stringify({public_id})
+        })
+        const data=await res.json()
+        if(data.status){
+          showAlert('success',data.message)
+          userProfile.value = "";
+          deleteBtn.classList.add("d-none");
+        }else{
+          showAlert('error',data.message)
+        }
       }
 
       addImg.addEventListener("click", () => userProfile.click());
@@ -130,7 +145,6 @@
         restorePlaceholder();
       });
     </script>
-    <script src="/js/userHeader.js"></script>
     </body>
 
     </html>

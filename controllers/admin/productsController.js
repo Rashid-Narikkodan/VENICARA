@@ -5,6 +5,7 @@ const getDiscountPercent = require("../../helpers/discPercent");
 const handleError = require("../../helpers/handleError");
 const finalAmount = require('../../helpers/finalPrice')
 const finalPercentage = require('../../helpers/finalPercentage')
+const cloudinary = require('../../config/cloudinary')
 
 const showProducts = async (req, res) => {
   try {
@@ -267,6 +268,7 @@ const  editProduct = async (req, res) => {
       return res.redirect(`/admin/products/edit/${productId}`);
     }
 
+
     if (req.files?.length) images = await processImages(req.files);
     if (images.length) update.images = product.images.concat(images);
 
@@ -286,18 +288,19 @@ const  editProduct = async (req, res) => {
 
 const removeImage = async (req, res) => {
   try {
-    const { image, index } = req.body;
+    const { public_id } = req.body;
     const productId = req.params.id;
     const product = await Product.findById(productId);
-    if (!product) {
-      req.flash("error", "product not found");
-      return res.redirect("/admin/products/edit/" + productId);
-    }
-    product.images.splice(index, 1);
-    await product.save();
-    return res.json({ success: true });
+    if (!public_id) return res.status(400).json({ success: false, message: 'public_id is required' });
+    if (!product) return res.status(400).json({ success: false, message: 'product not found' });
+
+    await cloudinary.uploader.destroy(public_id);
+    await Product.findByIdAndUpdate(productId, { $pull: { images: { public_id } } });
+
+    return res.status(200).json({ success: true, message: 'Image deleted successfully' });
   } catch (err) {
-    handleError(res, "removeImage", err);
+    console.error('Error deleting image:', err);
+    return res.status(500).json({ success: false, message: 'Server error' });
   }
 };
 

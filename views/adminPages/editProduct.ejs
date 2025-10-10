@@ -38,10 +38,10 @@
                   <%product.images.forEach((image,index)=>{%>
                     <div id="preview-<%=index%>" class="position-relative rounded-3 overflow-hidden"
                       style="width:10rem;height:10rem">
-                      <button type="button" onclick="removeImg('<%= image %>', '<%= index %>', '<%= product._id %>')"
+                      <button type="button" onclick="removeImg('<%= image.public_id %>', '<%= index %>', '<%= product._id %>')"
                         class="position-absolute rounded-5 pt-0 pb-0 top-0 end-0"><i class="fa-solid fa-trash-can"
                           style="font-size: xx-small;"></i></button>
-                      <img src="<%=image%>" alt="product images" style="width:10rem">
+                      <img src="<%=image.url%>" alt="product images" style="width:10rem">
                     </div>
                     <%})%>
                 </div>
@@ -121,19 +121,22 @@
         }
       });
 
-      async function removeImg(image, index, id) {
-        await fetch(`/admin/products/edit/removeImg/${id}?_method=PATCH`, {
-          method: 'POST',
+      async function removeImg(public_id,index,id) {
+        await fetch(`/admin/products/edit/removeImg/${id}`, {
+          method: 'PATCH',
           headers: {
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({ image, index })
+          body: JSON.stringify({ public_id })
         }).then((res) => res.json()).then(data => {
           if (data.success) {
             const previewDiv = document.getElementById(`preview-${index}`);
             if (previewDiv) {
-              previewDiv.remove();
+            previewDiv.remove();
+            showAlert('success','Product image Removed')
             }
+          }else{
+            showAlert('error','This image cannot remove')
           }
         })
       }

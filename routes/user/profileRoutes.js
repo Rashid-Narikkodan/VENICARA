@@ -22,6 +22,7 @@ router.route("/edit")
   upload.single("userProfile"),
   auth.requireLogin,userController.editProfile
 );
+router.patch('/api/deleteProfile',userController.deleteProfile)
 
 router.post('/edit/otp',userController.handleNewEmailOTP)
 router.post('/resendOTP',userController.resendNewEmailOTP)
