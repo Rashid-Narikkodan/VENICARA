@@ -54,25 +54,21 @@ const addToCart = async (req, res) => {
     const userId = req.session.user?.id;
 
     if (!userId) {
-      req.flash("error", "User must be logged in to add to cart");
-      return res.redirect(`/products/${productId}`);
+      return res.status(401).json({status:false,message:"User must be logged in to add to cart"});
     }
-
+    
     const product = await Product.findById(productId);
     if (!product) {
-      req.flash("error", "Product not found");
-      return res.redirect(`/products/${productId}`);
+      return res.status(404).json({status:false,message:"Product not found"});
     }
-
+    
     const variant = product.variants.id(variantId);
     if (!variant) {
-      req.flash("error", "Variant not found");
-      return res.redirect(`/products/${productId}`);
+      return res.status(404).json({status:false,message:"Variant not found"});
     }
-
+    
     if (variant.stock <= 0) {
-      req.flash("error", "Out of stock");
-      return res.redirect(`/products/${productId}`);
+      return res.status(400).json({status:false,message:"Out of stock"});
     }
 
     const existingCartItem = await Cart.findOne({
@@ -81,13 +77,12 @@ const addToCart = async (req, res) => {
       variantId,
       status: "active",
     });
-
+    
     const maxQty = Math.min(5, variant.stock);
 
     if (existingCartItem) {
       if (existingCartItem.quantity >= maxQty) {
-        req.flash("error", "Quantity limit reached or not enough stock");
-        return res.redirect(`/products/${productId}`);
+        return res.status(400).json({status:false,message:"Quantity limit reached or not enough stock"});
       }
       existingCartItem.quantity += 1;
       await existingCartItem.save();
@@ -102,10 +97,9 @@ const addToCart = async (req, res) => {
       await newItem.save();
     }
 
-    req.flash("success", "Product added to cart");
-    res.redirect(`/products/${productId}`);
+    return res.status(200).json({status:true,message:"Product added to Cart"});
   } catch (err) {
-    handleError(res, "addToCart", err);
+    return res.status(500).json({status:false,message:"Server Error"});
   }
 };
 
@@ -114,10 +108,9 @@ const removeFromCart = async (req, res) => {
   try {
     const { id } = req.params;
     await Cart.findByIdAndDelete(id);
-    req.flash("success", "Item removed from cart");
-    res.redirect("/cart");
+    res.status(200).json({status:true,message: "Item removed from cart"})
   } catch (err) {
-    handleError(res, "removeFromCart", err);
+    res.status(500).json({status:false,message:"serevr error"});
   }
 };
 

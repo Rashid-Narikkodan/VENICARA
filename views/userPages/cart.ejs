@@ -100,9 +100,7 @@ body {
         <button class="btn btn-outline-secondary btn-sm increase" data-cart-id="<%= item._id %>" <% if(item.variant.stock === 0) { %> disabled <% } %>>+</button>
       </div>
       <p class="text-muted mb-2 subtotal">Subtotal: Rs.<%= ((item.variant.finalAmount || 0) * item.quantity).toLocaleString() %></p>
-      <form action="/cart/remove/<%= item._id %>?_method=DELETE" method="POST">
-        <button type="submit" class="btn btn-dark py-1 px-2" style="font-size: small;">Remove</button>
-      </form>
+        <button type="button" onclick="removeItem('/cart/remove/<%= item._id %>',this)" class="btn btn-dark py-1 px-2" style="font-size: small;">Remove</button>
     </div>
   </div>
 </div>
@@ -231,6 +229,28 @@ body {
       } catch(err){ console.error(err); }
     });
   });
+
+  async function removeItem(url,btn){
+    try{
+
+      const res = await fetch(url,{
+        method:'DELETE',
+    })
+    const data = await res.json()
+    if(data.status){
+      showAlert('success',data.message)
+      const card = btn.closest('.card')
+      if(card) card.remove()
+      updateCartCount()
+      const have = document.getElementsByClassName('card')
+    if(!have||!have.length||have.length<1) window.location.replace('/cart')
+    }else{
+      showAlert('error',data.message)
+    }
+  }catch(error){
+    console.log(error)
+  }
+  }
 </script>
 
 <%-include('../partials/user/footer.ejs')%>

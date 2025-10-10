@@ -184,7 +184,7 @@
           <a href="products/<%=product._id%>" 
              class="col-12 col-sm-6 col-md-4 text-decoration-none text-black flex-shrink-0">
             <div class="product-card">
-              <img src="<%=product.images[0]%>" alt="<%=product.name%>" class="img-fluid rounded-5" />
+              <img src="<%=product.images[0].url%>" alt="<%=product.name%>" class="img-fluid rounded-5" />
               <div class="product-name mt-4 fs-4"><%=product.name%></div>
               <div class="product-price">
                 Rs.<%=Math.min(...product.variants.map(v=>v.finalAmount))%>

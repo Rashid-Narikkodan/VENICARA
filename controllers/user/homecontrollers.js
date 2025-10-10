@@ -62,18 +62,16 @@ const showShop = async (req, res) => {
     let { maxPrice, minPrice, sort, category, search} = req.query;
 
 
-    let wishlist=null;
-    let wishlistIds=[];
-    let user = req.session.user.id || null
-    if(user){
-       wishlist = await Wishlist.find({
-        userId: req.session.user?.id,
-      }).lean();
-       wishlistIds = wishlist.map((item) => item.variantId.toString());
-    }
+    const user = req.session?.user?.id || null;
+const wishlistIds = user
+  ? (await Wishlist.find({ userId: user }, { variantId: 1, _id: 0 }).lean())
+      .map((item) => item.variantId.toString())
+  : [];
+
 
     //if queries not exists
-    if (Object.keys(req.query).length === 0) {
+   const noFilters =!maxPrice && !minPrice && !sort && !category && !search;
+     if (noFilters) {
       const [products, categories] = await Promise.all([
         Product.find({ isDeleted: false, isAvailable: true })
           .populate("category")
@@ -112,11 +110,13 @@ const showShop = async (req, res) => {
     //////////////////////////////////////////////////////////////////////////
 
 
-    const selectedCategory = category !== "all" ? category : null;
+    const selectedCategory =
+      category && category !== "all" && mongoose.isValidObjectId(category)
+        ? new mongoose.Types.ObjectId(category)
+        : null;
 
-
-    const selectedMinPrice = Number(minPrice) || 0;
-    const selectedMaxPrice = Number(maxPrice) || Infinity;
+const selectedMinPrice = Number(minPrice)|| 0
+const selectedMaxPrice = Number(maxPrice)|| Infinity
 
     const sortOptions = {
       az: { name: 1 },
@@ -133,22 +133,12 @@ const showShop = async (req, res) => {
           isDeleted: false,
           isAvailable: true,
           ...(selectedCategory ? { category: selectedCategory } : {}),
+          ...(search?.trim() ? { name: { $regex: search.trim(), $options: "i" } }: {}),
         },
       },
       {
         $addFields: {
-          variantPrices: {
-            $map: {
-              input: "$variants",
-              as: "v",
-              in: "$$v.finalAmount",
-            },
-          },
-        },
-      },
-      {
-        $addFields: {
-          lowestPrice: { $min: "$variantPrices" },
+          lowestPrice: { $min: "$variants.finalAmount" },
         },
       },
       {
@@ -168,28 +158,16 @@ const showShop = async (req, res) => {
       },
     ];
 
-if (search && search.trim().length > 0) {
-  const sanitizedSearch = search.trim();
+    const [categories, result] = await Promise.all([
+      Category.find({ isActive: true, isDeleted: false }),
+      Product.aggregate(pipeline)
+    ]);
 
-  // Ensure $match exists
-  if (!pipeline[0].$match) pipeline[0].$match = {};
-
-  // Add regex search
-  pipeline[0].$match.name = { $regex: sanitizedSearch, $options: "i" };
-}
-
-
-    const result = await Product.aggregate(pipeline);
     let products = result[0].data;
     products = await Product.populate(products, { path: "category" });
 
     const totalProducts = result[0].totalCount[0]?.total || 0;
     const totalPages = Math.ceil(totalProducts / limit);
-
-    const categories = await Category.find({
-      isActive: true,
-      isDeleted: false,
-    });
 
     return res.render("userPages/shop", {
       products,

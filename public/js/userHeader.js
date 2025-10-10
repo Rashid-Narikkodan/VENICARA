@@ -20,7 +20,7 @@ setTimeout(() => {
 
   const notyf = new Notyf({
     duration: 3000,           // Toast display duration
-    position: { x: 'center', y: 'top' },
+    position: { x: 'right', y: 'top' },
     dismissible: true,        // Users can close manually
     ripple: true              // Optional ripple animation
   });

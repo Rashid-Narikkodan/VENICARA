@@ -150,19 +150,21 @@
           <%const lowestVariant = product.variants.reduce((min, v) => v.finalAmount < min.finalAmount ? v : min, product.variants[0])%>
 
           <div class="d-flex flex-column mt-3 gap-2 align-items-start">
-            <form action="/wishlist/add/<%=product._id%>" method="POST">
-              <input type="hidden" name="variantId" id="" value="<%= lowestVariant._id %>">
-              <input type="hidden" name="source" id="" value="details">
-            <button class="btn btn-dark rounded-5" style="width: 100%; max-width: 100%;padding:1rem 2rem">
+            <button class="btn btn-dark rounded-5 w-50" 
+                onclick="addToWishlist(this,'/wishlist/add/<%=product._id%>')" 
+                data-variant-id="<%= lowestVariant._id %>" 
+                data-source="details" 
+                style="padding:1rem 2rem"
+                id="addToWishlist">
               <span class="fw-bold">ADD TO WISHLIST</span>
             </button>
-          </form>
-            <form action="/cart/addToCart/<%=product._id%>" method="POST">
-                <input type="hidden" name="variantId" id="variantId" value="<%= lowestVariant._id %>">
-            <button class="btn btn-dark rounded-5" style="width: 100%; max-width: 100%;padding:1rem 3rem">
+            <button onclick="addToCart(this,'/cart/addToCart/<%=product._id%>')" 
+                data-variant-id="<%= lowestVariant._id %>" 
+                class="btn btn-dark rounded-5 w-50" 
+                style="padding:1rem 3rem"
+                id="addToCart">
               <span class="fw-bold">ADD TO CART</span>
             </button>
-            </form>
           </div>
 
           <!-- Variant buttons -->
@@ -259,31 +261,57 @@
       })
     }
 
-    // variant based changing
-    const variantButtons = document.querySelectorAll(".variant-btn");
-    const variantPrice = document.getElementById("variantPrice");
-    const variantBasePrice = document.getElementById("variantBasePrice");
-    const variantPerc = document.getElementById("variantPerc");
-    const variantStock = document.getElementById('variantStock')
-    const varientId = document.getElementById('variantId')
+  function initVariantSelection() {
+  const variantButtons = document.querySelectorAll(".variant-btn");
+  const variantPrice = document.getElementById("variantPrice");
+  const variantBasePrice = document.getElementById("variantBasePrice");
+  const variantPerc = document.getElementById("variantPerc");
+  const variantStock = document.getElementById("variantStock");
+  const variantId = document.getElementById("variantId");
+  const addToWishlist = document.getElementById("addToWishlist");
+  const addToCart = document.getElementById("addToCart");
 
-    variantButtons.forEach(btn => {
-      btn.addEventListener("click", () => {
-        variantButtons.forEach(b => b.classList.remove("active"));
-        btn.classList.add("active");
-        const price = btn.getAttribute("data-price");
-        const basePrice = btn.getAttribute("data-basePrice");
-        const percentage = btn.getAttribute("data-discount");
-        const stock = btn.getAttribute('data-stock')
-        const isAvailable = btn.getAttribute('data-isAvailable') === 'true'
-        variantPrice.textContent = `RS. ${price}`;
-        variantBasePrice.textContent = `₹${basePrice}`
-        variantPerc.textContent = `${Math.round(percentage)}% off`
-        variantStock.textContent = !isAvailable ? 'Product not Available' : stock <= 0 ? 'Out of Stock' : ''
+  if (!variantButtons.length) return;
 
-        variantId.value = btn.getAttribute('data-id')
-      });
+  variantButtons.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      // 1. Remove active class from all buttons
+      variantButtons.forEach((b) => b.classList.remove("active"));
+
+      // 2. Add active class to selected button
+      btn.classList.add("active");
+
+      // 3. Read variant data attributes
+      const price = btn.dataset.price;
+      const basePrice = btn.dataset.baseprice;
+      const percentage = btn.dataset.discount;
+      const stock = parseInt(btn.dataset.stock);
+      const isAvailable = btn.dataset.isavailable === "true";
+      const id = btn.dataset.id;
+
+      // 4. Update UI fields (if exist)
+      if (variantPrice) variantPrice.textContent = `₹${price}`;
+      if (variantBasePrice) variantBasePrice.textContent = `₹${basePrice}`;
+      if (variantPerc) variantPerc.textContent = `${Math.round(percentage)}% off`;
+
+      if (variantStock) {
+        if (!isAvailable) variantStock.textContent = "Product not available";
+        else if (stock <= 0) variantStock.textContent = "Out of stock";
+        else variantStock.textContent = "";
+      }
+
+      if (variantId) variantId.value = id;
+
+      // 5. Update "Add to Cart" and "Wishlist" buttons with selected variant
+      if (addToCart) addToCart.dataset.variantId = id;
+      if (addToWishlist) addToWishlist.dataset.variantId = id;
     });
+  });
+}
+
+// Initialize when DOM is ready
+document.addEventListener("DOMContentLoaded", initVariantSelection);
+
 
     const productTab = document.querySelectorAll('.product-tab')
     productTab.forEach(tab => {
@@ -397,5 +425,45 @@
       zoomBox.style.backgroundPosition =
         `-${x * 3 - zoomBox.offsetWidth / 2}px -${y * 3 - zoomBox.offsetHeight / 2}px`;
     });
+
+
+    async function addToCart(btn,url){
+      try{
+        const variantId = btn.getAttribute('data-variant-id')
+        const res = await fetch(url,{
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({variantId})
+        })
+        const data = await res.json()
+        if(data.status){
+          showAlert('success',data.message)
+          updateCartCount()
+        }else{
+          showAlert('error',data.message)
+        }
+      }catch(error){
+        console.log(error)
+      }
+    }
+    async function addToWishlist(btn,url){
+      try{
+        const variantId = btn.getAttribute('data-variant-id')
+        const source = btn.getAttribute('data-source')
+        const res = await fetch(url,{
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({variantId,source})
+        })
+        const data = await res.json()
+        if(data.status){
+          showAlert('success',data.message)
+        }else{
+          showAlert('error',data.message)
+        }
+      }catch(error){
+        console.log(error)
+      }
+    }
   </script>
   <%- include("../partials/user/footer.ejs") %>
