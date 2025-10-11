@@ -206,6 +206,8 @@ const showPaymentMethods = async (req, res) => {
       .populate("productId")
       .lean();
 
+      delete req.session?.coupon
+
     let items = cartDocs
       .map((doc) => {
         const variant = doc.productId?.variants.find(
@@ -221,6 +223,8 @@ const showPaymentMethods = async (req, res) => {
         };
       })
       .filter(Boolean);
+
+
 
     // 🔴 Check stock for all items
     const invalidItems = items.filter(
@@ -551,7 +555,10 @@ const handlePlaceOrder = async (req, res) => {
       finalAmount,
     });
   } catch (error) {
-    handleError(res, "handlePlaceOrder", error);
+    return res.status(500).json({
+      status: false,
+      message: `${error}`,
+    });
   }
 };
 
