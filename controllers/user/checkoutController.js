@@ -323,10 +323,12 @@ const applyCoupon = async (req, res) => {
     }
 
     // calculate discount & final total
-    const discount = parseFloat(
-      ((lineTotal * coupon.discount) / 100).toFixed(2)
-    );
+    let discPerc = coupon.discount
+    const discount = Math.min(parseFloat(((lineTotal * coupon.discount) / 100).toFixed(2)),coupon.maxDiscountAmount);
     const deliveryCharge = req.session.order?.deliveryCharge || 0;
+    if(discount == coupon.maxDiscountAmount){
+      discPerc = parseFloat(discount/lineTotal*100).toFixed(2)
+    }
     const finalAmount = parseFloat(lineTotal - discount + deliveryCharge);
 
     // send response
@@ -335,7 +337,8 @@ const applyCoupon = async (req, res) => {
       message: "Applied",
       discount,
       finalAmount,
-      discPerc: coupon.discount,
+      discPerc,
+      actualDiscount:coupon.discount
     });
   } catch (error) {
     handleError(res, "applyCoupon", error);
@@ -429,23 +432,25 @@ const handlePlaceOrder = async (req, res) => {
           .status(400)
           .json({ status: false, message: "Coupon already used" });
 
-      if (coupon) {
-        couponDiscount = coupon.discount;
-        couponAmount =
-          parseFloat(((coupon.discount / 100) * totalOrderPrice).toFixed(2)) ||
-          0;
+          if (coupon) {
+            couponDiscount = coupon.discount;
+        couponAmount = Math.min(parseFloat(((coupon.discount / 100) * totalOrderPrice).toFixed(2))||0,coupon.maxDiscountAmount)
+        console.log(couponDiscount)
+        console.log(couponAmount)
+        if(couponAmount === coupon.maxDiscountAmount){
+          couponDiscount = couponAmount/finalAmount*100
+        }
         finalAmount -= couponAmount;
 
         await Coupon.updateOne(
           { _id: coupon._id, usedBy: { $ne: user.id } },
           { $push: { usedBy: user.id }, $inc: { used: 1 } }
         );
+
       }
     }
 
-    finalAmount = parseFloat(
-      (finalAmount + req.session.order.deliveryCharge).toFixed(2)
-    );
+    finalAmount = parseFloat((finalAmount + req.session.order.deliveryCharge).toFixed(2));
 
     // Payment handling
     let payment = {
@@ -604,6 +609,8 @@ const handleRazorpaySuccess = async (req, res) => {
       );
     }
 
+    delete req.session?.coupon;
+
     // Clear cart
     await Cart.deleteMany({ userId: order.userId, status: "active" });
     
@@ -626,6 +633,7 @@ const handleRazorpayFailed = async (req, res) => {
       status: true,
       message: "Payment failed, Order placed as pending, Pleas Retry....",
     });
+    delete req.session?.coupon;
   } catch (error) {
     console.log(error);
     res

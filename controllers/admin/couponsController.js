@@ -41,6 +41,7 @@ const addCoupon= async (req,res)=>{
       name,
       code,
       minPrice,
+      maxDiscountAmount,
       discount,
       limit,
       expireAt
@@ -72,6 +73,7 @@ const date = new Date(
       name,
       code,
       minPrice:parseInt(minPrice),
+      maxDiscountAmount:parseInt(maxDiscountAmount),
       discount:parseInt(discount),
       limit:parseInt(limit),
       used:0,

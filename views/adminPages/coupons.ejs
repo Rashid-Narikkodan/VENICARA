@@ -29,6 +29,7 @@
             <th class="text-center p-3">Name</th>
             <th class="text-center p-3">Coupon</th>
             <th class="text-center p-3">Minimum</th>
+            <th class="text-center p-3">Maximum Discount</th>
             <th class="text-center p-3">Discount</th>
             <th class="text-center p-3">Active from</th>
             <th class="text-center p-3">Active to</th>
@@ -43,7 +44,8 @@
             <td class="text-center"><%= count %></td>
             <td class="text-center"><%= coupon.name%></td>
             <td class="text-center"><%= coupon.code %></td>
-            <td class="text-center"><%= coupon.minPrice %></td>
+            <td class="text-center">₹<%= coupon.minPrice %></td>
+            <td class="text-center">₹<%= coupon.maxDiscountAmount %></td>
             <td class="text-center"><%= coupon.discount%>%</td>
             <td class="text-center">
               <%= coupon.createdAt.toLocaleDateString()%>
@@ -84,40 +86,58 @@
         <button type="button" class="btn-close bg-white" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       
-      <form action="/admin/coupons/add" method="POST">
-        <div class="modal-body">
-          <div class="row g-3">
-            <div class="col-md-6">
-              <label class="form-label">Coupon Name</label>
-              <input type="text" class="form-control" name="name" placeholder="Summer Time" required>
-            </div>
-            <div class="col-md-6">
-              <label class="form-label">Coupon Code</label>
-              <input type="text" class="form-control" name="code" placeholder="SMELLNICE" required>
-            </div>
-            <div class="col-md-6">
-              <label class="form-label">Minimum Price</label>
-              <input type="number" class="form-control" name="minPrice" placeholder="100" required>
-            </div>
-            <div class="col-md-6">
-              <label class="form-label">Discount Percentage</label>
-              <input type="number" class="form-control" name="discount" placeholder="30%" required>
-            </div>
-            <div class="col-md-6">
-              <label class="form-label">Limit</label>
-              <input type="number" class="form-control" name="limit" placeholder="40" required>
-            </div>
-            <div class="col-md-6">
-              <label class="form-label">Expire Date</label>
-              <input type="date" class="form-control" name="expireAt" required>
-            </div>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="submit" class="btn btn-dark">Create</button>
-          <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Cancel</button>
-        </div>
-      </form>
+<form id="couponForm" action="/admin/coupons/add" method="POST" >
+  <div class="modal-body">
+    <div class="row g-3">
+      <div class="col-md-6">
+        <label for="couponName" class="form-label">Coupon Name</label>
+        <input type="text" id="couponName" class="form-control" name="name" placeholder="Summer Time" >
+        <div class="text-danger" id="nameError"></div>
+      </div>
+      
+      <div class="col-md-6">
+        <label for="couponCode" class="form-label">Coupon Code</label>
+        <input type="text" id="couponCode" class="form-control" name="code" placeholder="SMELLNICE" >
+        <div class="text-danger" id="codeError"></div>
+      </div>
+      
+      <div class="col-md-6">
+        <label for="minPrice" class="form-label">Minimum Price</label>
+        <input type="number" id="minPrice" class="form-control" name="minPrice" placeholder="100" min="1" >
+        <div class="text-danger" id="minPriceError"></div>
+      </div>
+      
+      <div class="col-md-6">
+        <label for="maxDiscountAmount" class="form-label">Maximum Discount Amount</label>
+        <input type="number" id="maxDiscountAmount" class="form-control" name="maxDiscountAmount" placeholder="3000" min="1" >
+        <div class="text-danger" id="maxDiscountError"></div>
+      </div>
+      
+      
+      <div class="col-md-6">
+        <label for="discount" class="form-label">Discount Percentage</label>
+        <input type="number" id="discount" class="form-control" name="discount" placeholder="30" min="1" max="100" >
+        <div class="text-danger" id="discountError"></div>
+      </div>
+      <div class="col-md-6">
+        <label for="limit" class="form-label">Limit</label>
+        <input type="number" id="limit" class="form-control" name="limit" placeholder="40" min="1" >
+        <div class="text-danger" id="limitError"></div>
+      </div>
+      
+      <div class="col-md-6">
+        <label for="expireAt" class="form-label">Expire Date</label>
+        <input type="date" id="expireAt" class="form-control" name="expireAt" >
+        <div class="text-danger" id="expireError"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-footer">
+    <button type="submit" class="btn btn-dark">Create</button>
+    <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Cancel</button>
+  </div>
+</form>
     </div>
   </div>
 </div>
@@ -199,5 +219,84 @@
   </div>
 </main>
 </div>
-<script></script>
+<script>
+document.getElementById('couponForm').addEventListener('submit', function (e) {
+  e.preventDefault();
+
+  // Get all inputs
+  const name = document.getElementById('couponName').value.trim();
+  const code = document.getElementById('couponCode').value.trim();
+  const minPrice = Number(document.getElementById('minPrice').value);
+  const discount = Number(document.getElementById('discount').value);
+  const maxDiscountAmount = Number(document.getElementById('maxDiscountAmount').value);
+  const limit = Number(document.getElementById('limit').value);
+  const expireAt = new Date(document.getElementById('expireAt').value);
+  const today = new Date();
+
+  // Get error elements
+  const errors = {
+    name: document.getElementById('nameError'),
+    code: document.getElementById('codeError'),
+    minPrice: document.getElementById('minPriceError'),
+    discount: document.getElementById('discountError'),
+    maxDiscount: document.getElementById('maxDiscountError'),
+    limit: document.getElementById('limitError'),
+    expire: document.getElementById('expireError'),
+  };
+
+  // Reset all errors
+  Object.values(errors).forEach(el => el.textContent = '');
+
+  let hasError = false;
+
+  // Validate fields
+  if (name.length < 3) {
+    errors.name.textContent = 'Coupon name must be at least 3 characters.';
+    hasError = true;
+  }
+
+  if (!/^[A-Z0-9]+$/i.test(code)) {
+    errors.code.textContent = 'Coupon code should contain only letters and numbers.';
+    hasError = true;
+  }
+
+  if (minPrice <= 0) {
+    errors.minPrice.textContent = 'Minimum price must be greater than 0.';
+    hasError = true;
+  }
+
+  if (discount <= 0 || discount > 100) {
+    errors.discount.textContent = 'Discount percentage must be between 1 and 100.';
+    hasError = true;
+  }
+
+  if (maxDiscountAmount <= 0) {
+    errors.maxDiscount.textContent = 'Maximum discount amount must be greater than 0.';
+    hasError = true;
+  } else if (maxDiscountAmount < (minPrice * discount) / 100) {
+    errors.maxDiscount.textContent = 'Max discount amount is too low compared to discount percentage.';
+    hasError = true;
+  }
+
+  if (limit <= 0) {
+    errors.limit.textContent = 'Coupon usage limit must be greater than 0.';
+    hasError = true;
+  }
+
+  if (!expireAt || expireAt <= today) {
+    errors.expire.textContent = 'Please choose a future expiry date.';
+    hasError = true;
+  }else if (expireAt=='') {
+    errors.expire.textContent = 'Please choose a expiry date.';
+    hasError = true;
+  }
+
+  // If any error found, stop submission
+  if (hasError) return;
+
+  // All validations passed — submit form
+  e.target.submit();
+});
+</script>
+
 <%- include('../partials/admin/footer.ejs')%>

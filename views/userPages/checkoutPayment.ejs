@@ -119,7 +119,7 @@
           <div class="summary-line fw-bold fs-5">
             <span>Total</span><span id="totalAmount">Rs.<%=total%></span>
           </div>
-          <div class="input-group mt-3 mb-3">
+          <div class="input-group mt-3 mb-2">
             <input
               type="text"
               class="form-control"
@@ -129,8 +129,8 @@
             />
             <button id="couponApplyBtn" class="btn btn-dark">Apply</button>
           </div>
-          <a id="cancelCoupon" class="text-decoration-none m-0" onclick="cancelCoupon()"></a>
-          <div id="couponMessage" class="text-danger small mt-2"></div>
+          <small id="couponMessage" class="text-danger small m-0 "></small>
+          <p id="cancelCoupon" class="text-decoration-none text-primary text-start m-0" onclick="cancelCoupon()"></p>
           <div class="d-flex justify-content-center">  
             <button id="continue"
               class="btn btn-dark text-decoration-none fw-bold w-100">
@@ -318,6 +318,9 @@ function showPaymentFailedModal(message = "Your payment could not be processed. 
         document.getElementById('totalAmount').innerHTML = `Rs.${data.finalAmount}`
         document.getElementById('couponDiscPerc').innerHTML = `${data.discPerc}%`
         document.getElementById('cancelCoupon').innerHTML = `Cancel coupon`
+        if(data.actualDiscount!==data.discPerc){
+          document.getElementById('couponMessage').innerHTML = `Since maximum discount amount is ${data.discount}, You will only get ${data.discPerc}% offer`
+        }
       }else{
         document.getElementById('couponMessage').innerHTML = `${data.message}`
       }
@@ -342,6 +345,7 @@ function showPaymentFailedModal(message = "Your payment could not be processed. 
         document.getElementById('totalAmount').innerHTML = `Rs.${data.finalAmount}`
         document.getElementById('couponDiscPerc').innerHTML = `${data.discPerc}%`
         document.getElementById('cancelCoupon').innerHTML = `Cancel coupon`
+        showAlert('success','Coupon Applied')
       }else{
         document.getElementById('couponMessage').classList.remove('d-none')
         document.getElementById('couponMessage').innerHTML = `${data.message}`

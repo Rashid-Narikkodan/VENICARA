@@ -20,6 +20,7 @@ const couponSchema = new mongoose.Schema({
   },
   limit: {
     type: Number,
+    required:true,
     default: 0 
   },
   used: {
@@ -28,10 +29,17 @@ const couponSchema = new mongoose.Schema({
   },
   minPrice: {
     type: Number,
+    required:true,
     default: 0 
+  },
+  maxDiscountAmount: {
+    type: Number,
+    required:true,
+    default: 0
   },
   expireAt: {
     type: Date,
+    required:true,
     required: true
   },
   isDeleted:{
