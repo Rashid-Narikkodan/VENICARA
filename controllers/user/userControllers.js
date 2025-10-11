@@ -86,7 +86,7 @@ const deleteProfile= async (req,res)=>{
     user.photoUrl = ''
     user.public_id = ''
     user.save()
-    await cloudinary.uploader.destroy(public_id);
+    if(public_id) await cloudinary.uploader.destroy(public_id);
     res.status(200).json({status:true,message:'Profile picture removed'})
   }catch(error){
     res.status(500).json({status:false,message:'server error'})
