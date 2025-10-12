@@ -1,51 +1,87 @@
-<footer class="bg-light p-md-3 p-0">
-  <div class="container-fluid">
-
-    <!-- Top border -->
-    <hr class="">
-
-    <div class="row p-3">
-
-      <!-- Brand (hidden on mobile) -->
-      <div class="col-md-3 d-none d-md-flex align-items-center justify-content-center">
-        <p class="fs-1 text-secondary mb-0">VENICARA</p>
+<footer class="bg-white text-dark py-5">
+  <div class="container">
+    <!-- Top Section -->
+    <div class="row gy-4 align-items-start">
+      <!-- Brand Section -->
+      <div class="col-12 col-md-4 text-center text-md-start">
+        <h2 class="fs-2 fw-bold text-uppercase mb-3" style="color: #b8860b;">VENICARA</h2>
+        <p class="text-dark mb-3">We Give You Smell. Discover the essence of luxury with our exclusive range of perfumes.</p>
+        <!-- Social Media Icons -->
+        <div class="d-flex gap-3 justify-content-center justify-content-md-start">
+          <a href="#" target="_blank" class="text-dark"><i class="fa-brands fa-square-whatsapp fa-2x" style="color: #b8860b;"></i></a>
+          <a href="https://www.instagram.com/rashid_narikkodan" target="_blank" class="text-dark"><i class="fa-brands fa-square-instagram fa-2x" style="color: #b8860b;"></i></a>
+          <a href="https://www.linkedin.com/in/rashidnarikkodan/" target="_blank" class="text-dark"><i class="fa-brands fa-linkedin fa-2x" style="color: #b8860b;"></i></a>
+          <a href="https://www.github.com/Rashid-Narikkodan/" target="_blank" class="text-dark"><i class="fa-brands fa-github fa-2x" style="color: #b8860b;"></i></a>
+          <a href="mailto:rashidnarikkodan20@gmail.com" target="_blank" class="text-dark"><i class="fa-solid fa-envelope fa-2x" style="color: #b8860b;"></i></a>
+        </div>
       </div>
 
-      <!-- Info links -->
-      <div class="col-6 col-md-2 mb-3 mb-md-0">
-        <p class="fw-semibold mb-2">Info</p>
-        <ul class="list-unstyled mb-0">
-          <li><a href="#" class="text-decoration-none text-secondary">Contact us</a></li>
-          <li><a href="#" class="text-decoration-none text-secondary">About us</a></li>
-          <li><div class="d-flex gap-2">
-            <a href="#"><i class="fa-brands fa-square-whatsapp fs-4 text-black"></i></a>
-            <a href="#"><i class="fa-brands fa-square-instagram fs-4 text-black"></i></a>
-            <a href="#"><i class="fa-brands fa-linkedin fs-4 text-black"></i></a>
-          </div>
-        </ul>
-      </div>
-      
-      <!-- Policies links -->
-      <div class="col-6 col-md-2 mb-3 mb-md-0">
-        <p class="fw-semibold mb-2">Policies</p>
-        <ul class="list-unstyled mb-0">
-          <li><a href="#" class="text-decoration-none text-secondary">Privacy Notice</a></li>
-          <li><a href="#" class="text-decoration-none text-secondary">Return Policy</a></li>
-          <li><a href="#" class="text-decoration-none text-secondary">Terms & Conditions</a></li>
-          <li><a href="#" class="text-decoration-none text-secondary">Cookie Policy</a></li>
+      <!-- Info Links -->
+      <div class="col-6 col-md-2">
+        <h5 class="fw-semibold mb-3 text-uppercase" style="color: #b8860b;">Info</h5>
+        <ul class="list-unstyled">
+          <li class="mb-2"><a href="https://rashid-narikkodan.github.io/Portfolio/#contact-me" target="_blank" class="text-decoration-none text-dark hover-effect">Contact Us</a></li>
+          <li class="mb-2"><a href="https://rashid-narikkodan.github.io/Portfolio" target="_blank" class="text-decoration-none text-dark hover-effect">About Us</a></li>
         </ul>
       </div>
 
+      <!-- Policies Links -->
+      <div class="col-6 col-md-2">
+        <h5 class="fw-semibold mb-3 text-uppercase" style="color: #b8860b;">Policies</h5>
+        <ul class="list-unstyled">
+          <li class="mb-2"><a href="/footer/privacy-policy" class="text-decoration-none text-dark hover-effect">Privacy Notice</a></li>
+          <li class="mb-2"><a href="/footer/return-policy" class="text-decoration-none text-dark hover-effect">Return Policy</a></li>
+          <li class="mb-2"><a href="/footer/terms-conditions" class="text-decoration-none text-dark hover-effect">Terms & Conditions</a></li>
+          <li class="mb-2"><a href="/footer/cookie-policy" class="text-decoration-none text-dark hover-effect">Cookie Policy</a></li>
+        </ul>
+      </div>
 
+      <!-- Newsletter Signup -->
+      <div class="col-12 col-md-4">
+        <h5 class="fw-semibold mb-3 text-uppercase" style="color: #b8860b;">Stay Connected</h5>
+        <p class="text-dark">Subscribe to our newsletter for exclusive offers and updates on our latest perfumes.</p>
+        <div class="input-group mb-3">
+          <input type="email" class="form-control rounded-start" placeholder="Enter your email" aria-label="Email" style="border-color: #b8860b;">
+          <button class="btn btn-outline-dark rounded-end" type="button" style="border-color: #b8860b; color: #b8860b;">Subscribe</button>
+        </div>
+      </div>
     </div>
 
-    <!-- Bottom copyright -->
-    <div class="text-center mt-4">
-      <hr class="border-1">
-      <p class="mb-2">© 2025 | VENICARA | All Rights Reserved. | We Give You Smell.</p>
+    <!-- Bottom Copyright -->
+    <hr class="border-dark my-4">
+    <div class="text-center">
+      <p class="mb-0 text-dark">© <span id="year"></span> | VENICARA | All Rights Reserved.</p>
     </div>
-
   </div>
 </footer>
+
+<!-- Inline CSS for hover effects and responsiveness -->
+<style>
+  .hover-effect:hover {
+    color: #b8860b !important;
+    color: #fff;
+    transition: color 0.3s ease;
+  }
+  .btn-outline-dark:hover {
+    background-color: #b8860b;
+    color: #fff;
+    transition: background-color 0.3s ease;
+  }
+  @media (max-width: 767px) {
+    .input-group {
+      flex-direction: column;
+    }
+    .input-group input,
+    .input-group button {
+      width: 100%;
+      margin-bottom: 10px;
+    }
+  }
+</style>
+
+<!-- Script for dynamic year -->
+<script>
+  document.getElementById("year").textContent = new Date().getFullYear();
+</script>
 </body>
 </html>

@@ -40,7 +40,7 @@
                       <%= product.name %>
                     </td>
                     <td class="text-center">
-                          <img src="<%=product.image?.url||product.image%>" alt="product img" width="50">
+                          <img src="<%=product.image?.url%>" alt="product img" width="50">
                     </td>
                     <td class="text-center">
                       <%= product.basePrice%>₹
@@ -57,7 +57,7 @@
                       </span>
                     </td>
                     <td>
-                      <button type="button" onclick="toggleProductActive('<%=product._id%>')"
+                      <button type="button" onclick="showConfirmModal('toggle','<%=product._id%>','While inactivate this product, it will unlist from shop')"
                         class="alert py-1 m-0 <%= product.isAvailable?'alert-success text-success':'alert-danger text-danger'%>">
                         <%= product.isAvailable? 'Available' : 'Not Available' %>
                       </button>
@@ -70,9 +70,9 @@
                       <a href="/admin/products/edit/<%=product._id%>"><button class="btn btn-sm btn-outline-primary"><i
                             class="fa fa-pen"></i></button></a>
 
-                      <form action="/admin/products/<%=product._id%>?_method=PATCH" method="POST" class="d-inline">
-                        <button type="submit" class="btn btn-sm btn-outline-danger"
-                          onclick="return confirm('Are you sure you want to delete this product?')"><i
+                      <form id="deleteForm" action="/admin/products/<%=product._id%>?_method=PATCH" method="POST" class="d-inline">
+                        <button type="button" class="btn btn-sm btn-outline-danger"
+                          onclick="showConfirmModal('delete','<%=product._id%>','When you delete this product, it will unlist this product and you may lose controle over this product')"><i
                             class="fa fa-trash"></i></button>
                       </form>
                     </td>
@@ -148,6 +148,51 @@
         </nav>
       </div>
 
+      <div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content border-dark">
+            <div class="modal-header bg-dark text-white">
+              <h5 class="modal-title" id="confirmLabel">Are you sure You want to Log-Out?</h5>
+              <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <p id="confirmMessage"></p>
+            </div>
+            <div class="modal-footer">
+              <button type="button" data-bs-dismiss="modal" class="btn btn-outline-dark">No</button>
+              <button type="button" class="btn btn-dark" id="yes" data-operation="" data-productId="">Yes</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </main>
     </div>
+    <script>
+
+      const yes = document.getElementById('yes')
+      const form = document.getElementById('deleteForm')
+
+          function showConfirmModal(operation,productId,message){
+            
+    const modalEl = document.getElementById("confirmModal");
+    const messageEl = document.getElementById("confirmMessage");
+    messageEl.textContent = message;
+    yes.setAttribute('data-operation',operation)
+    yes.setAttribute('data-productId',productId)
+    const modal = new bootstrap.Modal(modalEl);
+    modal.show();
+    }
+    
+    yes.addEventListener('click',(e)=>{
+      const productId = yes.getAttribute('data-productId')
+      const operation = yes.getAttribute('data-operation')
+      if(operation === 'delete'){
+        form.submit()
+      }else if(operation === 'toggle'){
+        toggleProductActive(productId)
+      }
+    })
+
+    </script>
     <%- include('../partials/admin/footer.ejs')%>

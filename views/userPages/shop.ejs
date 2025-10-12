@@ -62,7 +62,7 @@
             <div class="mb-3">
               <div class="mb-3">
                 <button type="button"
-                  class="btn w-100 d-flex justify-content-between align-items-center p-2 border-0 bg-transparent"
+                  class="btn w-100 d-flex justify-content-between align-items-center p-2 border-0"
                   data-bs-toggle="collapse" data-bs-target="#categoryCollapse" aria-expanded="true">
                   <span class="fw-bold">Categories</span>
                   <i class="fa-solid fa-caret-down"></i>
@@ -166,7 +166,7 @@
 
 
     <!-- filtering sidebar -->
-        <nav class="col-md-2 col-6 px-5 py-5 d-none d-md-block" style="min-height:100vh;height:fit-content">
+        <nav class="col-md-2 col-6 px-4 py-5 d-none d-md-block" style="min-height:100vh;height:fit-content;background:whitesmoke">
           <div class="d-flex justify-content-between align-items-center mb-3">
             <h6 class="mb-0 fw-bold">Filters & Sort</h6>
             <a id="clearAll" href="/shop" class="text-decoration-none small text-black">Clear All</a>
@@ -305,14 +305,14 @@
                     <div class="col-6 col-md-4 col-lg-3 mb-4"> <!-- Responsive columns -->
                       <a href="/products/<%= product._id %>"
                         class="card text-decoration-none shadow p-2 rounded-4 border-0 position-relative product-card"
-                        style="background: linear-gradient(to right, #c2ab59, #c1b36e);">
+                        style="background: linear-gradient(to right, #ba9e3a, #cebe6b);">
 
                         <img src="<%= product.images[0]?.url%>" class="rounded-4 img-fluid" alt="Product Image" >
 
                         
                         <div class="card-body p-2 pt-3">
                           <div class="d-flex justify-content-between align-items-center">
-                            <span class="card-title mb-1 product-name">
+                            <span class="card-title mb-1 product-name" >
                               <%= product.name %>
                             </span>
                               <span class="wishlist-btn p-2" 
@@ -443,10 +443,10 @@
   const variantId = btn.dataset.variantId;
 
   try {
-    const res = await fetch(`/wishlist/api/add/toWish/${productId}`, {
+    const res = await fetch(`/wishlist/api/add/${productId}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ productId, variantId }),
+      body: JSON.stringify({ variantId }),
     });
 
     const data = await res.json();

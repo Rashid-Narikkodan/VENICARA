@@ -266,6 +266,7 @@
     // For non-Razorpay methods, redirect to order page
     window.location.href = `/checkout/placeOrder/${data.orderId}`;
   } catch (err) {
+    console.log(err)
     showPaymentFailedModal("Payment Failed - "+err.message);
     return
   }
@@ -325,6 +326,7 @@ function showPaymentFailedModal(message = "Your payment could not be processed. 
         document.getElementById('couponMessage').innerHTML = `${data.message}`
       }
     }catch(error){
+      console.log(error)
       showAlert('error',error.message)
     }
   })
@@ -351,6 +353,7 @@ function showPaymentFailedModal(message = "Your payment could not be processed. 
         document.getElementById('couponMessage').innerHTML = `${data.message}`
       }
     }catch(error){
+      console.log(error)
       showAlert('error',error.message)
     }
   })
@@ -365,7 +368,7 @@ function showPaymentFailedModal(message = "Your payment could not be processed. 
       window.location.reload()      
     }
   }
-
+  
   function selectMethod(card){
     const input = card.querySelector('input[type="radio"]');
     if(input && !input.disabled){

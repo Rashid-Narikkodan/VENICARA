@@ -150,20 +150,20 @@
           <%const lowestVariant = product.variants.reduce((min, v) => v.finalAmount < min.finalAmount ? v : min, product.variants[0])%>
 
           <div class="d-flex flex-column mt-3 gap-2 align-items-start">
-            <button class="btn btn-dark rounded-5 w-50" 
-                onclick="addToWishlist(this,'/wishlist/add/<%=product._id%>')" 
+            <button class="btn btn-dark rounded-5 w-50 fw-bold" 
+                onclick="addToWishlist(this,'/wishlist/api/add/<%=product._id%>')" 
                 data-variant-id="<%= lowestVariant._id %>" 
                 data-source="details" 
                 style="padding:1rem 2rem"
                 id="addToWishlist">
-              <span class="fw-bold">ADD TO WISHLIST</span>
+              <span>ADD TO WISHLIST</span>
             </button>
             <button onclick="addToCart(this,'/cart/addToCart/<%=product._id%>')" 
                 data-variant-id="<%= lowestVariant._id %>" 
-                class="btn btn-dark rounded-5 w-50" 
+                class="btn btn-dark rounded-5 w-50 fw-bold" 
                 style="padding:1rem 3rem"
                 id="addToCart">
-              <span class="fw-bold">ADD TO CART</span>
+              <span>ADD TO CART</span>
             </button>
           </div>
 
@@ -427,26 +427,42 @@ document.addEventListener("DOMContentLoaded", initVariantSelection);
     });
 
 
-    async function addToCart(btn,url){
-      try{
-        const variantId = btn.getAttribute('data-variant-id')
-        const res = await fetch(url,{
-          method:'POST',
-          headers:{'Content-Type':'application/json'},
-          body:JSON.stringify({variantId})
-        })
-        const data = await res.json()
-        if(data.status){
-          showAlert('success',data.message)
-          updateCartCount()
-        }else{
-          showAlert('error',data.message)
-        }
-      }catch(error){
-        console.log(error)
-      }
+async function addToCart(btn, url) {
+  // Prevent multiple clicks
+  if (btn.disabled) return;
+  btn.disabled = true;
+  btn.textContent = 'Adding...'; // optional visual feedback
+
+  try {
+    const variantId = btn.getAttribute('data-variant-id');
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ variantId })
+    });
+
+    const data = await res.json();
+
+    if (data.status) {
+      showAlert('success', data.message);
+      updateCartCount();
+    } else {
+      showAlert('error', data.message);
     }
+  } catch (error) {
+    console.error(error);
+    showAlert('error', 'Something went wrong. Try again.');
+  } finally {
+    // Re-enable after all operations
+    btn.disabled = false;
+    btn.textContent = 'Add to Cart'; // restore text
+  }
+}
+
     async function addToWishlist(btn,url){
+        if (btn.disabled) return;
+          btn.disabled = true;
+          btn.textContent = 'Adding...'; // optional visual feedback
       try{
         const variantId = btn.getAttribute('data-variant-id')
         const source = btn.getAttribute('data-source')
@@ -463,7 +479,11 @@ document.addEventListener("DOMContentLoaded", initVariantSelection);
         }
       }catch(error){
         console.log(error)
-      }
+      } finally {
+    // Re-enable after all operations
+    btn.disabled = false;
+    btn.textContent = 'Add to Wishlist'; // restore text
+  }
     }
   </script>
   <%- include("../partials/user/footer.ejs") %>

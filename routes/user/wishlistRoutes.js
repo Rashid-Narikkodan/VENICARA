@@ -7,9 +7,8 @@ const {
 const auth = require("../../middlewares/authUser");
 
 router.get("/", wishlistController.show);
-router.post("/add/:id", wishlistController.add);
-router.post("/api/add/:id", wishlistController.addToCart);
-router.post("/api/add/toWish/:id", wishlistController.addToWishlist);
+router.post("/api/add/:id", wishlistController.addToWishlist);
+router.post("/api/addToCart/:id", wishlistController.addToCart);
 router.delete("/api/remove/:id", wishlistController.remove);
 
 module.exports = router

@@ -78,6 +78,7 @@ const orderSchema = new mongoose.Schema(
 
     totalOrderPrice: { type: Number, required: true },
     couponDiscount:{type:Number,default:0},//percentage discount
+    couponAmount:{type:Number,default:0},//amount discount
     finalAmount: { type: Number, required: true }, // totalOrderPrice - couponDiscount
     deliveryCharge:{ type:Number},
     orderId:{type:String,required:true},

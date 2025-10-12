@@ -14,5 +14,6 @@ router.use("/orders",auth.requireLogin,auth.isUserBlocked, require("./orderRoute
 router.use("/referEarn",auth.requireLogin,auth.isUserBlocked, require("./referRoutes"));
 router.use("/wallet",auth.requireLogin,auth.isUserBlocked, require("./walletRoutes"));
 router.use("/delete",auth.requireLogin,auth.isUserBlocked, require("./deleteRoutes"));
+router.use("/footer", require("./footerRoutes"));
 
 module.exports = router;

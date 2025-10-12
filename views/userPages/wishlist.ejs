@@ -110,7 +110,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (e.target.classList.contains("add-cart-btn")) {
       try {
-        const res = await fetch(`/wishlist/api/add/${id}`, { method: "POST" });
+        const res = await fetch(`/wishlist/api/addToCart/${id}`, { method: "POST" });
         const data = await res.json();
         if (data.success) {
           showAlert('success',data.message);

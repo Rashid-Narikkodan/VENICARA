@@ -48,7 +48,7 @@
                       <%= user.createdAt.toLocaleDateString()%>
                     </td>
                     <td class="text-center">
-                      <button type="button" onclick="toggleUserStatus('<%=user._id%>')"
+                      <button type="button" onclick="showConfirmModal('<%=user._id%>','When you click Ok, This user will mark as Unlisted%>')"
                         class="alert px-3 py-0 <%=  user.isBlocked?'alert-danger text-danger':'alert-success text-success'%>">
                         <%= user.isBlocked? 'Blocked' : 'Active' %>
                       </button>
@@ -123,6 +123,48 @@
           </ul>
         </nav>
       </div>
+
+
+      <div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content border-dark">
+            <div class="modal-header bg-dark text-white">
+              <h5 class="modal-title" id="confirmLabel">Are you sure?</h5>
+              <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <p id="confirmMessage"></p>
+            </div>
+            <div class="modal-footer">
+              <button type="button" data-bs-dismiss="modal" class="btn btn-outline-dark">No</button>
+              <button type="button" class="btn btn-dark" id="yes" data-userId="">Yes</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </main>
     </div>
+        <script>
+
+      const yes = document.getElementById('yes')
+      const form = document.getElementById('deleteForm')
+
+          function showConfirmModal(userId,message){
+            
+    const modalEl = document.getElementById("confirmModal");
+    const messageEl = document.getElementById("confirmMessage");
+    messageEl.textContent = message;
+    yes.setAttribute('data-userId',userId)
+    const modal = new bootstrap.Modal(modalEl);
+    modal.show();
+    }
+    
+    yes.addEventListener('click',(e)=>{
+      const userId = yes.getAttribute('data-userId')
+        toggleUserStatus(userId)    
+    })
+
+    </script>
+
     <%- include('../partials/admin/footer.ejs')%>

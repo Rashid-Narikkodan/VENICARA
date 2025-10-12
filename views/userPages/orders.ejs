@@ -145,16 +145,21 @@
             >
               <span>Discount</span>
               <span class="text-success"
-                ><%=order.couponDiscount?order.couponDiscount+'%':'No Discounts'%></span
+                ><%=order.couponDiscount?order.couponDiscount+'%':order.couponDiscount == 0?'-':'No Discounts'%></span
               >
             </div>
             <div
               class="d-flex justify-content-between mb-2 fs-7 fs-md-6 <%=order.couponApplied?'':'d-none'%>"
             >
               <span>Discount Amount</span>
-              <span class="text-danger"
-                >-₹<%=parseFloat(((order.totalOrderPrice-order.refundAmount)*order.couponDiscount/100).toFixed(2))%></span
-              >
+             <%const remainingProducts = order.products.filter((p, i) =>!["cancelled", "returned"].includes(p.status));
+                const remainingDiscount = remainingProducts.reduce(
+                  (sum, p) => sum + p.subtotal * (order.couponDiscount || 0) / 100,
+                  0
+                );
+              %>
+              <span class="text-danger">-₹<%= remainingDiscount?remainingDiscount.toFixed(2):order.couponAmount %></span>
+
             </div>
             <div class="d-flex justify-content-between mb-2 fs-7 fs-md-6">
               <span>Delivery Charge</span>

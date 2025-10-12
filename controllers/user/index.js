@@ -10,5 +10,6 @@ module.exports={
   checkoutController:require('./checkoutController'),
   orderController:require('./orderController'),
   wishlistController:require('./wishlistController'),
-  deleteController:require('./deleteController')
+  deleteController:require('./deleteController'),
+  footerController:require('./footerController'),
 }

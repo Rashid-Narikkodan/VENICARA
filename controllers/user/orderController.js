@@ -161,53 +161,78 @@ const cancelProduct = async (req, res) => {
       { $inc: { "variants.$.stock": product.quantity } }
     );
 
-    // Wallet refund
-    if (["WALLET", "RAZORPAY"].includes(order.payment.method)) {
+if (["RAZORPAY", "WALLET"].includes(order.payment.method)) {
+  let wallet = await Wallet.findOne({ userId });
+  if (!wallet) wallet = new Wallet({ userId, balance: 0 });
 
-      let wallet = await Wallet.findOne({ userId });
-      if (!wallet) wallet = new Wallet({ userId, balance: 0 });
+  const couponId = order.couponApplied;
+  let refundAmount;
 
-      let refundAmount = parseFloat((product.subtotal).toFixed(2));
+  // --- CASE 1: Coupon Applied ---
+  if (couponId) {
+    const coupon = await Coupon.findById(couponId);
+    const couponDiscountPercent = order.couponDiscount;
 
-      //refund logic if coupon applied
-      if (order.couponApplied) {
-        const coupon=await Coupon.findById(order.couponApplied)
-        const {minPrice:minPurchase}=coupon;
+    // STEP 1: Calculate paid amount for this product (after coupon)
+    let productPaid = parseFloat(
+      (product.subtotal - product.subtotal * (couponDiscountPercent / 100)).toFixed(2)
+    );
 
-        const newTotalPrice = order.totalOrderPrice - (order.refundAmount+product.subtotal)
-        
-        if(newTotalPrice < minPurchase){
-          const discount = order.totalOrderPrice * order.couponDiscount / 100;
-          refundAmount = parseFloat((product.subtotal - discount).toFixed(2));
-          order.couponApplied = null;
-          order.couponDiscount = 0;
-        }
-
-        order.finalAmount = newTotalPrice - (newTotalPrice*order.couponDiscount/100).toFixed(2)
-      
-      }else{
-
-        order.finalAmount -= refundAmount;
-        
-      }
-
-      //update RefundAmount in both
-      product.refundAmount = refundAmount;
-      order.refundAmount += refundAmount;
-
-      wallet.balance = Math.round((wallet.balance + refundAmount) * 100) / 100;;
-      await wallet.save();
-
-      await WalletTransaction.create({
-        userId,
-        orderId,
-        productId: product.productId,
-        type: "credit",
-        amount: refundAmount*100, 
-        status: "success",
-        lastBalance: wallet.balance,
-      });
+    const amount = order.finalAmount - productPaid
+    console.log(amount)
+    if(amount<coupon.minPrice){
+      const remainings = order.products.filter((p, i) => i!=index&&!["cancelled", "returned"].includes(p.status));
+      console.log(remainings+'remainings')
+      let remainingsTotal = remainings.reduce((sum,p)=>sum+(p.subtotal * (couponDiscountPercent / 100)),0)
+      console.log(remainingsTotal+'  -remainTotal')
+      console.log(productPaid+'  -inital')
+      productPaid -= remainingsTotal
+      console.log(productPaid+'alter')
+      order.couponApplied = null
     }
+    refundAmount = productPaid;
+    order.finalAmount = order.finalAmount - refundAmount
+    
+    const remainingProducts = order.products.filter((p, i) => !["cancelled", "returned"].includes(p.status));
+    
+    if(remainingProducts.length == 0) order.finalAmount = 0
+    
+  }
+  // --- CASE 2: No Coupon Applied ---
+  else {
+    refundAmount = parseFloat(product.subtotal.toFixed(2));
+    order.finalAmount = parseFloat((order.finalAmount - refundAmount).toFixed(2));
+  }
+
+  // --- STEP 5: Prevent over-refund ---
+  const totalPaid = order.products.reduce((sum, p) => sum + parseFloat(p.subtotal.toFixed(2)), 0);
+  const totalRefunded = order.refundAmount || 0;
+  if (totalRefunded + refundAmount > totalPaid) {
+    refundAmount = parseFloat((totalPaid - totalRefunded).toFixed(2));
+  }
+
+  // --- STEP 6: Update refund records ---
+  if (!order.refundAmount) order.refundAmount = 0;
+  product.refundAmount = refundAmount;
+  order.refundAmount += refundAmount;
+
+  // --- STEP 7: Credit wallet ---
+  wallet.balance = parseFloat((wallet.balance + refundAmount).toFixed(2));
+  await wallet.save();
+
+  await WalletTransaction.create({
+    userId,
+    orderId,
+    productId: product.productId,
+    type: "credit",
+    amount: refundAmount*100,
+    status: "success",
+    lastBalance: wallet.balance,
+    reference: "Proportional coupon-adjusted refund"
+  });
+}
+
+
     
     // Update order status
     if (order.products.every((p) => p.status === "cancelled")) {

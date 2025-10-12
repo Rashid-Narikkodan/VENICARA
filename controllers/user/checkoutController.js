@@ -439,10 +439,8 @@ const handlePlaceOrder = async (req, res) => {
           if (coupon) {
             couponDiscount = coupon.discount;
         couponAmount = Math.min(parseFloat(((coupon.discount / 100) * totalOrderPrice).toFixed(2))||0,coupon.maxDiscountAmount)
-        console.log(couponDiscount)
-        console.log(couponAmount)
         if(couponAmount === coupon.maxDiscountAmount){
-          couponDiscount = couponAmount/finalAmount*100
+          couponDiscount = 0
         }
         finalAmount -= couponAmount;
 
@@ -473,7 +471,7 @@ const handlePlaceOrder = async (req, res) => {
       }
 
       const options = {
-        amount: finalAmount * 100,
+        amount: parseInt(finalAmount * 100),
         currency: "INR",
         receipt: `rcpt_${Date.now()}`,
         payment_capture: 1,
@@ -527,6 +525,7 @@ const handlePlaceOrder = async (req, res) => {
       couponApplied: coupon?._id || null,
       totalOrderPrice,
       couponDiscount,
+      couponAmount,
       deliveryCharge: req.session.order.deliveryCharge,
       finalAmount,
       status: paymentMethod==='RAZORPAY'?'pending':'confirmed',
@@ -555,6 +554,7 @@ const handlePlaceOrder = async (req, res) => {
       finalAmount,
     });
   } catch (error) {
+    console.log(error)
     return res.status(500).json({
       status: false,
       message: `${error}`,
