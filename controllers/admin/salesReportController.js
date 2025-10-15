@@ -32,6 +32,10 @@ const showSalesReport = async (req, res) => {
       case "custom":
         startDate = new Date(req.query.startDate);
         endDate = new Date(req.query.endDate);
+        if(!req.query.startDate || !req.query.endDate){
+          req.flash("error"," Please select both start and end dates for custom filter.");
+          return res.redirect(`/admin/salesReport?filter=daily`);
+        }
         endDate.setHours(23, 59, 59, 999);
         break;
     }
@@ -130,6 +134,7 @@ const showSalesReport = async (req, res) => {
       totalProductReturned
     };
     req.session.salesReport = { data, filter, startDate, endDate, orders };
+
 
     return res.render("adminPages/salesReport", {
       page: "salesReport",

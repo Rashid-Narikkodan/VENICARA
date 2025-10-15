@@ -6,10 +6,10 @@
   <!-- Filter Buttons -->
   <div class="row mb-3">
     <div class="col-12 d-flex gap-2">
-      <a href="/admin/dashboard?filter=daily" class="btn btn-sm btn-primary <% if(filter==='daily'){ %>active<% } %>">Daily</a>
-      <a href="/admin/dashboard?filter=weekly" class="btn btn-sm btn-primary <% if(filter==='weekly'){ %>active<% } %>">Weekly</a>
-      <a href="/admin/dashboard?filter=monthly" class="btn btn-sm btn-primary <% if(filter==='monthly'){ %>active<% } %>">Monthly</a>
-      <a href="/admin/dashboard?filter=yearly" class="btn btn-sm btn-primary <% if(filter==='yearly'){ %>active<% } %>">Yearly</a>
+      <a href="/admin/dashboard?filter=daily" class="btn btn-sm <%= filter==='daily' ? 'btn-dark' : 'btn-outline-dark'%>">Daily</a>
+      <a href="/admin/dashboard?filter=weekly" class="btn btn-sm <%= filter==='weekly' ? 'btn-dark' : 'btn-outline-dark'%>">Weekly</a>
+      <a href="/admin/dashboard?filter=monthly" class="btn btn-sm <%= filter==='monthly' ? 'btn-dark' : 'btn-outline-dark'%>">Monthly</a>
+      <a href="/admin/dashboard?filter=yearly" class="btn btn-sm <%= filter==='yearly' ? 'btn-dark' : 'btn-outline-dark'%>">Yearly</a>
     </div>
   </div>
 

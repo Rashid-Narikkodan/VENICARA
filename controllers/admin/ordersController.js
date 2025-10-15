@@ -9,7 +9,7 @@ const Coupon = require("../../models/Coupon");
 const showOrders = async (req, res) => {
   try {
     const page = parseInt(req.query.page, 10) || 1;
-    const limit = parseInt(req.query.limit, 10) || 10;
+    const limit = parseInt(req.query.limit, 10) || 9;
     const search = req.query.search?.trim() || "";
     const status = req.query.status?.trim() || "";
     const sortOption = req.query.sort?.trim() || "";

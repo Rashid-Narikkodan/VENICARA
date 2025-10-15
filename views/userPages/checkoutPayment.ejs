@@ -72,7 +72,7 @@
                   id="pay_<%= method.code %>"
                   value="<%=method.code %>" 
                   <%=method.code=='COD'&&Number(total)>7000?'disabled':''%>
-                  <%= i==0&&total<7000 || i=== 1 ? "checked" : "" %>>
+                  <%= i == 1 && method.code !== 'COD' ? "checked" : "" %>>
               </div>
 
               <div class="flex-grow-1">
@@ -94,12 +94,10 @@
           <%items.forEach((item,index)=>{%>
           <div class="summary-line">
             <span
-              ><%= item.quantity %> × <%= item.product.name %> (<%=
-              item.variant.volume %>ml)</span
+              ><%= item.quantity %> × <%= item.product.name %> (<%=item.variant.volume %>ml)</span
             >
             <span
-              >Rs.<%= ((item.variant.finalAmount) *
-              item.quantity).toLocaleString() %></span
+              >Rs.<%= ((item.variant.finalAmount) * item.quantity).toLocaleString() %></span
             >
           </div>
           <% }) %>

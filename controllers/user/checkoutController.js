@@ -198,7 +198,7 @@ const handleSelectAddress = (req, res) => {
  */
 const showPaymentMethods = async (req, res) => {
   try {
-    const paymentMethods = await PaymentMethod.find({ isActive: true });
+    const paymentMethods = await PaymentMethod.find({ isActive: true }).sort({createdAt:1});
     const cartDocs = await Cart.find({
       userId: req.session.user.id,
       status: "active",

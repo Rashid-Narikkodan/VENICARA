@@ -86,11 +86,11 @@
               <input name="endDate"
                 type="date"
                 class="form-control d-inline-block w-auto"
-                min="<%= today %>"
+                max="<%= today %>"
                 value="<%= endDate || '' %>">
             </div>
             <div>
-              <button type="submit" class="btn btn-dark">Apply</button>
+              <button type="submit" id="formBtn" class="btn btn-dark">Apply</button>
             </div>
             <div>
               <a href="/admin/salesReport" class="btn btn-outline-dark">Cancel</a>
@@ -114,9 +114,8 @@
           </button>
         </form>
       </div>
-
+      <div class="text-danger" id="dateError"></div>
     </div>
-    <div class="text-danger" id="dateError"></div>
 
     <!-- Sales Report Cards -->
     <div class="row g-3 mb-4">
@@ -247,66 +246,21 @@
     }
   });
 
-function validateDate() {
-  const durationFilter = document.getElementById("durationFilter");
-  
-  // Only validate dates if "custom" is selected
-  if (durationFilter.value !== "custom") return true;
-
-  const startInput = document.querySelector('[name="startDate"]');
-  const endInput = document.querySelector('[name="endDate"]');
-  const error = document.getElementById('dateError');
-
-  const startDate = startInput.value;
-  const endDate = endInput.value;
-
-  // Check if either date is empty
-  if (!startDate || !endDate) {
-    error.textContent = 'Please select both a start and an end date.';
-    return false;
-  }
-
-  // Optional: check for invalid ordering
-  if (startDate > endDate) {
-    error.textContent = 'Start date cannot be later than end date.';
-    return false;
-  }
-
-  // Clear error if valid
-  error.textContent = '';
-  return true;
-}
-
-  
-   document.addEventListener("DOMContentLoaded", () => {
-  const startInput = document.querySelector('[name="startDate"]');
-  const endInput = document.querySelector('[name="endDate"]');
-
-  // today's date in YYYY-MM-DD format
-  const today = new Date().toISOString().split("T")[0];
-
-  // set default limits
-  startInput.max = today;
-  endInput.max = today;
-
-  // when start date changes
-  startInput.addEventListener("change", () => {
-    const startDate = startInput.value;
-    endInput.min = startDate || "";
-    endInput.max = today;
+  const customDateRange = document.getElementById('customDateRange');
+  const startDateInput = customDateRange.querySelector('input[name="startDate"]');
+  const endDateInput = customDateRange.querySelector('input[name="endDate"]');
+  const dateErrorDiv = document.getElementById('dateError');
+  const btn = document.getElementById('formBtn');
+  customDateRange.addEventListener('change', function () {
+    btn.disabled = false;
+    dateErrorDiv.textContent = '';
+    const startDate = new Date(startDateInput.value);
+    const endDate = new Date(endDateInput.value);
+    if (startDateInput.value && endDateInput.value && startDate > endDate) {
+      dateErrorDiv.textContent = 'Invalid range — start date cannot be later than end date. You can\’t apply this filter.';
+      endDateInput.value = '';
+      btn.disabled = true;
+    }
   });
-
-  // when end date changes
-  endInput.addEventListener("change", () => {
-    const endDate = endInput.value;
-    startInput.max = endDate || today;
-  });
-});
-
-document.getElementById('formDate').addEventListener('submit',(e)=>{
-  e.preventDefault()
-  const valid = validateDate()
-  if(valid) document.getElementById('formDate').submit()
-})
 
 </script>
