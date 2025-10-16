@@ -76,8 +76,15 @@
               </div>
 
               <div class="flex-grow-1">
-                <h6 class="mb-0 fw-semibold <%=total>7000&&method.code=='COD'?'text-secondary':''%>">
-                  <%= method.name %>
+                <h6 class="mb-0 d-flex fs-5 p-3 justify-content-between fw-semibold <%=total>7000&&method.code=='COD'?'text-secondary':''%>">
+                  <span>
+                    <%= method.name %>
+                  </span>
+                  <%if(method.code === 'WALLET'){%>
+                  <span>
+                    Balance : <%= balance %>
+                  </span>
+                  <%}%>
                 </h6>
               </div>
             </div>
@@ -318,7 +325,8 @@ function showPaymentFailedModal(message = "Your payment could not be processed. 
         document.getElementById('couponDiscPerc').innerHTML = `${data.discPerc}%`
         document.getElementById('cancelCoupon').innerHTML = `Cancel coupon`
         if(data.actualDiscount!==data.discPerc){
-          document.getElementById('couponMessage').innerHTML = `Since maximum discount amount is ${data.discount}, You will only get ${data.discPerc}% offer`
+          document.getElementById("couponMessage").classList.remove('d-none')
+          document.getElementById('couponMessage').innerHTML = `Since maximum discount amount is ${data.discount}, You will only get ${data.discount} rupees offer`
         }
       }else{
         document.getElementById('couponMessage').innerHTML = `${data.message}`
@@ -329,32 +337,32 @@ function showPaymentFailedModal(message = "Your payment could not be processed. 
     }
   })
 
-  document.getElementById('canelCoupon').addEventListener('click',async(e)=>{
-    const code=document.getElementById('coupon').value
-    try{
-      const res=await fetch('/checkout/api/coupon/apply',{
-        method:'PATCH',
-        headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({code})
-      })
-      const data=await res.json()
-      if(data.status){
-        document.getElementById('couponMessage').classList.add('d-none')
-        document.getElementById('couponApplyBtn').innerHTML = `${data.message}`
-        document.getElementById('couponDisc').innerHTML = `Rs.${data.discount}`
-        document.getElementById('totalAmount').innerHTML = `Rs.${data.finalAmount}`
-        document.getElementById('couponDiscPerc').innerHTML = `${data.discPerc}%`
-        document.getElementById('cancelCoupon').innerHTML = `Cancel coupon`
-        showAlert('success','Coupon Applied')
-      }else{
-        document.getElementById('couponMessage').classList.remove('d-none')
-        document.getElementById('couponMessage').innerHTML = `${data.message}`
-      }
-    }catch(error){
-      console.log(error)
-      showAlert('error',error.message)
-    }
-  })
+  // document.getElementById('canelCoupon').addEventListener('click',async(e)=>{
+  //   const code=document.getElementById('coupon').value
+  //   try{
+  //     const res=await fetch('/checkout/api/coupon/apply',{
+  //       method:'PATCH',
+  //       headers:{'Content-Type':'application/json'},
+  //       body:JSON.stringify({code})
+  //     })
+  //     const data=await res.json()
+  //     if(data.status){
+  //       document.getElementById('couponMessage').classList.add('d-none')
+  //       document.getElementById('couponApplyBtn').innerHTML = `${data.message}`
+  //       document.getElementById('couponDisc').innerHTML = `Rs.${data.discount}`
+  //       document.getElementById('totalAmount').innerHTML = `Rs.${data.finalAmount}`
+  //       document.getElementById('couponDiscPerc').innerHTML = `${data.discPerc}%`
+  //       document.getElementById('cancelCoupon').innerHTML = `Cancel coupon`
+  //       showAlert('success','Coupon Applied')
+  //     }else{
+  //       document.getElementById('couponMessage').classList.remove('d-none')
+  //       document.getElementById('couponMessage').innerHTML = `${data.message}`
+  //     }
+  //   }catch(error){
+  //     console.log(error)
+  //     showAlert('error',error.message)
+  //   }
+  // })
 
   //cancel coupon
   async function cancelCoupon(){
@@ -363,7 +371,16 @@ function showPaymentFailedModal(message = "Your payment could not be processed. 
     })
     const data=await res.json()
     if(data.status){
-      window.location.reload()      
+          document.getElementById('couponMessage').classList.add('d-none')
+        document.getElementById('couponApplyBtn').innerHTML = "Apply"
+        document.getElementById('coupon').readOnly = false
+        document.getElementById('coupon').placeholder = 'Discount Code'
+        document.getElementById('coupon').value = ''
+        document.getElementById('couponDisc').innerHTML = `0`
+        document.getElementById('totalAmount').innerHTML = `${data.finalAmount}`
+        document.getElementById('couponDiscPerc').innerHTML = `0%`
+        document.getElementById('cancelCoupon').innerHTML = ``
+        showAlert('success','Coupon Cancelled')  
     }
   }
   

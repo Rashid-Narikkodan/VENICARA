@@ -14,14 +14,27 @@ const showOrders = async (req, res) => {
   try {
     const userId = req.session?.user?.id;
     if (!userId) return res.redirect("/login");
+    const page = parseInt(req.query.page || 1)
+    const limit = parseInt(req.query.limit || 6);
 
     const user = await User.findById(userId);
 
     const orders = await Order.find({ userId })
-      .populate("products.productId")
-      .sort({ createdAt: -1 });
+    .populate("products.productId")
+    .skip((page-1) * limit)
+    .limit(limit)
+    .sort({ createdAt: -1 });
+    
+    const totalOrders = await Order.countDocuments({userId})
+    const totalPages = totalOrders/limit
 
-    res.render("userPages/orders", { orders, user });
+    res.render("userPages/orders", {
+      orders,
+      user,
+      page,
+      limit,
+      totalPages,
+    });
   } catch (error) {
     handleError(res, "showOrders", error);
   }
@@ -243,49 +256,36 @@ const cancelProduct = async (req, res) => {
           const productDiscount = parseFloat((totalDiscount * productShare).toFixed(2));
           let productPaid = parseFloat((product.subtotal - productDiscount).toFixed(2));
 
-          console.log(`total subtotal : - ${totalSubtotal}`)
-          console.log(`total totalDiscount : - ${totalDiscount}`)
-          console.log(`productShare : - ${productShare}`)
-          console.log(`productDiscount : - ${productDiscount}`)
-          console.log(`productPaid : - ${productPaid}`)
-          console.log(`order.finalAmount : - ${order.finalAmount}`)
           
           const amount = parseFloat((order.finalAmount - productPaid).toFixed(2));
-          console.log(`amount : - ${amount}`)
           
           // STEP 2: Check coupon eligibility after cancellation
           if (amount < coupon.minPrice) {
             const remainings = order.products.filter(
               (p, i) => i != index && !["cancelled", "returned"].includes(p.status)
             );
-            console.log(`remainings : - ${remainings}`)
             
             let remainingsTotal = remainings.reduce((sum, p) =>{
               const productShare = parseFloat((product.subtotal / totalSubtotal).toFixed(2));
               const productDiscount = parseFloat((totalDiscount * productShare).toFixed(2));
               return sum + productDiscount
             },0)
-            console.log(`remainings : - ${remainingsTotal}`)
             
             productPaid -= parseFloat(remainingsTotal.toFixed(2));
-            console.log(`remainings : - ${productPaid}`)
             // order.couponApplied = null;
           }
           refundAmount = productPaid;
-          console.log(`refundAmount : - ${refundAmount}`)
         }
         
         // STEP 3: Adjust order final amount
         order.finalAmount = parseFloat((order.finalAmount - refundAmount).toFixed(2));
-        console.log(`order.finalAmount : - ${order.finalAmount}`)
         
         const remainingProducts = order.products.filter(
           (p) => !["cancelled", "returned"].includes(p.status)
         );
 
-        console.log(`remainingProducts : - ${remainingProducts}`)
 
-        if (remainingProducts.length === 0) order.finalAmount = 0;
+        // if (remainingProducts.length === 0) order.finalAmount = 0;
 
       } else {
         // --- CASE 2: No Coupon Applied ---
@@ -296,10 +296,6 @@ const cancelProduct = async (req, res) => {
       }
 
       // 4. Prevent over-refund
-      // const totalPaid = order.products.reduce(
-      //   (sum, p) => sum + parseFloat(p.subtotal.toFixed(2)),
-      //   0
-      // );
       const totalPaid = order.totalOrderPrice - (order.couponAmount || 0); // actual paid before this cancellation
 
       const totalRefunded = order.refundAmount || 0;
@@ -310,8 +306,8 @@ const cancelProduct = async (req, res) => {
 
       // 5. Update refund records
       if (!order.refundAmount) order.refundAmount = 0;
-      product.refundAmount = refundAmount;
-      order.refundAmount += refundAmount;
+      product.refundAmount = parseFloat(refundAmount.toFixed(2));
+      order.refundAmount += parseFloat(refundAmount.toFixed(2));
 
       // 6. Credit refund to wallet
       wallet.balance = parseFloat((wallet.balance + refundAmount).toFixed(2));
@@ -347,9 +343,6 @@ const cancelProduct = async (req, res) => {
       .json({ status: false, message: "Something went wrong" });
   }
 };
-
-
-
 
 const returnOrderRequest = async (req, res) => {
   try {

@@ -198,7 +198,9 @@ const handleSelectAddress = (req, res) => {
  */
 const showPaymentMethods = async (req, res) => {
   try {
-    const paymentMethods = await PaymentMethod.find({ isActive: true }).sort({createdAt:1});
+    const paymentMethods = await PaymentMethod.find({ isActive: true }).sort({
+      createdAt: 1,
+    });
     const cartDocs = await Cart.find({
       userId: req.session.user.id,
       status: "active",
@@ -206,7 +208,7 @@ const showPaymentMethods = async (req, res) => {
       .populate("productId")
       .lean();
 
-      delete req.session?.coupon
+    delete req.session?.coupon;
 
     let items = cartDocs
       .map((doc) => {
@@ -223,10 +225,7 @@ const showPaymentMethods = async (req, res) => {
         };
       })
       .filter(Boolean);
-
-
-
-    // 🔴 Check stock for all items
+    // Check stock for all items
     const invalidItems = items.filter(
       (item) => item.variant.stock < item.quantity
     );
@@ -258,6 +257,11 @@ const showPaymentMethods = async (req, res) => {
 
     const user = await User.findById(req.session.user.id);
 
+    const wallet = await Wallet.find(
+      { userId: req.session.user.id },
+      { balance: 1 }
+    );
+    const balance = wallet[0].balance;
     res.render("userPages/checkoutPayment", {
       paymentMethods,
       items,
@@ -265,6 +269,7 @@ const showPaymentMethods = async (req, res) => {
       total,
       deliveryCharge,
       user,
+      balance,
     });
   } catch (error) {
     handleError(res, "showPaymentMethods", error);
@@ -327,11 +332,14 @@ const applyCoupon = async (req, res) => {
     }
 
     // calculate discount & final total
-    let discPerc = coupon.discount
-    const discount = Math.min(parseFloat(((lineTotal * coupon.discount) / 100).toFixed(2)),coupon.maxDiscountAmount);
+    let discPerc = coupon.discount;
+    const discount = Math.min(
+      parseFloat(((lineTotal * coupon.discount) / 100).toFixed(2)),
+      coupon.maxDiscountAmount
+    );
     const deliveryCharge = req.session.order?.deliveryCharge || 0;
-    if(discount == coupon.maxDiscountAmount){
-      discPerc = parseFloat(discount/lineTotal*100).toFixed(2)
+    if (discount == coupon.maxDiscountAmount) {
+      discPerc = parseFloat((discount / lineTotal) * 100).toFixed(2);
     }
     const finalAmount = parseFloat(lineTotal - discount + deliveryCharge);
 
@@ -342,7 +350,7 @@ const applyCoupon = async (req, res) => {
       discount,
       finalAmount,
       discPerc,
-      actualDiscount:coupon.discount
+      actualDiscount: coupon.discount,
     });
   } catch (error) {
     handleError(res, "applyCoupon", error);
@@ -352,10 +360,29 @@ const applyCoupon = async (req, res) => {
 /**
  * Cancel coupon
  */
-const cancelCoupon = (req, res) => {
+const cancelCoupon = async (req, res) => {
   try {
     delete req.session.coupon;
-    res.json({ status: true, message: "Coupon cancelled" });
+    const cartDocs = await Cart.find({
+      userId: req.session.user.id,
+      status: "active",
+    })
+      .populate("productId")
+      .lean();
+    let lineTotal = 0;
+    for (const doc of cartDocs) {
+      const variant = doc.productId?.variants.find(
+        (v) => v._id.toString() === doc.variantId.toString()
+      );
+      // accumulate totals
+      lineTotal += variant.finalAmount * doc.quantity;
+    }
+
+    res.json({
+      status: true,
+      message: "Coupon cancelled",
+      finalAmount: lineTotal,
+    });
   } catch (error) {
     handleError(res, "cancelCoupon", error);
   }
@@ -397,12 +424,10 @@ const handlePlaceOrder = async (req, res) => {
       if (!variant) continue;
 
       if (variant.stock < item.quantity) {
-        return res
-          .status(400)
-          .json({
-            status: false,
-            message: `Insufficient stock for ${item.productId.name} (${variant.volume}ml)`,
-          });
+        return res.status(400).json({
+          status: false,
+          message: `Insufficient stock for ${item.productId.name} (${variant.volume}ml)`,
+        });
       }
 
       const subtotal = Number(variant.finalAmount) * item.quantity;
@@ -418,7 +443,7 @@ const handlePlaceOrder = async (req, res) => {
         quantity: item.quantity,
         subtotal,
         volume: variant.volume,
-        status:paymentMethod==="RAZORPAY"?'pending':'confirmed',
+        status: paymentMethod === "RAZORPAY" ? "pending" : "confirmed",
         image: item.productId.images[0].url,
       });
     }
@@ -436,11 +461,15 @@ const handlePlaceOrder = async (req, res) => {
           .status(400)
           .json({ status: false, message: "Coupon already used" });
 
-          if (coupon) {
-            couponDiscount = coupon.discount;
-        couponAmount = Math.min(parseFloat(((coupon.discount / 100) * totalOrderPrice).toFixed(2))||0,coupon.maxDiscountAmount)
-        if(couponAmount === coupon.maxDiscountAmount){
-          couponDiscount = 0
+      if (coupon) {
+        couponDiscount = coupon.discount;
+        couponAmount = Math.min(
+          parseFloat(((coupon.discount / 100) * totalOrderPrice).toFixed(2)) ||
+            0,
+          coupon.maxDiscountAmount
+        );
+        if (couponAmount === coupon.maxDiscountAmount) {
+          couponDiscount = 0;
         }
         finalAmount -= couponAmount;
 
@@ -448,11 +477,12 @@ const handlePlaceOrder = async (req, res) => {
           { _id: coupon._id, usedBy: { $ne: user.id } },
           { $push: { usedBy: user.id }, $inc: { used: 1 } }
         );
-
       }
     }
 
-    finalAmount = parseFloat((finalAmount + req.session.order.deliveryCharge).toFixed(2));
+    finalAmount = parseFloat(
+      (finalAmount + req.session.order.deliveryCharge).toFixed(2)
+    );
 
     // Payment handling
     let payment = {
@@ -464,9 +494,10 @@ const handlePlaceOrder = async (req, res) => {
 
     if (paymentMethod === "RAZORPAY") {
       const MAX_AMOUNT = 50000000; // In paise, for ₹5,00,000
-      if (finalAmount*100 > MAX_AMOUNT) {
-        return res.status(400).json({status: false,
-          message: "Amount exceeds maximum allowed in Razorpay Test Mode."
+      if (finalAmount * 100 > MAX_AMOUNT) {
+        return res.status(400).json({
+          status: false,
+          message: "Amount exceeds maximum allowed in Razorpay Test Mode.",
         });
       }
 
@@ -528,7 +559,7 @@ const handlePlaceOrder = async (req, res) => {
       couponAmount,
       deliveryCharge: req.session.order.deliveryCharge,
       finalAmount,
-      status: paymentMethod==='RAZORPAY'?'pending':'confirmed',
+      status: paymentMethod === "RAZORPAY" ? "pending" : "confirmed",
       razorpayOrderId,
     });
 
@@ -554,7 +585,7 @@ const handlePlaceOrder = async (req, res) => {
       finalAmount,
     });
   } catch (error) {
-    console.log(error)
+    console.log(error);
     return res.status(500).json({
       status: false,
       message: `${error}`,
@@ -599,13 +630,12 @@ const handleRazorpaySuccess = async (req, res) => {
 
     // Reduce stock
     for (const prod of order.products) {
-      prod.status = 'confirmed'
+      prod.status = "confirmed";
       await Product.updateOne(
         { _id: prod.productId, "variants._id": prod.variantId },
         { $inc: { "variants.$.stock": -prod.quantity } }
       );
       await order.save();
-
     }
 
     // Mark coupon as used
@@ -620,7 +650,7 @@ const handleRazorpaySuccess = async (req, res) => {
 
     // Clear cart
     await Cart.deleteMany({ userId: order.userId, status: "active" });
-    
+
     res.json({ status: true, message: "Payment verified and order completed" });
   } catch (err) {
     console.error("Razorpay success handler error:", err);
@@ -632,10 +662,10 @@ const handleRazorpayFailed = async (req, res) => {
   try {
     const { orderId } = req.body;
     const userId = req.session.user.id;
-    
+
     const order = await Order.findOne({ orderId });
     await Cart.deleteMany({ userId: order.userId, status: "active" });
-    
+
     res.json({
       status: true,
       message: "Payment failed, Order placed as pending, Pleas Retry....",
@@ -643,12 +673,10 @@ const handleRazorpayFailed = async (req, res) => {
     delete req.session?.coupon;
   } catch (error) {
     console.log(error);
-    res
-      .status(500)
-      .json({
-        status: false,
-        message: "Server error in handling razorpay failed",
-      });
+    res.status(500).json({
+      status: false,
+      message: "Server error in handling razorpay failed",
+    });
   }
 };
 
