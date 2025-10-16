@@ -14,19 +14,19 @@ const showOrders = async (req, res) => {
   try {
     const userId = req.session?.user?.id;
     if (!userId) return res.redirect("/login");
-    const page = parseInt(req.query.page || 1)
+    const page = parseInt(req.query.page || 1);
     const limit = parseInt(req.query.limit || 6);
 
     const user = await User.findById(userId);
 
     const orders = await Order.find({ userId })
-    .populate("products.productId")
-    .skip((page-1) * limit)
-    .limit(limit)
-    .sort({ createdAt: -1 });
-    
-    const totalOrders = await Order.countDocuments({userId})
-    const totalPages = totalOrders/limit
+      .populate("products.productId")
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .sort({ createdAt: -1 });
+
+    const totalOrders = await Order.countDocuments({ userId });
+    const totalPages = totalOrders / limit;
 
     res.render("userPages/orders", {
       orders,
@@ -77,28 +77,25 @@ const cancelOrder = async (req, res) => {
       if (order.payment.status === "pending") {
         order.status = "cancelled";
         await order.save();
-        return res
-          .status(200)
-          .json({
-            status: true,
-            message:
-              "Order cancelled successfully, No refunds since you didn't paid Amount",
-          });
+        return res.status(200).json({
+          status: true,
+          message:
+            "Order cancelled successfully, No refunds since you didn't paid Amount",
+        });
       }
 
       let wallet = await Wallet.findOne({ userId });
       if (!wallet) wallet = new Wallet({ userId, balance: 0 });
 
-      let refundAmount = parseFloat(order.finalAmount.toFixed(2))
+      let refundAmount = parseFloat(order.finalAmount.toFixed(2));
 
-      
       if (order.couponApplied) {
-        console.log('coupon applied')
+        console.log("coupon applied");
         const totalRefund = parseFloat(
           (order.refundAmount + order.finalAmount).toFixed(2)
         );
         const orginalAmount =
-        order.totalOrderPrice -
+          order.totalOrderPrice -
           ((order.totalOrderPrice * order.couponDiscount) / 100).toFixed(2);
         if (totalRefund > orginalAmount) {
           const extraMoney = totalRefund - orginalAmount;
@@ -108,7 +105,7 @@ const cancelOrder = async (req, res) => {
         }
       }
 
-      wallet.balance = parseFloat((wallet.balance + refundAmount).toFixed(2))
+      wallet.balance = parseFloat((wallet.balance + refundAmount).toFixed(2));
       await wallet.save();
 
       await WalletTransaction.create({
@@ -170,146 +167,95 @@ const returnProductRequest = async (req, res) => {
   }
 };
 
-
-
 const cancelProduct = async (req, res) => {
   try {
-
-    // 1. Extract and validate input
     const { id: orderId } = req.params;
     const { index } = req.query;
     const userId = req.session.user.id;
 
-    const order = await Order.findOne({ _id: orderId, userId });
-    if (!order) {
-      return res.status(404).json({ status: false, message: "Order not found" });
-    }
+    const [order,wallet] = await Promise.all([
+  Order.findOne({ _id: orderId, userId }),
+  Wallet.findOne({ userId })
+])
+    if (!order) return res.status(404).json({ status: false, message: "Order not found" });
+    if (!wallet) wallet = new Wallet({ userId, balance: 0 });
 
     const product = order.products[index];
-    if (!product) {
-      return res.status(400).json({ status: false, message: "Invalid product index" });
-    }
-
-    if (["cancelled", "returned"].includes(product.status)) {
+    if (!product) return res.status(400).json({ status: false, message: "Invalid product index" });
+    if (product.status === "cancelled") return res.status(400).json({ status: false, message: "Already cancelled" });
+    if (["cancelled", "returned"].includes(product.status))
       return res.status(400).json({ status: false, message: "Product already cancelled/returned" });
-    }
-
-    if (["delivered", "shipped"].includes(product.status)) {
+    if (["delivered", "shipped", "Out of delivery"].includes(product.status))
       return res.status(400).json({ status: false, message: "Cannot cancel at this stage" });
-    }
 
-    
-    // Restore product stock
     await Product.updateOne(
       { _id: product.productId, "variants._id": product.variantId },
       { $inc: { "variants.$.stock": product.quantity } }
     );
-    
-    // 2. Cancel the product
     product.status = "cancelled";
-    
-    // 3. Handle refund (Razorpay / Wallet only)
+
     if (["RAZORPAY", "WALLET"].includes(order.payment.method)) {
-      let wallet = await Wallet.findOne({ userId });
-      if (!wallet) wallet = new Wallet({ userId, balance: 0 });
-
       const couponId = order.couponApplied;
-      let refundAmount;
+      let refundAmount = 0;
 
-      // --- CASE 1:Coupon Applied ---
       if (couponId) {
-        const coupon = await Coupon.findById(couponId);
-        const couponDiscountPercent = order.couponDiscount;
-        
-        if(order.couponAmount < coupon.maxDiscountAmount){
-        // STEP 1: Calculate paid amount for this product (after coupon)
-        let productPaid = parseFloat(
-          (
-            product.subtotal -
-            product.subtotal * (couponDiscountPercent / 100)
-          ).toFixed(2)
-        );
+        const coupon = await Coupon.findById(couponId).lean();
+        const discountPercent = order.couponDiscount;
 
-        const amount = parseFloat((order.finalAmount - productPaid).toFixed(2));
-
-        // STEP 2: Check coupon eligibility after cancellation
-        if (amount < coupon.minPrice) {
-          const remainings = order.products.filter(
-            (p, i) => i != index && !["cancelled", "returned"].includes(p.status)
+        if (order.couponAmount < coupon.maxDiscountAmount) {
+          let productPaid = parseFloat(
+            (product.subtotal - product.subtotal * (discountPercent / 100)).toFixed(2)
           );
+          const amount = parseFloat((order.finalAmount - productPaid).toFixed(2));
 
-          let remainingsTotal = remainings.reduce(
-            (sum, p) => sum + p.subtotal * (couponDiscountPercent / 100),
-            0
-          );
-
-          productPaid -= remainingsTotal.toFixed(2);
-          order.couponApplied = null;
-        }
-
-        refundAmount = productPaid;
-        }else{
-          //if coupn is maxDiscountAmount
-          const totalSubtotal = order.totalOrderPrice; // original total before discounts
-          const totalDiscount = order.couponAmount;    // capped discount
+          if (amount < coupon.minPrice) {
+            const remainings = order.products.filter(
+              (p, i) => i !== index && !["cancelled", "returned"].includes(p.status)
+            );
+            const remainingsTotal = remainings.reduce(
+              (sum, p) => sum + p.subtotal * (discountPercent / 100),
+              0
+            );
+            productPaid -= parseFloat(remainingsTotal.toFixed(2));
+            order.couponApplied = null;
+          }
+          refundAmount = productPaid;
+        } else {
+          const totalSubtotal = order.totalOrderPrice;
+          const totalDiscount = order.couponAmount;
           const productShare = parseFloat((product.subtotal / totalSubtotal).toFixed(2));
           const productDiscount = parseFloat((totalDiscount * productShare).toFixed(2));
           let productPaid = parseFloat((product.subtotal - productDiscount).toFixed(2));
-
-          
           const amount = parseFloat((order.finalAmount - productPaid).toFixed(2));
-          
-          // STEP 2: Check coupon eligibility after cancellation
+
           if (amount < coupon.minPrice) {
             const remainings = order.products.filter(
-              (p, i) => i != index && !["cancelled", "returned"].includes(p.status)
+              (p, i) => i !== index && p.status === "confirmed"
             );
-            
-            let remainingsTotal = remainings.reduce((sum, p) =>{
-              const productShare = parseFloat((product.subtotal / totalSubtotal).toFixed(2));
-              const productDiscount = parseFloat((totalDiscount * productShare).toFixed(2));
-              return sum + productDiscount
-            },0)
-            
+            const remainingsTotal =  remainings.reduce((sum, p) => {
+              const share = parseFloat((p.subtotal / totalSubtotal).toFixed(2));
+              const discount = parseFloat((totalDiscount * share).toFixed(2));
+              return sum + discount;
+            }, 0);
             productPaid -= parseFloat(remainingsTotal.toFixed(2));
-            // order.couponApplied = null;
+            order.couponApplied = null;
           }
           refundAmount = productPaid;
         }
-        
-        // STEP 3: Adjust order final amount
-        order.finalAmount = parseFloat((order.finalAmount - refundAmount).toFixed(2));
-        
-        const remainingProducts = order.products.filter(
-          (p) => !["cancelled", "returned"].includes(p.status)
-        );
-
-
-        // if (remainingProducts.length === 0) order.finalAmount = 0;
-
       } else {
-        // --- CASE 2: No Coupon Applied ---
         refundAmount = parseFloat(product.subtotal.toFixed(2));
-        order.finalAmount = parseFloat(
-          (order.finalAmount - refundAmount).toFixed(2)
-        );
       }
 
-      // 4. Prevent over-refund
-      const totalPaid = order.totalOrderPrice - (order.couponAmount || 0); // actual paid before this cancellation
-
+      const totalPaid = order.totalOrderPrice - (order.couponAmount || 0);
       const totalRefunded = order.refundAmount || 0;
-
-      if (totalRefunded + refundAmount > totalPaid) {
+      if (totalRefunded + refundAmount > totalPaid)
         refundAmount = parseFloat((totalPaid - totalRefunded).toFixed(2));
-      }
 
-      // 5. Update refund records
+      order.finalAmount = parseFloat((order.finalAmount - refundAmount).toFixed(2));
       if (!order.refundAmount) order.refundAmount = 0;
       product.refundAmount = parseFloat(refundAmount.toFixed(2));
       order.refundAmount += parseFloat(refundAmount.toFixed(2));
 
-      // 6. Credit refund to wallet
       wallet.balance = parseFloat((wallet.balance + refundAmount).toFixed(2));
       await wallet.save();
 
@@ -322,27 +268,20 @@ const cancelProduct = async (req, res) => {
       });
     }
 
-    // 7. Update overall order status
-    if (order.products.every((p) => p.status === "cancelled")) {
-      order.status = "cancelled";
-    } else if (order.products.every((p) => p.status === "returned")) {
+    if (order.products.every((p) => p.status === "cancelled")) order.status = "cancelled";
+    else if (order.products.every((p) => p.status === "returned")) {
       order.status = "returned";
       order.payment.status = "refunded";
     }
 
     await order.save();
-
-    return res
-      .status(200)
-      .json({ status: true, message: "Product cancelled successfully" });
-
+    res.status(200).json({ status: true, message: "Product cancelled successfully" });
   } catch (error) {
     console.error("cancelProduct error:", error);
-    return res
-      .status(500)
-      .json({ status: false, message: "Something went wrong" });
+    res.status(500).json({ status: false, message: "Something went wrong" });
   }
 };
+
 
 const returnOrderRequest = async (req, res) => {
   try {
@@ -502,12 +441,10 @@ const retryPayment = async (req, res) => {
 
     const MAX_AMOUNT = 50000000; // In paise, for ₹5,00,000
     if (order.finalAmount * 100 > MAX_AMOUNT) {
-      return res
-        .status(400)
-        .json({
-          status: false,
-          message: "Amount exceeds maximum allowed in Razorpay.",
-        });
+      return res.status(400).json({
+        status: false,
+        message: "Amount exceeds maximum allowed in Razorpay.",
+      });
     }
 
     const options = {

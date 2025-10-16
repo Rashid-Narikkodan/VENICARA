@@ -16,8 +16,19 @@ form.addEventListener("submit", (e) => {
     document.getElementById("passError").textContent = "";
     document.getElementById("confirmError").textContent = "";
 
+    const namePattern = /^[A-Za-z]+(?: [A-Za-z]+)*$/; // only letters + single spaces
+
     if (!name) {
       document.getElementById("nameError").textContent = "Name is required";
+      valid = false;
+    } else if (name.length < 2) {
+      document.getElementById("nameError").textContent = "Name must be at least 2 characters long";
+      valid = false;
+    } else if (name.length > 50) {
+      document.getElementById("nameError").textContent = "Name cannot exceed 50 characters";
+      valid = false;
+    } else if (!namePattern.test(name)) {
+      document.getElementById("nameError").textContent = "Name can only contain letters and single spaces";
       valid = false;
     }
 

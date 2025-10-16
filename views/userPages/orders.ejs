@@ -515,14 +515,26 @@
 
   async function cancelProduct(id, index) {
     try {
+      document.getElementById('yes').disable = true
+      document.getElementById('yes').textContent = 'Cancelling'
+      const modalEl = document.getElementById("confirmModal");
+      const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+      modal.hide();
       const res = await fetch(`/orders/product/cancel/${id}?index=${index}`, {
         method: "PATCH",
       });
       const data = await res.json();
-      if (data.status) location.reload();
+      if (data.status){
+        window.location.reload()
+        showAlert('success',"Product cancelled");
+      } 
     } catch (err) {
       console.error(err);
       showAlert('error',"Unable to cancel product");
+    }finally{
+      document.getElementById('yes').disable = false
+      document.getElementById('yes').textContent = 'Yes'
+
     }
   }
 
