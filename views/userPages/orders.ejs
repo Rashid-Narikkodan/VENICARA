@@ -89,6 +89,7 @@
             <% if(!["pending","shipped","Out ofdelivery","delivered","cancelled","returned"].includes(product.status)){ %>
             <button
               class="btn btn-danger fs-7 fs-md-6"
+              id="cancel-<%=order._id%>-<%=index%>"
               onclick="showConfirmModal('<%=order._id%>','cancelProduct','<%=index%>')"
             >
               Cancel
@@ -520,6 +521,7 @@
       const modalEl = document.getElementById("confirmModal");
       const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
       modal.hide();
+      document.getElementById(`cancel-${id}-${index}`).classList.add('d-none')
       const res = await fetch(`/orders/product/cancel/${id}?index=${index}`, {
         method: "PATCH",
       });
