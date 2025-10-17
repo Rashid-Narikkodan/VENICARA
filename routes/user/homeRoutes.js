@@ -9,7 +9,6 @@ const auth = require("../../middlewares/authUser");
 
 router.get(
   "/home",
-  auth.requireLogin,
   auth.isUserBlocked,
   homeController.showHome
 );

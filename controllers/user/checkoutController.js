@@ -261,7 +261,7 @@ const showPaymentMethods = async (req, res) => {
       { userId: req.session.user.id },
       { balance: 1 }
     );
-    const balance = wallet[0].balance;
+    const balance = parseFloat(wallet[0].balance.toFixed(2));
     res.render("userPages/checkoutPayment", {
       paymentMethods,
       items,

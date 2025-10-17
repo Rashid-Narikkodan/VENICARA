@@ -1,4 +1,27 @@
 <%- include('../partials/admin/header.ejs')%>
+<style>
+  /* Let modal grow with content */
+  .modal-dialog {
+    max-width: 600px; /* optional: adjust width */
+  }
+
+  .modal-content {
+    max-height: none !important;   /* remove Bootstrap's height restriction */
+  }
+
+  .modal-body {
+    max-height: none;
+    overflow: visible;  /* remove scrollbar */
+  }
+
+  #returnReason {
+    font-size: 1rem;
+    line-height: 1.6;
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+</style>
+
 <main class="flex-grow-1 min-vh-100 p-3">
   <div class="container">
     <div class="row">
@@ -183,7 +206,9 @@
                     <span class="badge <%=product.return.isRequested?'bg-primary':product.status == "returned"?'bg-success':'bg-secondary'%>"><%=product.return.isRequested?'Requested':product.status == "returned"?'Approved':'No request'%></span>
                   </td>
                   <td class="text-center text-black">
-                    <%=product?.return.reason||'-'%>
+                    <button class="btn px-2 py-0 btn-outline-primary text-primary" onclick="showReason(' <%=product?.return.reason||'-'%>')">
+                      Reason
+                    </button>
                 </td>
                 <td class="text-center">
                     <% if(product.return.isRequested && !product.return.adminReason){ %>
@@ -227,6 +252,24 @@
   </div>
 </div>
 
+<div class="modal fade" id="reasonModal" tabindex="-1" aria-labelledby="reasonLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+        <div class="modal-header bg-dark text-white">
+          <h5 class="modal-title" id="reasonLabel">Reject Return Request</h5>
+          <button type="button" class="btn-close bg-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="fw-semibold ">Return Reason</label>
+            <div  id="returnReason" style="max-width: 600px;"></div>
+          </div>
+        </div>
+    </div>
+  </div>
+</div>
+
 </main>
 </div>
 <script>
@@ -240,6 +283,14 @@
     const modal = new bootstrap.Modal(document.getElementById("rejectReturnModal"));
     modal.show();
   }
+
+
+  function showReason(reason){
+    document.getElementById('returnReason').textContent = reason
+    const modal = new bootstrap.Modal(document.getElementById("reasonModal"));
+    modal.show();
+  }
+
 
   function Approve(orderId, index = null) {
     let url = index !== null

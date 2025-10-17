@@ -358,6 +358,13 @@ const approveReturn = async (req, res) => {
 
     const userId = order.userId;
 
+    const wallet = await Wallet.findOne({ userId });
+    if (!wallet) wallet = new Wallet.create({ userId, balance: 0 });
+
+    let refundAmount = 0;
+
+    const couponId = order.couponApplied;
+
     if (index !== undefined) {
       const productIndex = parseInt(index, 10);
       if (
@@ -374,7 +381,7 @@ const approveReturn = async (req, res) => {
         req.flash("error", "No products exists");
         return res.redirect(`/admin/order/${orderId}`);
       }
-      if(product.status !== 'delivered'){
+      if (product.status !== "delivered") {
         req.flash("error", "Delivered products can only return");
         return res.redirect(`/admin/order/${orderId}`);
       }
@@ -390,55 +397,87 @@ const approveReturn = async (req, res) => {
         { $inc: { "variants.$.stock": product.quantity } }
       );
 
-      const wallet = await Wallet.findOne({ userId });
-      if (!wallet) wallet = new Wallet.create({ userId, balance: 0 });
-
-      let refundAmount = parseFloat(product.subtotal.toFixed(2));
+      refundAmount = parseFloat(product.subtotal.toFixed(2));
 
       //refund logic if coupon applied
-      if (order.couponApplied) {
-        const coupon = await Coupon.findById(order.couponApplied);
-        const { minPrice: minPurchase } = coupon;
+      if (couponId) {
+        const coupon = await Coupon.findById(couponId).lean();
+        const discountPercent = order.couponDiscount;
 
-        const newTotalPrice =
-          order.totalOrderPrice - (order.refundAmount + product.subtotal);
+        if (order.couponAmount < coupon.maxDiscountAmount) {
+          let productPaid = parseFloat(
+            (
+              product.subtotal -
+              product.subtotal * (discountPercent / 100)
+            ).toFixed(2)
+          );
+          const amount = parseFloat(
+            (order.finalAmount - productPaid).toFixed(2)
+          );
 
-        if (newTotalPrice < minPurchase) {
-          const discount = (order.totalOrderPrice * order.couponDiscount) / 100;
-          refundAmount = parseFloat((product.subtotal - discount).toFixed(2));
-          order.couponApplied = null;
-          order.couponDiscount = 0;
+          if (amount < coupon.minPrice) {
+            const remainings = order.products.filter(
+              (p, i) =>
+                i !== index && !["cancelled", "returned"].includes(p.status)
+            );
+            const remainingsTotal = remainings.reduce(
+              (sum, p) => sum + p.subtotal * (discountPercent / 100),
+              0
+            );
+            productPaid -= parseFloat(remainingsTotal.toFixed(2));
+            order.couponApplied = null;
+          }
+
+          refundAmount = productPaid;
+        } else {
+          const totalSubtotal = order.totalOrderPrice;
+          const totalDiscount = order.couponAmount;
+          const productShare = parseFloat(
+            (product.subtotal / totalSubtotal).toFixed(2)
+          );
+          const productDiscount = parseFloat(
+            (totalDiscount * productShare).toFixed(2)
+          );
+          let productPaid = parseFloat(
+            (product.subtotal - productDiscount).toFixed(2)
+          );
+          const amount = parseFloat(
+            (order.finalAmount - productPaid).toFixed(2)
+          );
+
+          if (amount < coupon.minPrice) {
+            const remainings = order.products.filter(
+              (p, i) => i !== index && p.status === "delivered"
+            );
+            const remainingsTotal = remainings.reduce((sum, p) => {
+              const share = parseFloat((p.subtotal / totalSubtotal).toFixed(2));
+              const discount = parseFloat((totalDiscount * share).toFixed(2));
+              return sum + discount;
+            }, 0);
+            productPaid -= parseFloat(remainingsTotal.toFixed(2));
+            order.couponApplied = null;
+          }
+
+          refundAmount = productPaid;
         }
-
-        order.finalAmount =
-          newTotalPrice -
-          ((newTotalPrice * order.couponDiscount) / 100).toFixed(2);
       } else {
-        order.finalAmount -= refundAmount;
+        refundAmount = parseFloat(product.subtotal.toFixed(2));
       }
+            product.refundAmount = parseFloat(refundAmount.toFixed(2));
 
-      wallet.balance += parseFloat(refundAmount.toFixed(2));
-      await wallet.save();
-      await WalletTransaction.create({
-        userId,
-        orderId,
-        productId: product.productId,
-        type: "credit",
-        amount: refundAmount * 100,
-        status: "success",
-        lastBalance: wallet.balance,
-      });
-      order.refundAmount += refundAmount;
-
-      const allReturned = order.products.every((p) => p.status === "returned");
-      if (allReturned) order.status = "returned";
     }
 
     //Order level Return Approve Logics
     else {
+
       order.status = "returned";
       order.return.isRequested = false;
       order.return.status = "approved";
+      const atleast = order.products.some(p=>p.status === 'delivered')
+      if(!atleast){
+        req.flash("error", "All products are already Returned/Cancelled");
+        return res.redirect(`/admin/order/${orderId}`);
+      }
       for (const p of order.products) {
         if (p.status === "delivered") {
           p.status = "returned";
@@ -451,15 +490,12 @@ const approveReturn = async (req, res) => {
           );
         }
       }
-
-      //refund for all COD,RAZORPAY,WALLET
-      const wallet = await Wallet.findOne({ userId });
-      if (!wallet) wallet = new Wallet.create({ userId, balance: 0 });
-
-      let refundAmount = parseFloat(order.finalAmount.toFixed(2));
+      refundAmount = parseFloat(order.finalAmount.toFixed(2));
 
       if (order.couponApplied) {
-        const totalRefund = order.refundAmount + order.finalAmount;
+        const totalRefund = parseFloat(
+          (order.refundAmount + order.finalAmount).toFixed(2)
+        );
         const orginalAmount =
           order.totalOrderPrice -
           ((order.totalOrderPrice * order.couponDiscount) / 100).toFixed(2);
@@ -470,21 +506,32 @@ const approveReturn = async (req, res) => {
           order.couponDiscount = 0;
         }
       }
-
-      wallet.balance += parseFloat(refundAmount.toFixed(2));
-      await wallet.save();
-      await WalletTransaction.create({
-        userId,
-        orderId,
-        type: "credit",
-        amount: refundAmount * 100,
-        status: "success",
-        lastBalance: wallet.balance,
-      });
-      order.finalAmount = 0;
-      order.refundAmount += refundAmount;
       order.payment.status = "refunded";
     }
+
+    const totalPaid = order.totalOrderPrice - (order.couponAmount || 0);
+    const totalRefunded = order.refundAmount || 0;
+    if (totalRefunded + refundAmount > totalPaid)
+      refundAmount = parseFloat((totalPaid - totalRefunded).toFixed(2));
+
+    order.finalAmount = parseFloat(
+      (order.finalAmount - refundAmount).toFixed(2)
+    );
+
+    wallet.balance += parseFloat(refundAmount.toFixed(2));
+    await wallet.save();
+    await WalletTransaction.create({
+      userId,
+      type: "credit",
+      amount: refundAmount * 100,
+      status: "success",
+      lastBalance: wallet.balance,
+    });
+    order.refundAmount += refundAmount;
+
+    const allReturned = order.products.every((p) => p.status === "returned");
+    if (allReturned) order.status = "returned";
+
     await order.save();
     return res
       .status(200)

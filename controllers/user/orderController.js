@@ -58,12 +58,7 @@ const cancelOrder = async (req, res) => {
       });
 
     for (const product of order.products) {
-      if (
-        ["cancelled", "returned", "delivered", "shipped"].includes(
-          product.status
-        )
-      )
-        continue;
+      if (product.status !== "confirmed") continue;
       // Restore stock
       await Product.updateOne(
         { _id: product.productId, "variants._id": product.variantId },
@@ -90,7 +85,6 @@ const cancelOrder = async (req, res) => {
       let refundAmount = parseFloat(order.finalAmount.toFixed(2));
 
       if (order.couponApplied) {
-        console.log("coupon applied");
         const totalRefund = parseFloat(
           (order.refundAmount + order.finalAmount).toFixed(2)
         );
@@ -154,8 +148,13 @@ const returnProductRequest = async (req, res) => {
         .status(400)
         .json({ status: false, message: "Invalid product index" });
 
+    let cleanReason = reason
+      .replace(/<[^>]*>/g, "")
+      .replace(/\s+/g, " ")
+      .trim();
+
     product.return.isRequested = true;
-    product.return.reason = reason;
+    product.return.reason = cleanReason;
 
     await order.save();
 
@@ -173,20 +172,33 @@ const cancelProduct = async (req, res) => {
     const { index } = req.query;
     const userId = req.session.user.id;
 
-    const [order,wallet] = await Promise.all([
-  Order.findOne({ _id: orderId, userId }),
-  Wallet.findOne({ userId })
-])
-    if (!order) return res.status(404).json({ status: false, message: "Order not found" });
+    const [order, wallet] = await Promise.all([
+      Order.findOne({ _id: orderId, userId }),
+      Wallet.findOne({ userId }),
+    ]);
+    if (!order)
+      return res
+        .status(404)
+        .json({ status: false, message: "Order not found" });
     if (!wallet) wallet = new Wallet({ userId, balance: 0 });
 
     const product = order.products[index];
-    if (!product) return res.status(400).json({ status: false, message: "Invalid product index" });
-    if (product.status === "cancelled") return res.status(400).json({ status: false, message: "Already cancelled" });
+    if (!product)
+      return res
+        .status(400)
+        .json({ status: false, message: "Invalid product index" });
+    if (product.status === "cancelled")
+      return res
+        .status(400)
+        .json({ status: false, message: "Already cancelled" });
     if (["cancelled", "returned"].includes(product.status))
-      return res.status(400).json({ status: false, message: "Product already cancelled/returned" });
+      return res
+        .status(400)
+        .json({ status: false, message: "Product already cancelled/returned" });
     if (["delivered", "shipped", "Out of delivery"].includes(product.status))
-      return res.status(400).json({ status: false, message: "Cannot cancel at this stage" });
+      return res
+        .status(400)
+        .json({ status: false, message: "Cannot cancel at this stage" });
 
     await Product.updateOne(
       { _id: product.productId, "variants._id": product.variantId },
@@ -204,13 +216,19 @@ const cancelProduct = async (req, res) => {
 
         if (order.couponAmount < coupon.maxDiscountAmount) {
           let productPaid = parseFloat(
-            (product.subtotal - product.subtotal * (discountPercent / 100)).toFixed(2)
+            (
+              product.subtotal -
+              product.subtotal * (discountPercent / 100)
+            ).toFixed(2)
           );
-          const amount = parseFloat((order.finalAmount - productPaid).toFixed(2));
+          const amount = parseFloat(
+            (order.finalAmount - productPaid).toFixed(2)
+          );
 
           if (amount < coupon.minPrice) {
             const remainings = order.products.filter(
-              (p, i) => i !== index && !["cancelled", "returned"].includes(p.status)
+              (p, i) =>
+                i !== index && !["cancelled", "returned"].includes(p.status)
             );
             const remainingsTotal = remainings.reduce(
               (sum, p) => sum + p.subtotal * (discountPercent / 100),
@@ -223,16 +241,24 @@ const cancelProduct = async (req, res) => {
         } else {
           const totalSubtotal = order.totalOrderPrice;
           const totalDiscount = order.couponAmount;
-          const productShare = parseFloat((product.subtotal / totalSubtotal).toFixed(2));
-          const productDiscount = parseFloat((totalDiscount * productShare).toFixed(2));
-          let productPaid = parseFloat((product.subtotal - productDiscount).toFixed(2));
-          const amount = parseFloat((order.finalAmount - productPaid).toFixed(2));
+          const productShare = parseFloat(
+            (product.subtotal / totalSubtotal).toFixed(2)
+          );
+          const productDiscount = parseFloat(
+            (totalDiscount * productShare).toFixed(2)
+          );
+          let productPaid = parseFloat(
+            (product.subtotal - productDiscount).toFixed(2)
+          );
+          const amount = parseFloat(
+            (order.finalAmount - productPaid).toFixed(2)
+          );
 
           if (amount < coupon.minPrice) {
             const remainings = order.products.filter(
               (p, i) => i !== index && p.status === "confirmed"
             );
-            const remainingsTotal =  remainings.reduce((sum, p) => {
+            const remainingsTotal = remainings.reduce((sum, p) => {
               const share = parseFloat((p.subtotal / totalSubtotal).toFixed(2));
               const discount = parseFloat((totalDiscount * share).toFixed(2));
               return sum + discount;
@@ -251,7 +277,9 @@ const cancelProduct = async (req, res) => {
       if (totalRefunded + refundAmount > totalPaid)
         refundAmount = parseFloat((totalPaid - totalRefunded).toFixed(2));
 
-      order.finalAmount = parseFloat((order.finalAmount - refundAmount).toFixed(2));
+      order.finalAmount = parseFloat(
+        (order.finalAmount - refundAmount).toFixed(2)
+      );
       if (!order.refundAmount) order.refundAmount = 0;
       product.refundAmount = parseFloat(refundAmount.toFixed(2));
       order.refundAmount += parseFloat(refundAmount.toFixed(2));
@@ -268,20 +296,22 @@ const cancelProduct = async (req, res) => {
       });
     }
 
-    if (order.products.every((p) => p.status === "cancelled")) order.status = "cancelled";
+    if (order.products.every((p) => p.status === "cancelled"))
+      order.status = "cancelled";
     else if (order.products.every((p) => p.status === "returned")) {
       order.status = "returned";
       order.payment.status = "refunded";
     }
 
     await order.save();
-    res.status(200).json({ status: true, message: "Product cancelled successfully" });
+    res
+      .status(200)
+      .json({ status: true, message: "Product cancelled successfully" });
   } catch (error) {
     console.error("cancelProduct error:", error);
     res.status(500).json({ status: false, message: "Something went wrong" });
   }
 };
-
 
 const returnOrderRequest = async (req, res) => {
   try {
@@ -294,8 +324,13 @@ const returnOrderRequest = async (req, res) => {
         .status(404)
         .json({ status: false, message: "Order not found" });
 
+    let cleanReason = reason
+      .replace(/<[^>]*>/g, "")
+      .replace(/\s+/g, " ")
+      .trim();
+
     order.return.isRequested = true;
-    order.return.reason = reason;
+    order.return.reason = cleanReason;
     order.save();
 
     res
