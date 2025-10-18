@@ -1,172 +1,203 @@
 <%- include('../partials/admin/header.ejs')%>
-     <main class="flex-grow-1 min-vh-100 p-3">
-      <div class="container-fluid">
-        <div class="row align-items-center my-3">
-          <div class="col-md-6">
-            <h1>Order Managment</h1>
-          </div>
-        </div>
-       <!-- Filters & Search Section -->
-<div class="row mb-3">
-  <div class="col-12">
-    <form action="/admin/orders" method="GET" class="d-flex flex-wrap gap-2 align-items-center">
-
-      <!-- Search -->
-      <input type="text" 
-             name="search" 
-             class="form-control w-auto flex-grow-1"
-             placeholder="Search by Order ID / Email..." 
-             value="<%= search %>">
-
-      <!-- Filter by Status -->
-      <select name="status" class="form-select w-auto">
-        <option value="">All Status</option>
-        <option value="pending" <%= status==='pending' ? 'selected' : '' %>>Pending</option>
-        <option value="shipped" <%= status==='shipped' ? 'selected' : '' %>>Shipped</option>
-        <option value="Out of delivery" <%= status==='Out of delivery' ? 'selected' : '' %>>Out of Delivery</option>
-        <option value="delivered" <%= status==='delivered' ? 'selected' : '' %>>Delivered</option>
-        <option value="cancelled" <%= status==='cancelled' ? 'selected' : '' %>>Cancelled</option>
-        <option value="returned" <%= status==='returned' ? 'selected' : '' %>>Returned</option>
-      </select>
-
-      <!-- Sort -->
-      <select name="sort" class="form-select w-auto">
-        <option value="">Sort By</option>
-        <option value="date_desc" <%= sort==='date_desc' ? 'selected' : '' %>>Date (Newest)</option>
-        <option value="date_asc" <%= sort==='date_asc' ? 'selected' : '' %>>Date (Oldest)</option>
-        <option value="amount_desc" <%= sort==='amount_desc' ? 'selected' : '' %>>Amount (High → Low)</option>
-        <option value="amount_asc" <%= sort==='amount_asc' ? 'selected' : '' %>>Amount (Low → High)</option>
-      </select>
-
-      <!-- Apply -->
-      <button class="btn btn-dark">Apply</button>
-
-      <!-- Reset / Cancel -->
-      <a href="/admin/orders" class="btn btn-outline-secondary">Cancel</a>
-    </form>
-  </div>
-</div>
-
-
-        <div class="table-responsive shadow rounded-3 bg-white">
-          <table class="table table-hover align-middle mb-0">
-            <thead class="table-dark">
-              <tr>
-                <th class="text-center p-3">No.</th>
-                <th class="text-center p-3">OrderID</th>
-                <th class="text-center p-3">Customer</th>
-                <th class="text-center p-3">Paid Amount</th>
-                <th class="text-center p-3">Purchased On</th>
-                <th class="text-center p-3">Updated On</th>
-                <th class="text-center p-3">status</th>
-                <th class="text-center p-3">Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              <% orders.forEach(order=> { %>
-                <%count++%>
-                  <tr>
-                    <td class="text-center">
-                      <%= count %>
-                    </td>
-                    <td class="text-center">
-                      <%= order.orderId %>
-                    </td>
-                    <td class="text-center">
-                      <%= order.userId?.email%>
-                    </td>
-                    <td class="text-center">
-                        ₹<%= order.finalAmount%>
-                    </td>
-                    <td class="text-center">
-                      <%= order.createdAt?.toLocaleDateString()%>
-                    </td>
-                    <td class="text-center">
-                      <%= order.updatedAt?.toLocaleDateString()%>
-                    </td>
-                    <td class="text-center text-success">
-                      <%=order.status%>
-                  </td>
-                    <td class="text-center">
-                        <a href="/admin/order/<%=order._id%>" type="submit" class="btn btn-sm btn-outline-primary">View</a>
-                        <span class="btn btn-info p-1 <%=!order.return.isRequested||order.products.some(p=>p.return.isRequested)?'d-none':''%>"></span>
-                    </td>
-                  </tr>
-                  <% }) %>
-            </tbody>
-          </table>
-        </div>
+<style>
+  @media (max-width: 767.98px) {
+    .responsive-table thead {
+      display: none;
+    }
+    .responsive-table tr {
+      display: block;
+      margin-bottom: 1.5rem;
+      border: 1px solid #dee2e6;
+      border-radius: 0.25rem;
+      padding: 0.5rem;
+      background-color: #fff;
+      box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    }
+    .responsive-table td {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      text-align: right !important;
+      border-top: 1px solid #dee2e6;
+      padding: 0.75rem 1rem;
+    }
+    .responsive-table td:first-child {
+      border-top: none;
+    }
+    .responsive-table td::before {
+      content: attr(data-label);
+      font-weight: bold;
+      text-transform: uppercase;
+      color: #6c757d;
+      flex: 0 0 40%;
+      text-align: left;
+    }
+    .responsive-table td .btn {
+      width: auto;
+    }
+    .tr-mobile{
+      border-radius: 15px !important;
+    }
+    .td-mobile{
+      background:#f5f5f5
+    }
+    .container-fluid,main{
+      padding:0 0 !important
+    }
+  }
+</style>
+<main class="flex-grow-1 min-vh-100 p-3">
+  <div class="container-fluid">
+    <div class="row align-items-center my-3">
+      <div class="col-md-6">
+        <h1>Order Management</h1>
       </div>
-
-      <!-- ////////////////////// -->
-<!-- Pagination -->
-<div class="d-flex justify-content-end">
-  <nav aria-label="Page navigation">
-    <ul class="pagination justify-content-end flex-wrap p-3">
-
-      <!-- Previous Button -->
-      <% if (currentPage > 1) { %>
-        <li class="page-item">
-          <a class="page-link bg-dark"
-             href="?page=<%= currentPage - 1 %>&limit=<%= limit %>&search=<%= search %>&status=<%= status %>&sort=<%= sort %>">
-            <i class="fa-solid fa-caret-left text-white"></i>
-          </a>
-        </li>
-      <% } else { %>
-        <li class="page-item disabled">
-          <span class="page-link bg-dark">
-            <i class="fa-solid fa-caret-left text-white"></i>
-          </span>
-        </li>
-      <% } %>
-
-      <!-- Left Page (if exists) -->
-      <% if (currentPage - 1 >= 1) { %>
-        <li class="page-item">
-          <a class="page-link"
-             href="?page=<%= currentPage - 1 %>&limit=<%= limit %>&search=<%= search %>&status=<%= status %>&sort=<%= sort %>">
-            <%= currentPage - 1 %>
-          </a>
-        </li>
-      <% } %>
-
-      <!-- Current Page -->
-      <li class="page-item active">
-        <span class="page-link bg-white text-dark border-0">
-          <%= currentPage %>
-        </span>
-      </li>
-
-      <!-- Right Page (if exists) -->
-      <% if (currentPage + 1 <= totalPages) { %>
-        <li class="page-item">
-          <a class="page-link"
-             href="?page=<%= currentPage + 1 %>&limit=<%= limit %>&search=<%= search %>&status=<%= status %>&sort=<%= sort %>">
-            <%= currentPage + 1 %>
-          </a>
-        </li>
-      <% } %>
-
-      <!-- Next Button -->
-      <% if (currentPage < totalPages) { %>
-        <li class="page-item">
-          <a class="page-link bg-dark"
-             href="?page=<%= currentPage + 1 %>&limit=<%= limit %>&search=<%= search %>&status=<%= status %>&sort=<%= sort %>">
-            <i class="fa-solid fa-caret-right text-white"></i>
-          </a>
-        </li>
-      <% } else { %>
-        <li class="page-item disabled">
-          <span class="page-link bg-dark">
-            <i class="fa-solid fa-caret-right text-white"></i>
-          </span>
-        </li>
-      <% } %>
-
-    </ul>
-  </nav>
-</div>
-
-    </main>
     </div>
-    <%- include('../partials/admin/footer.ejs')%>
+    <!-- Filters & Search Section -->
+    <div class="row mb-3">
+      <div class="col-12">
+        <form action="/admin/orders" method="GET" class="d-flex flex-wrap gap-2 align-items-center">
+          <!-- Search -->
+          <input type="text" 
+                 name="search" 
+                 class="form-control w-auto flex-grow-1"
+                 placeholder="Search by Order ID / Email..." 
+                 value="<%= search %>">
+          <!-- Filter by Status -->
+          <select name="status" class="form-select w-auto">
+            <option value="">All Status</option>
+            <option value="pending" <%= status==='pending' ? 'selected' : '' %>>Pending</option>
+            <option value="shipped" <%= status==='shipped' ? 'selected' : '' %>>Shipped</option>
+            <option value="Out of delivery" <%= status==='Out of delivery' ? 'selected' : '' %>>Out of Delivery</option>
+            <option value="delivered" <%= status==='delivered' ? 'selected' : '' %>>Delivered</option>
+            <option value="cancelled" <%= status==='cancelled' ? 'selected' : '' %>>Cancelled</option>
+            <option value="returned" <%= status==='returned' ? 'selected' : '' %>>Returned</option>
+          </select>
+          <!-- Sort -->
+          <select name="sort" class="form-select w-auto">
+            <option value="">Sort By</option>
+            <option value="date_desc" <%= sort==='date_desc' ? 'selected' : '' %>>Date (Newest)</option>
+            <option value="date_asc" <%= sort==='date_asc' ? 'selected' : '' %>>Date (Oldest)</option>
+            <option value="amount_desc" <%= sort==='amount_desc' ? 'selected' : '' %>>Amount (High → Low)</option>
+            <option value="amount_asc" <%= sort==='amount_asc' ? 'selected' : '' %>>Amount (Low → High)</option>
+          </select>
+          <!-- Apply -->
+          <button class="btn btn-dark">Apply</button>
+          <!-- Reset / Cancel -->
+          <a href="/admin/orders" class="btn btn-outline-secondary">Cancel</a>
+        </form>
+      </div>
+    </div>
+    <div class="table-responsive shadow rounded-3 bg-white">
+      <table class="table table-hover align-middle mb-0 responsive-table">
+        <thead class="table-dark">
+          <tr>
+            <th class="text-center p-3">No.</th>
+            <th class="text-center p-3">OrderID</th>
+            <th class="text-center p-3">Customer</th>
+            <th class="text-center p-3">Paid Amount</th>
+            <th class="text-center p-3">Purchased On</th>
+            <th class="text-center p-3">Updated On</th>
+            <th class="text-center p-3">Status</th>
+            <th class="text-center p-3">Action</th>
+          </tr>
+        </thead>
+        <tbody class="td-mobile">
+          <% orders.forEach(order=> { %>
+            <%count++%>
+              <tr class="tr-mobile">
+                <td class="text-center" data-label="No.">
+                  <%= count %>
+                </td>
+                <td class="text-center" data-label="OrderID">
+                  <%= order.orderId %>
+                </td>
+                <td class="text-center" data-label="Customer">
+                  <%= order.userId?.email%>
+                </td>
+                <td class="text-center" data-label="Paid Amount">
+                    ₹<%= order.finalAmount%>
+                </td>
+                <td class="text-center" data-label="Purchased On">
+                  <%= order.createdAt?.toLocaleDateString()%>
+                </td>
+                <td class="text-center" data-label="Updated On">
+                  <%= order.updatedAt?.toLocaleDateString()%>
+                </td>
+                <td class="text-center text-success" data-label="Status">
+                  <%=order.status%>
+                </td>
+                <td class="text-center" data-label="Action">
+                    <a href="/admin/order/<%=order._id%>" type="submit" class="btn btn-sm btn-outline-primary">View</a>
+                    <span class="btn btn-info p-1 <%=!order.return.isRequested||order.products.some(p=>p.return.isRequested)?'d-none':''%>"></span>
+                </td>
+              </tr>
+              <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <!-- Pagination -->
+  <div class="d-flex justify-content-end">
+    <nav aria-label="Page navigation">
+      <ul class="pagination justify-content-end flex-wrap p-3">
+        <!-- Previous Button -->
+        <% if (currentPage > 1) { %>
+          <li class="page-item">
+            <a class="page-link bg-dark"
+               href="?page=<%= currentPage - 1 %>&limit=<%= limit %>&search=<%= search %>&status=<%= status %>&sort=<%= sort %>">
+              <i class="fa-solid fa-caret-left text-white"></i>
+            </a>
+          </li>
+        <% } else { %>
+          <li class="page-item disabled">
+            <span class="page-link bg-dark">
+              <i class="fa-solid fa-caret-left text-white"></i>
+            </span>
+          </li>
+        <% } %>
+        <!-- Left Page (if exists) -->
+        <% if (currentPage - 1 >= 1) { %>
+          <li class="page-item">
+            <a class="page-link"
+               href="?page=<%= currentPage - 1 %>&limit=<%= limit %>&search=<%= search %>&status=<%= status %>&sort=<%= sort %>">
+              <%= currentPage - 1 %>
+            </a>
+          </li>
+        <% } %>
+        <!-- Current Page -->
+        <li class="page-item active">
+          <span class="page-link bg-white text-dark border-0">
+            <%= currentPage %>
+          </span>
+        </li>
+        <!-- Right Page (if exists) -->
+        <% if (currentPage + 1 <= totalPages) { %>
+          <li class="page-item">
+            <a class="page-link"
+               href="?page=<%= currentPage + 1 %>&limit=<%= limit %>&search=<%= search %>&status=<%= status %>&sort=<%= sort %>">
+              <%= currentPage + 1 %>
+            </a>
+          </li>
+        <% } %>
+        <!-- Next Button -->
+        <% if (currentPage < totalPages) { %>
+          <li class="page-item">
+            <a class="page-link bg-dark"
+               href="?page=<%= currentPage + 1 %>&limit=<%= limit %>&search=<%= search %>&status=<%= status %>&sort=<%= sort %>">
+              <i class="fa-solid fa-caret-right text-white"></i>
+            </a>
+          </li>
+        <% } else { %>
+          <li class="page-item disabled">
+            <span class="page-link bg-dark">
+              <i class="fa-solid fa-caret-right text-white"></i>
+            </span>
+          </li>
+        <% } %>
+      </ul>
+    </nav>
+  </div>
+</main>
+</div>
+<%- include('../partials/admin/footer.ejs')%>

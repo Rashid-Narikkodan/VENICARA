@@ -1,198 +1,327 @@
 <%- include('../partials/admin/header.ejs')%>
-    <main class="flex-grow-1 min-vh-100 p-3">
-      <div class="container-fluid">
-        <div class="row align-items-center mb-5">
-          <div class="col-md-6">
-            <h1>Products List</h1>
-          </div>
-          <div class="col-md-6 d-flex justify-content-end gap-2">
-            <form action="/admin/products" method="GET" class="d-flex gap-2 w-100">
-              <input type="text" name="search" class="form-control w-50" placeholder="Search..." value="<%= search %>">
-              <button class="btn btn-dark">Search</button>
-            </form>
-            <a href="/admin/products/add"><button class="btn btn-dark">New</button></a>
-          </div>
-        </div>
-        <div class="table-responsive shadow rounded-3 bg-white">
-          <table class="table table-hover align-middle mb-0">
-            <thead class="table-dark">
-              <tr>
-                <th>No.</th>
-                <th>Product</th>
-                <th>Product Image</th>
-                <th>Base Price</th>
-                <th>Category</th>
-                <th>Total Stock</th>
-                <th>Variants</th>
-                <th>Status</th>
-                <th>Added On</th>
-                <th class="text-center">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              <% products.forEach(product=> { %>
-                <%count++%>
-                  <tr>
-                    <td class="text-center">
-                      <%= count %>
-                    </td>
-                    <td class="text-center">
-                      <%= product.name %>
-                    </td>
-                    <td class="text-center">
-                          <img src="<%=product.image?.url%>" alt="product img" width="50">
-                    </td>
-                    <td class="text-center">
-                      <%= product.basePrice%>₹
-                    </td>
-                    <td class="text-center">
-                      <%= product.categoryName %>
-                    </td>
-                    <td class="text-center">
-                      <%= product.totalStock %>
-                    </td>
-                    <td>
-                      <span class="alert alert-info py-1 text-primary">
-                        <%=product.variantLabel%>
-                      </span>
-                    </td>
-                    <td>
-                      <button type="button" onclick="showConfirmModal('toggle','<%=product._id%>','While inactivate this product, it will unlist from shop')"
-                        class="alert py-1 m-0 <%= product.isAvailable?'alert-success text-success':'alert-danger text-danger'%>">
-                        <%= product.isAvailable? 'Available' : 'Not Available' %>
-                      </button>
-                    </td>
-                    <td>
-                      <%=product.addedOn%>
-                    </td>
-                    <td class="text-center">
+<style>
+  /* Responsive Products Management */
+  @media (max-width: 767.98px) {
+    .products-table thead {
+      display: none;
+    }
+    .products-table tr {
+      display: block;
+      margin-bottom: 1.5rem;
+      border: 1px solid #dee2e6;
+      border-radius: 0.25rem;
+      padding: 0.5rem;
+      background-color: #fff;
+      box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    }
+    .products-table td {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      text-align: right !important;
+      border-top: 1px solid #dee2e6;
+      padding: 0.75rem 1rem;
+    }
+    .products-table td:first-child {
+      border-top: none;
+    }
+    .products-table td::before {
+      content: attr(data-label);
+      font-weight: bold;
+      text-transform: uppercase;
+      color: #6c757d;
+      flex: 0 0 40%;
+      text-align: left;
+    }
+    .products-table .product-image {
+      width: 60px !important;
+      height: auto !important;
+    }
+    .products-table .status-btn {
+      width: 100% !important;
+      margin: 0 !important;
+    }
+    .products-table .actions {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: flex-end;
+    }
+    .products-table .btn {
+      flex: 1;
+      min-width: 40px;
+    }
+  }
 
-                      <a href="/admin/products/edit/<%=product._id%>"><button class="btn btn-sm btn-outline-primary"><i
-                            class="fa fa-pen"></i></button></a>
+  /* Header & Search Mobile */
+  @media (max-width: 767.98px) {
+    .header-row {
+      flex-direction: column !important;
+      gap: 1rem !important;
+      text-align: center !important;
+    }
+    .search-form {
+      flex-direction: column !important;
+      width: 100% !important;
+    }
+    .search-form input {
+      width: 100% !important;
+      margin-bottom: 0.5rem !important;
+    }
+    .search-form button,
+    .search-form a button {
+      width: 100% !important;
+    }
+    .header-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      width: 100%;
+    }
+  }
 
-                      <form id="deleteForm" action="/admin/products/<%=product._id%>?_method=PATCH" method="POST" class="d-inline">
-                        <button type="button" class="btn btn-sm btn-outline-danger"
-                          onclick="showConfirmModal('delete','<%=product._id%>','When you delete this product, it will unlist this product and you may lose controle over this product')"><i
-                            class="fa fa-trash"></i></button>
-                      </form>
-                    </td>
-                  </tr>
-                  <% }) %>
-            </tbody>
-          </table>
-        </div>
+  /* Mobile Layout */
+  @media (max-width: 575.98px) {
+    .main-container {
+      padding: 0.5rem !important;
+    }
+    h1 {
+      font-size: 1.5rem !important;
+    }
+    .product-image {
+      width: 50px !important;
+    }
+  }
+
+  /* Modal Mobile */
+  @media (max-width: 575.98px) {
+    .modal-dialog {
+      margin: 0.5rem !important;
+    }
+    #confirmLabel {
+      font-size: 1.1rem !important;
+    }
+  }
+</style>
+
+<main class="flex-grow-1 min-vh-100 p-3 main-container">
+  <div class="container-fluid">
+    <!-- Header with Search & Add Button -->
+    <div class="row align-items-center header-row mb-5">
+      <div class="col-12 col-md-6">
+        <h1 class="mb-3 mb-md-0">Products List</h1>
       </div>
-
-
-      <!-- //pagination -->
-      <div class="d-flex justify-content-end">
-        <nav aria-label="Page navigation">
-          <ul class="pagination justify-content-end flex-wrap p-3">
-
-            <!-- Previous Button -->
-            <% if (currentPage> 1) { %>
-              <li class="page-item">
-                <a class="page-link bg-dark" href="?page=<%= currentPage - 1 %>&limit=<%= limit %>">
-                  <i class="fa-solid fa-caret-left text-white"></i>
-                </a>
-              </li>
-              <% } else { %>
-                <li class="page-item disabled">
-                  <span class="page-link bg-dark">
-                    <i class="fa-solid fa-caret-left text-white"></i>
-                  </span>
-                </li>
-                <% } %>
-
-                  <!-- Left Page (if exists) -->
-                  <% if (currentPage - 1>= 1) { %>
-                    <li class="page-item">
-                      <a class="page-link" href="?page=<%= currentPage - 1 %>&limit=<%= limit %>">
-                        <%= currentPage - 1 %>
-                      </a>
-                    </li>
-                    <% } %>
-
-                      <!-- Current Page -->
-                      <li class="page-item active">
-                        <span class="page-link bg-white text-dark border-0">
-                          <%= currentPage %>
-                        </span>
-                      </li>
-
-                      <!-- Right Page (if exists) -->
-                      <% if (currentPage + 1 <=totalPages) { %>
-                        <li class="page-item">
-                          <a class="page-link" href="?page=<%= currentPage + 1 %>&limit=<%= limit %>">
-                            <%= currentPage + 1 %>
-                          </a>
-                        </li>
-                        <% } %>
-
-                          <!-- Next Button -->
-                          <% if (currentPage < totalPages) { %>
-                            <li class="page-item">
-                              <a class="page-link bg-dark" href="?page=<%= currentPage + 1 %>&limit=<%= limit %>">
-                                <i class="fa-solid fa-caret-right text-white"></i>
-                              </a>
-                            </li>
-                            <% } else { %>
-                              <li class="page-item disabled">
-                                <span class="page-link bg-dark">
-                                  <i class="fa-solid fa-caret-right text-white"></i>
-                                </span>
-                              </li>
-                              <% } %>
-
-          </ul>
-        </nav>
-      </div>
-
-      <div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-          <div class="modal-content border-dark">
-            <div class="modal-header bg-dark text-white">
-              <h5 class="modal-title" id="confirmLabel">Are you sure You want to Log-Out?</h5>
-              <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-              <p id="confirmMessage"></p>
-            </div>
-            <div class="modal-footer">
-              <button type="button" data-bs-dismiss="modal" class="btn btn-outline-dark">No</button>
-              <button type="button" class="btn btn-dark" id="yes" data-operation="" data-productId="">Yes</button>
-            </div>
-          </div>
+      <div class="col-12 col-md-6">
+        <div class="header-actions d-flex justify-content-end gap-2 w-100">
+          <form action="/admin/products" method="GET" class="search-form d-flex gap-2 flex-grow-1 flex-md-grow-0">
+            <input type="text" 
+                   name="search" 
+                   class="form-control" 
+                   placeholder="Search by name/category..." 
+                   value="<%= search %>">
+            <button class="btn btn-dark">Search</button>
+          </form>
+          <a href="/admin/products/add" class="btn btn-dark">New</a>
         </div>
       </div>
-
-    </main>
     </div>
-    <script>
 
-      const yes = document.getElementById('yes')
-      const form = document.getElementById('deleteForm')
+    <!-- Products Table -->
+    <div class="table-responsive shadow rounded-3 bg-white">
+      <table class="table table-hover align-middle mb-0 products-table">
+        <thead class="table-dark">
+          <tr>
+            <th class="text-center p-3">No.</th>
+            <th class="text-center p-3">Product</th>
+            <th class="text-center p-3">Image</th>
+            <th class="text-center p-3">Base Price</th>
+            <th class="text-center p-3">Category</th>
+            <th class="text-center p-3">Stock</th>
+            <th class="text-center p-3">Variants</th>
+            <th class="text-center p-3">Status</th>
+            <th class="text-center p-3">Added On</th>
+            <th class="text-center p-3">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% products.forEach(product=> { %>
+            <%count++%>
+            <tr>
+              <td data-label="No." class="text-center"><%= count %></td>
+              <td data-label="Product"><%= product.name %></td>
+              <td data-label="Image" class="text-center">
+                <img src="<%=product.image?.url%>" 
+                     alt="<%= product.name %>" 
+                     class="product-image rounded"
+                     width="50">
+              </td>
+              <td data-label="Base Price">₹<%= product.basePrice %></td>
+              <td data-label="Category"><%= product.categoryName %></td>
+              <td data-label="Stock"><%= product.totalStock %></td>
+              <td data-label="Variants">
+                <span class="badge bg-info text-primary py-1">
+                  <%=product.variantLabel%>
+                </span>
+              </td>
+              <td data-label="Status">
+                <button type="button" 
+                        onclick="showConfirmModal('toggle','<%=product._id%>','While inactivate this product, it will unlist from shop')"
+                        class="status-btn alert py-1 w-100 <%= product.isAvailable?'alert-success text-success':'alert-danger text-danger'%>">
+                  <%= product.isAvailable? 'Available' : 'Not Available' %>
+                </button>
+              </td>
+              <td data-label="Added On"><%=product.addedOn%></td>
+              <td data-label="Actions" class="actions">
+                <a href="/admin/products/edit/<%=product._id%>" 
+                   class="btn btn-sm btn-outline-primary" 
+                   title="Edit">
+                  <i class="fa fa-pen"></i>
+                </a>
+                <form action="/admin/products/<%=product._id%>?_method=DELETE" 
+                      method="POST" 
+                      class="d-inline delete-form" 
+                      data-product-id="<%=product._id%>">
+                  <button type="button" 
+                          class="btn btn-sm btn-outline-danger"
+                          onclick="showConfirmModal('delete','<%=product._id%>','When you delete this product, it will be permanently removed')"
+                          title="Delete">
+                    <i class="fa fa-trash"></i>
+                  </button>
+                </form>
+              </td>
+            </tr>
+            <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </div>
 
-          function showConfirmModal(operation,productId,message){
-            
+  <!-- Pagination -->
+  <div class="d-flex justify-content-end mt-4">
+    <nav aria-label="Page navigation">
+      <ul class="pagination justify-content-end flex-wrap p-3">
+        <!-- Previous Button -->
+        <% if (currentPage > 1) { %>
+          <li class="page-item">
+            <a class="page-link bg-dark" 
+               href="?page=<%= currentPage - 1 %>&limit=<%= limit %>&search=<%= search %>">
+              <i class="fa-solid fa-caret-left text-white"></i>
+            </a>
+          </li>
+        <% } else { %>
+          <li class="page-item disabled">
+            <span class="page-link bg-dark">
+              <i class="fa-solid fa-caret-left text-white"></i>
+            </span>
+          </li>
+        <% } %>
+
+        <!-- Left Page -->
+        <% if (currentPage - 1 >= 1) { %>
+          <li class="page-item">
+            <a class="page-link" 
+               href="?page=<%= currentPage - 1 %>&limit=<%= limit %>&search=<%= search %>">
+              <%= currentPage - 1 %>
+            </a>
+          </li>
+        <% } %>
+
+        <!-- Current Page -->
+        <li class="page-item active">
+          <span class="page-link bg-white text-dark border-0">
+            <%= currentPage %>
+          </span>
+        </li>
+
+        <!-- Right Page -->
+        <% if (currentPage + 1 <= totalPages) { %>
+          <li class="page-item">
+            <a class="page-link" 
+               href="?page=<%= currentPage + 1 %>&limit=<%= limit %>&search=<%= search %>">
+              <%= currentPage + 1 %>
+            </a>
+          </li>
+        <% } %>
+
+        <!-- Next Button -->
+        <% if (currentPage < totalPages) { %>
+          <li class="page-item">
+            <a class="page-link bg-dark" 
+               href="?page=<%= currentPage + 1 %>&limit=<%= limit %>&search=<%= search %>">
+              <i class="fa-solid fa-caret-right text-white"></i>
+            </a>
+          </li>
+        <% } else { %>
+          <li class="page-item disabled">
+            <span class="page-link bg-dark">
+              <i class="fa-solid fa-caret-right text-white"></i>
+            </span>
+          </li>
+        <% } %>
+      </ul>
+    </nav>
+  </div>
+
+  <!-- Confirmation Modal -->
+  <div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-dark">
+        <div class="modal-header bg-dark text-white">
+          <h5 class="modal-title" id="confirmLabel">Confirm Action</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body text-center">
+          <p id="confirmMessage" class="mb-0"></p>
+        </div>
+        <div class="modal-footer justify-content-center">
+          <button type="button" data-bs-dismiss="modal" class="btn btn-outline-dark">Cancel</button>
+          <button type="button" class="btn btn-danger" id="yes" data-operation="" data-productId="">Confirm</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+  </div>
+<script>
+  function showConfirmModal(operation, productId, message) {
     const modalEl = document.getElementById("confirmModal");
     const messageEl = document.getElementById("confirmMessage");
+    const yesBtn = document.getElementById("yes");
+    
     messageEl.textContent = message;
-    yes.setAttribute('data-operation',operation)
-    yes.setAttribute('data-productId',productId)
+    yesBtn.setAttribute('data-operation', operation);
+    yesBtn.setAttribute('data-productId', productId);
+    
     const modal = new bootstrap.Modal(modalEl);
     modal.show();
-    }
+  }
+
+  document.getElementById('yes').addEventListener('click', (e) => {
+    const productId = e.target.getAttribute('data-productId');
+    const operation = e.target.getAttribute('data-operation');
     
-    yes.addEventListener('click',(e)=>{
-      const productId = yes.getAttribute('data-productId')
-      const operation = yes.getAttribute('data-operation')
-      if(operation === 'delete'){
-        form.submit()
-      }else if(operation === 'toggle'){
-        toggleProductActive(productId)
+    if (operation === 'delete') {
+      document.querySelector(`form[data-product-id="${productId}"]`).submit();
+    } else if (operation === 'toggle') {
+      toggleProductActive(productId);
+    }
+  });
+
+  function toggleProductActive(productId) {
+    fetch(`/admin/products/${productId}/toggle?_method=PATCH`, {
+      method: 'PATCH'
+    })
+    .then(response => {
+      if (response.ok) {
+        location.reload();
+      } else {
+        alert('Failed to update product status');
       }
     })
+    .catch(error => {
+      console.error('Error:', error);
+      alert('An error occurred');
+    });
+  }
+</script>
 
-    </script>
-    <%- include('../partials/admin/footer.ejs')%>
+<%- include('../partials/admin/footer.ejs')%>

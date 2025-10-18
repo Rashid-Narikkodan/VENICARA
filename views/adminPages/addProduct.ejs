@@ -1,160 +1,199 @@
 <%- include('../partials/admin/header.ejs')%>
-   <style>
-        input::-webkit-outer-spin-button,
-    input::-webkit-inner-spin-button {
-      -webkit-appearance: none;
-      margin: 0;
+<style>
+  input::-webkit-outer-spin-button,
+  input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .container {
+      padding: 0 15px;
     }
-  </style>
-    <main class="flex-fill">
-      <div class="container my-4 d-flex justify-content-center">
-        <div class="w-75 p-5 rounded-4" style="background:rgb(166, 166, 166)">
-          <h1 class="mb-4">Add Product</h1>
-          <div class="alert alert-danger d-none" id="addProductError"></div>
-          <form id="addProductForm" method="post" action="/admin/products/add" enctype="multipart/form-data">
-            <div class="mb-3">
-              <label class="form-label">Product Name</label>
-              <input type="text" id="name" name="name" class="form-control" placeholder="eg :- Blue de Chanel">
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Product Description</label>
-              <textarea name="description" id="description" class="form-control" rows="4"
-                placeholder="Write your description here..."></textarea>
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Product Images</label>
-              <div class="rounded-3 border p-4 bg-light">
-                <input type="file" name="images" multiple accept="image/*" id="imgInput" hidden>
-                <div class="border rounded p-5 text-center position-relative"
-                  style="cursor:pointer;background: rgb(205, 205, 205);" id="addImgDiv">
-                  <i class="fa-solid fa-images fa-2x z-5"></i>
-                  <div>Add Images</div>
-                  <small>Select only 3 images</small>
-                </div>
-                <div id="previewContainer" class="d-flex justify-content-center gap-2 mt-3 flex-wrap"></div>
-              </div>
-            </div>
-            <div class="row mb-4 g-3">
-              <div class="col-md-4">
-                <label class="form-label">Category</label>
-                <select name="categoryId" id="category" class="form-select">
-                  <option selected disabled>Select Category</option>
-                  <% categories.forEach(category=> { %>
-                    <option value="<%= category._id %>">
-                      <%= category.name %>
-                    </option>
-                    <% }) %>
-                </select>
-              </div>
-              <div class="col-md-4">
-                <label class="form-label">Tags</label>
-                <input name="tags" id="tags" type="text" class="form-control" placeholder="tags(seperate with ',')">
-              </div>
-              <!-- variants -->
-              <p class="mb-0 fw-bold fs-5">Add Variant</p>
-              <div id="variantContainer">
-                <ol>
-                <div class="variantSection">
-                  <li><div class="row mb-3 m-0 g-3">
-                    <div class="col-md-3">
-                      <label class="form-label">Base Price (₹)</label>
-                      <input name="basePrice" type="number" class="form-control" placeholder="eg :- 5000">
-                    </div>
-                    <div class="col-md-3">
-                      <label class="form-label">Discount Price (₹)</label>
-                      <input name="discount" type="number" class="form-control" placeholder="eg :- 10(percentage)">
-                    </div>
-                    <div class="col-md-3">
-                      <label class="form-label">Stock</label>
-                      <input name="stock" type="number" class="form-control" placeholder="eg :- 20">
-                    </div>
-                    <div class="col-md-3">
-                      <label class="form-label">Volume (ml)</label>
-                      <input name="volume" type="text" class="form-control" placeholder="eg :- 100">
-                    </div>
-                  </div></li>
-                </div>
-                </ol>
-              </div>
-
-              <button type="button" class="btn btn-dark"
-                onclick="addVariant(document.querySelector('#addProductForm #variantContainer ol'))">Add Variant</button>
-              <div class="d-flex justify-content-end gap-2">
-                <a href="/admin/products"><button type="button" class="btn btn-outline-secondary">Cancel</button></a>
-                <button type="submit" class="btn btn-primary">Save</button>
-              </div>
-          </form>
+    .w-75 {
+      width: 100% !important;
+    }
+    .p-5 {
+      padding: 1.5rem !important;
+    }
+    .variantSection .row {
+      flex-direction: column;
+    }
+    .variantSection .col-md-3 {
+      width: 100%;
+    }
+    #previewContainer {
+      flex-direction: column;
+      align-items: center;
+    }
+    #addImgDiv {
+      padding: 2rem !important;
+    }
+    .btn {
+      width: 100%;
+      margin-bottom: 0.5rem;
+    }
+    .d-flex.justify-content-end {
+      flex-direction: column;
+      align-items: stretch;
+    }
+  }
+  @media (max-width: 576px) {
+    h1 {
+      font-size: 1.5rem;
+    }
+    .form-label {
+      font-size: 0.9rem;
+    }
+    .form-control, .form-select {
+      font-size: 0.9rem;
+    }
+    #addImgDiv {
+      padding: 1.5rem !important;
+    }
+    small {
+      font-size: 0.75rem;
+    }
+  }
+</style>
+<main class="flex-fill">
+  <div class="container my-4 d-flex justify-content-center">
+    <div class="w-75 p-5 rounded-4" style="background:rgb(166, 166, 166)">
+      <h1 class="mb-4">Add Product</h1>
+      <div class="alert alert-danger d-none" id="addProductError"></div>
+      <form id="addProductForm" method="post" action="/admin/products/add" enctype="multipart/form-data">
+        <div class="mb-3">
+          <label class="form-label">Product Name</label>
+          <input type="text" id="name" name="name" class="form-control" placeholder="eg :- Blue de Chanel">
         </div>
-      </div>
-
-    </main>
+        <div class="mb-3">
+          <label class="form-label">Product Description</label>
+          <textarea name="description" id="description" class="form-control" rows="4"
+            placeholder="Write your description here..."></textarea>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Product Images</label>
+          <div class="rounded-3 border p-4 bg-light">
+            <input type="file" name="images" multiple accept="image/*" id="imgInput" hidden>
+            <div class="border rounded p-5 text-center position-relative"
+              style="cursor:pointer;background: rgb(205, 205, 205);" id="addImgDiv">
+              <i class="fa-solid fa-images fa-2x z-5"></i>
+              <div>Add Images</div>
+              <small>Select only 3 images</small>
+            </div>
+            <div id="previewContainer" class="d-flex justify-content-center gap-2 mt-3 flex-wrap"></div>
+          </div>
+        </div>
+        <div class="row mb-4 g-3">
+          <div class="col-md-4 col-12">
+            <label class="form-label">Category</label>
+            <select name="categoryId" id="category" class="form-select">
+              <option selected disabled>Select Category</option>
+              <% categories.forEach(category=> { %>
+                <option value="<%= category._id %>">
+                  <%= category.name %>
+                </option>
+              <% }) %>
+            </select>
+          </div>
+          <div class="col-md-4 col-12">
+            <label class="form-label">Tags</label>
+            <input name="tags" id="tags" type="text" class="form-control" placeholder="tags(seperate with ',')">
+          </div>
+        </div>
+        <!-- variants -->
+        <p class="mb-0 fw-bold fs-5">Add Variant</p>
+        <div id="variantContainer">
+          <ol>
+            <div class="variantSection">
+              <li>
+                <div class="row mb-3 m-0 g-3">
+                  <div class="col-md-3 col-12">
+                    <label class="form-label">Base Price (₹)</label>
+                    <input name="basePrice" type="number" class="form-control" placeholder="eg :- 5000">
+                  </div>
+                  <div class="col-md-3 col-12">
+                    <label class="form-label">Discount Price (₹)</label>
+                    <input name="discount" type="number" class="form-control" placeholder="eg :- 10(percentage)">
+                  </div>
+                  <div class="col-md-3 col-12">
+                    <label class="form-label">Stock</label>
+                    <input name="stock" type="number" class="form-control" placeholder="eg :- 20">
+                  </div>
+                  <div class="col-md-3 col-12">
+                    <label class="form-label">Volume (ml)</label>
+                    <input name="volume" type="text" class="form-control" placeholder="eg :- 100">
+                  </div>
+                </div>
+              </li>
+            </div>
+          </ol>
+        </div>
+        <button type="button" class="btn btn-dark my-3" onclick="addVariant(document.querySelector('#addProductForm #variantContainer ol'))">Add Variant</button>
+        <div class="d-flex justify-content-end gap-2">
+          <a href="/admin/products"><button type="button" class="btn btn-outline-secondary">Cancel</button></a>
+          <button type="submit" class="btn btn-primary">Save</button>
+        </div>
+      </form>
     </div>
-    <script>
-
-      const addProduct = document.getElementById('addProductForm');
-      // Form submission validation
-      addProduct.addEventListener('submit', e => {
+  </div>
+</main>
+  </div>
+<script>
+  const addProduct = document.getElementById('addProductForm');
+  // Form submission validation
+  addProduct.addEventListener('submit', e => {
     e.preventDefault(); // Stop form submission
-
     const errors = [];
-
     // Simple fields
     const name = document.getElementById('name').value.trim();
     const description = document.getElementById('description').value.trim();
     const category = document.getElementById('category').value.trim();
     const tags = document.getElementById('tags').value.trim();
-
     if (!name) errors.push('Product name is required.');
     if (!description) errors.push('Product description is required.');
     if (!category) errors.push('Please select a category.');
     if (!tags) errors.push('Tags are required.');
-
     // Variant fields
     const basePrices = Array.from(document.getElementsByName('basePrice')).map(i => i.value.trim());
     const discounts = Array.from(document.getElementsByName('discount')).map(i => i.value.trim());
     const stocks = Array.from(document.getElementsByName('stock')).map(i => i.value.trim());
     const volumes = Array.from(document.getElementsByName('volume')).map(i => i.value.trim());
-
     volumes.forEach((vol, i) => {
-        const bp = Number(basePrices[i]);
-        const disc = Number(discounts[i]);
-        const st = parseInt(stocks[i]);
-
-        if (!bp || bp <= 0) errors.push(`Base price must be greater than 0 in variant ${i + 1}.`);
-        if (!st && st !== 0 || st < 0) errors.push(`Stock must be 0 or more in variant ${i + 1}.`);
-        if (!vol) errors.push(`Volume is required in variant ${i + 1}.`);
-        if (disc < 0||disc>100) errors.push(`Discount cannot be negative or more than 100 in variant ${i + 1}.`);
+      const bp = Number(basePrices[i]);
+      const disc = Number(discounts[i]);
+      const st = parseInt(stocks[i]);
+      if (!bp || bp <= 0) errors.push(`Base price must be greater than 0 in variant ${i + 1}.`);
+      if (!st && st !== 0 || st < 0) errors.push(`Stock must be 0 or more in variant ${i + 1}.`);
+      if (!vol) errors.push(`Volume is required in variant ${i + 1}.`);
+      if (disc < 0 || disc > 100) errors.push(`Discount cannot be negative or more than 100 in variant ${i + 1}.`);
     });
-
     // FormData
     const formData = new FormData(addProduct);
     formData.delete('images'); // clear old files
     getFinalFiles().forEach(file => formData.append('images', file));
-
     // Show errors or submit
     const errorBox = document.getElementById('addProductError');
     if (errors.length > 0) {
-        errorBox.classList.remove('d-none');
-        errorBox.innerHTML = errors.join('<br>');
+      errorBox.classList.remove('d-none');
+      errorBox.innerHTML = errors.join('<br>');
     } else {
-        errorBox.classList.add('d-none');
-        errorBox.innerHTML = '';
-        updateInputFiles();
-        addProduct.submit();
+      errorBox.classList.add('d-none');
+      errorBox.innerHTML = '';
+      updateInputFiles();
+      addProduct.submit();
     }
-});
-
-      function updateInputFiles() {
-        const dataTransfer = new DataTransfer();
-        getFinalFiles().forEach(file => dataTransfer.items.add(file));
-        imgInput.files = dataTransfer.files; // overwrite input with cleaned list
-      }
-
-      document.getElementById('variantContainer').addEventListener('click', (e) => {
-        if (e.target.classList.contains('delete-variant-btn')) {
-          const variantSection = e.target.closest('LI');
-          if (variantSection) variantSection.remove();
-        }
-      });
-    </script>
-    <%- include('../partials/admin/footer.ejs')%>
+  });
+  function updateInputFiles() {
+    const dataTransfer = new DataTransfer();
+    getFinalFiles().forEach(file => dataTransfer.items.add(file));
+    imgInput.files = dataTransfer.files; // overwrite input with cleaned list
+  }
+  document.getElementById('variantContainer').addEventListener('click', (e) => {
+    if (e.target.classList.contains('delete-variant-btn')) {
+      const variantSection = e.target.closest('LI');
+      if (variantSection) variantSection.remove();
+    }
+  });
+</script>
+<%- include('../partials/admin/footer.ejs')%>
