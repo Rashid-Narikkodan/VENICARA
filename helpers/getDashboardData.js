@@ -46,7 +46,8 @@
         {$lookup:{from:'products',localField:'_id',foreignField:'_id',as:'products'}},
         {$unwind:'$products'},
         {$project:{_id:0,productId:'$products._id',name:'$products.name',totalSold:1,img:'$products.images'}},
-        {$sort:{totalSold:-1}}
+        {$sort:{totalSold:-1}},
+        {$limit:10}
     ])
 
     //dashbord datas

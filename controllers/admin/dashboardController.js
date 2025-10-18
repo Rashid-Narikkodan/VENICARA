@@ -16,15 +16,34 @@ const showDashboard = async (req, res) => {
     
     const {
       labels:productsSoldLabels,
-      data:productsSoldData
+      data,
     } = await getChartData(filter,'products.quantity')
+    
 
+    const productsSoldData = []
+    const productsReturnedData = []
+    const productsCancelledData = []
+    
+    for(let elem of data){
+      productsSoldData.push(elem.soldCount)
+      productsReturnedData.push(elem.returnCount)
+      productsCancelledData.push(elem.cancelCount)
+    }
+
+    
     const {
       labels:revenueLabels,
-      data:revenueChartData
+      data:revenue
     } = await getChartData(filter,'finalAmount')
 
   
+    const refundChartData = []
+    const revenueChartData = []
+    
+    for(let elem of revenue){
+      revenueChartData.push(elem.revenueCount)
+      refundChartData.push(elem.refundCount)
+    }
    
     return res.render('adminPages/dashboard', {
       page: 'dashboard',
@@ -37,8 +56,11 @@ const showDashboard = async (req, res) => {
         topProducts,
         productsSoldLabels,
         productsSoldData,
+        productsReturnedData,
+        productsCancelledData,
         revenueLabels,
         revenueChartData,
+        refundChartData,
       }
     });
 

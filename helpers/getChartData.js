@@ -1,4 +1,4 @@
-const Order = require('../models/Order')
+const Order = require("../models/Order");
 
 async function getChartData(filter, field) {
   const now = new Date();
@@ -7,12 +7,63 @@ async function getChartData(filter, field) {
 
   // helper: build pipeline per iteration
   function buildPipeline(start, end) {
-    const pipeline = [{ $match: { createdAt: { $gte: start, $lte: end },'payment.status':'paid' } }];
+    let pipeline = [];
     if (field === "finalAmount") {
-      pipeline.push({ $group: { _id: null, count: { $sum: `$${field}` } } });
+      pipeline = [
+        {
+          $match: {
+            createdAt: { $gte: start, $lte: end },
+          },
+        },
+        { $group: {
+          _id: null,
+          revenueCount: {
+             $sum: {
+              $cond:[{ $eq: ["$payment.status", "paid"] },`$${field}`,0]
+             } 
+            },
+          refundCount : { $sum : '$refundAmount' }
+        } 
+      }];
     } else {
-      pipeline.push({ $unwind: "$products" });
-      pipeline.push({ $group: { _id: null, count: { $sum: `$${field}` } } });
+      pipeline = [
+        {
+          $match: {
+            createdAt: { $gte: start, $lte: end },
+          },
+        },
+        { $unwind: "$products" },
+        {
+          $group: {
+            _id: null,
+            soldCount: {
+              $sum: {
+                $cond: [
+                  {
+                    $and: [
+                      { $eq: ["$payment.status", "paid"] },
+                      { $ne: ["$products.status", "returned"] },
+                      { $ne: ["$products.status", "cancelled"] },
+                    ],
+                  }, // if not returned
+                  "$products.quantity",
+                  0,
+                ],
+              },
+            },
+            returnCount: {
+              $sum: {
+                $cond: [ { $eq: ["$products.status", "returned"] }, "$products.quantity", 0 ]
+              }
+            },
+            cancelCount: {
+              $sum: {
+                $cond: [ { $eq: ["$products.status", "cancelled"] }, "$products.quantity", 0 ]
+              }
+            }
+          }
+        }
+      ];
     }
     return pipeline;
   }
@@ -28,7 +79,19 @@ async function getChartData(filter, field) {
         end.setHours(i, 59, 59, 999);
 
         const result = await Order.aggregate(buildPipeline(start, end));
-        data.push(result[0]?.count || 0);
+
+        if (field === "finalAmount") {
+          data.push({
+            revenueCount : result[0]?.revenueCount || 0,
+            refundCount : result[0]?.refundCount || 0
+          });
+        } else {
+          data.push({
+            soldCount: result[0]?.soldCount || 0,
+            returnCount: result[0]?.returnCount || 0,
+            cancelCount: result[0]?.cancelCount || 0
+          });
+        }
       }
       break;
     }
@@ -41,10 +104,22 @@ async function getChartData(filter, field) {
         const start = new Date(day.setHours(0, 0, 0, 0));
         const end = new Date(day.setHours(23, 59, 59, 999));
 
-        labels.push(day.toLocaleDateString('en-US', { weekday: 'short' }));
+        labels.push(day.toLocaleDateString("en-US", { weekday: "short" }));
 
         const result = await Order.aggregate(buildPipeline(start, end));
-        data.push(result[0]?.count || 0);
+
+        if (field === "finalAmount") {
+          data.push({
+            revenueCount : result[0]?.revenueCount || 0,
+            refundCount : result[0]?.refundCount || 0
+          });
+        } else {
+          data.push({
+            soldCount: result[0]?.soldCount || 0,
+            returnCount: result[0]?.returnCount || 0,
+            cancelCount: result[0]?.cancelCount || 0
+          });
+        }
       }
       break;
     }
@@ -61,7 +136,19 @@ async function getChartData(filter, field) {
         const end = new Date(year, month, i, 23, 59, 59, 999);
 
         const result = await Order.aggregate(buildPipeline(start, end));
-        data.push(result[0]?.count || 0);
+
+        if (field === "finalAmount") {
+          data.push({
+            revenueCount : result[0]?.revenueCount || 0,
+            refundCount : result[0]?.refundCount || 0
+          });
+        } else {
+          data.push({
+            soldCount: result[0]?.soldCount || 0,
+            returnCount: result[0]?.returnCount || 0,
+            cancelCount: result[0]?.cancelCount || 0           
+          });
+        }
       }
       break;
     }
@@ -70,14 +157,28 @@ async function getChartData(filter, field) {
       const thisYear = now.getFullYear();
 
       for (let month = 0; month < 12; month++) {
-        const label = new Date(thisYear, month).toLocaleString("en-US", { month: "short" });
+        const label = new Date(thisYear, month).toLocaleString("en-US", {
+          month: "short",
+        });
         labels.push(label);
 
         const start = new Date(thisYear, month, 1, 0, 0, 0, 0);
         const end = new Date(thisYear, month + 1, 0, 23, 59, 59, 999);
 
         const result = await Order.aggregate(buildPipeline(start, end));
-        data.push(result[0]?.count || 0);
+
+        if (field === "finalAmount") {
+          data.push({
+            revenueCount : result[0]?.revenueCount || 0,
+            refundCount : result[0]?.refundCount || 0
+          });
+        } else {
+          data.push({
+            soldCount: result[0]?.soldCount || 0,
+            returnCount: result[0]?.returnCount || 0,
+            cancelCount: result[0]?.cancelCount || 0
+          });
+        }
       }
       break;
     }
