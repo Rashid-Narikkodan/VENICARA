@@ -135,6 +135,12 @@
         const file = e.target.files[0];
         if (!file) return;
 
+        if(!file.type.startsWith('image/')){
+              showAlert("error","Please upload a valid image file (jpg, png, etc.)");
+          e.target.value = ""; // clear the invalid file input
+          return;
+        }
+
         const reader = new FileReader();
         reader.onload = (event) => {
           [...addImg.children].forEach((child) => {
@@ -149,6 +155,7 @@
 
           deleteBtn.classList.remove("d-none");
         };
+
         reader.readAsDataURL(file);
       });
 

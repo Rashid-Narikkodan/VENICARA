@@ -9,9 +9,11 @@ addImgDiv.addEventListener('click', () => imgInput.click());
 
 imgInput.addEventListener('change', (e) => {
   const files = Array.from(e.target.files);
-
   files.forEach((file) => {
-    if (!file.type.startsWith('image/')) return;
+    if (!file.type.startsWith('image/')){
+      showAlert('error',"Images are only allowed (eg:- .jpg, .png)")
+      return
+    };
     selectedFiles.push(file);
     const index = selectedFiles.length - 1;
     const reader = new FileReader();

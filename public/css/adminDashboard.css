@@ -10,6 +10,10 @@ html, body {
     overflow-x: hidden; /* Prevent horizontal scrolling */
 }
 
+.table{
+    overflow-y: scroll !important;
+}
+
 body {
     background-color: #f5f5f5;
     line-height: 1.6;

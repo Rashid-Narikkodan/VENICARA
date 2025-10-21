@@ -11,10 +11,23 @@ const showProducts = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 6;
-    const search = req.query.search || "";
+    let search = req.query.search || "";
 
     let filter = { isDeleted: false };
-    if (search) filter.name = { $regex: search, $options: "i" };
+        if (search) {
+      search = search.trim().toUpperCase();
+
+      const matchedCategories = await Category.find({
+        name: search
+      }).select('_id')
+      
+      const categoryIds = matchedCategories.map(c=>c._id)
+
+      filter.$or = [
+        { name: { $regex: search, $options: "i" } },
+        { category: {$in:categoryIds} }
+      ];
+    }
 
     const totalProducts = await Product.countDocuments(filter);
 
