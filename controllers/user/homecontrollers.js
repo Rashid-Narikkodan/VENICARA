@@ -4,6 +4,7 @@ const mongoose = require("mongoose");
 const handleError = require("../../helpers/handleError");
 const Wishlist = require("../../models/Wishlist");
 const Cart = require("../../models/Cart");
+const Review = require("../../models/Review");
 
 const landingPage = async (req, res) => {
   try {
@@ -80,6 +81,16 @@ const wishlistIds = user
           .sort({ createdAt: -1 }),
         Category.find({ isDeleted: false, isActive: true }),
       ]);
+
+      for(let product of products){
+
+        const reviews = await Review.find({productId:product._id})
+        if (reviews.length > 0) {
+          const total = reviews.reduce((acc, r) => acc + r.rating, 0);
+          product.rating = total / reviews.length;
+          product.reviewLength = reviews.length 
+        }
+      }
 
       const totalProducts = await Product.countDocuments({
         isDeleted: false,
