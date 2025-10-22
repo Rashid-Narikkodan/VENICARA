@@ -16,7 +16,7 @@ function exportSalesPDF(req, res, data, orders, filter, startDate, endDate) {
     // ---- Duration ----
     const durationText =
       filter === "custom"
-        ? `Duration: ${startDate || "-"} to ${endDate || "-"}`
+        ? `Duration: ${startDate ? new Date(startDate).toISOString().split('T')[0] : '-'} to ${endDate ? new Date(endDate).toISOString().split('T')[0] : '-'}`
         : `Duration: ${filter ? filter.toUpperCase() : "ALL"}`;
     doc.fontSize(12).fillColor("gray").text(durationText, { align: "center" });
     doc.moveDown(0.5);
