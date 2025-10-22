@@ -290,7 +290,7 @@ const handleOrderStatus = async (req, res) => {
 
     if (status === "delivered") {
       order.return.returnTimeLimit = new Date(
-        Date.now() + 2 * 24 * 60 * 60 * 5000
+        Date.now() + 2 * 24 * 60 * 60 * 1000
       ); // 2 days from now
       order.payment.status = "paid";
     }
