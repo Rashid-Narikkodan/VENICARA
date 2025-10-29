@@ -280,6 +280,10 @@ const cancelProduct = async (req, res) => {
       order.finalAmount = parseFloat(
         (order.finalAmount - refundAmount).toFixed(2)
       );
+      if(order.deliveryCharge>0&&order.finalAmount === order.deliveryCharge){
+        order.finalAmount -= order.deliveryCharge
+        refundAmount += order.deliveryCharge
+      }
       if (!order.refundAmount) order.refundAmount = 0;
       product.refundAmount = parseFloat(refundAmount.toFixed(2));
       order.refundAmount += parseFloat(refundAmount.toFixed(2));

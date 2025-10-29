@@ -9,7 +9,7 @@ const requireLogin = async (req, res, next) => {
   next()
 }
 const isUserBlocked=async(req, res, next)=>{
-  const user=await User.findById(req.session.user.id);
+  const user=await User.findById(req.session.user?.id);
   if (!user||user.isBlocked) {
      req.logout((err) => {
     if (err) {
