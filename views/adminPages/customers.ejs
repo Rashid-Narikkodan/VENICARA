@@ -129,7 +129,7 @@
               </td>
               <td data-label="Created On"><%= user.createdAt.toLocaleDateString() %></td>
               <td data-label="Status">
-                <button type="button" 
+                <button type="button"
                         onclick="showConfirmModal('<%=user._id%>', '<%= user.isBlocked ? 'User will be Activated' : 'User will be Blocked' %>')"
                         class="status-btn alert px-3 py-1 w-100 <%= user.isBlocked ? 'alert-danger text-danger' : 'alert-success text-success' %>">
                   <%= user.isBlocked ? 'Blocked' : 'Active' %>

@@ -44,7 +44,7 @@ router
   .route("/products/add")
   .get(auth.requireLogin, productsController.showAddProduct)
   .post(upload.array("images", 10), productsController.addProduct);
-router.patch("/products/:id", productsController.deleteProduct);
+router.delete("/products/:id", productsController.deleteProduct);
 router
   .route("/products/edit/:id")
   .get(auth.requireLogin, productsController.showEditProduct)

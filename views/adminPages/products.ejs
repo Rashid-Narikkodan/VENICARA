@@ -295,6 +295,8 @@
     modal.show();
   }
 
+
+
   document.getElementById('yes').addEventListener('click', (e) => {
     const productId = e.target.getAttribute('data-productId');
     const operation = e.target.getAttribute('data-operation');
@@ -306,6 +308,8 @@
     }
   });
 
+
+  
   function toggleProductActive(productId) {
     fetch(`/admin/products/${productId}/toggle?_method=PATCH`, {
       method: 'PATCH'
