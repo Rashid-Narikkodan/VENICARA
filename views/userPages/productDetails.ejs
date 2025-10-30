@@ -169,7 +169,7 @@
 
           <!-- Variant buttons -->
           <div class="mt-4">
-            <% product.variants.sort((a,b)=>a.volume-b.volume).forEach((variant, index)=> { %>
+            <% product.variants.sort((a,b)=>a.finalAmount-b.finalAmount).forEach((variant, index)=> { %>
               <button class="btn btn-outline-dark rounded-5 variant-btn <%= index === 0 ? 'active' : '' %>"
                 data-price="<%= variant.finalAmount%>" data-volume="<%= variant.volume %>"
                 data-basePrice="<%= variant.basePrice%>" data-discount="<%= variant.finalDiscount %>"
