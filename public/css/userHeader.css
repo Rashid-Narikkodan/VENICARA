@@ -8,6 +8,7 @@ html {
   scroll-padding-top: 70px; /* Offset for sticky header */
   margin: 0;
   padding: 0;
+  background: black;
 }
 
 
