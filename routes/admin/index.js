@@ -1,14 +1,15 @@
 const router = require("express").Router();
 const auth = require("../../middlewares/authAdmin");
 
-router.use("/auth",auth.isLoggedIn, require("./authRoutes"));
-router.use("/dashboard",auth.requireLogin, require("./dashboardRoutes"));
-router.use("/orders",auth.requireLogin, require("./orderRoutes"));
-router.use("/products",auth.requireLogin, require("./productsRoutes"));
-router.use("/salesReport",auth.requireLogin, require("./salesReportRoutes"));
-router.use("/customers",auth.requireLogin, require("./customersRoutes"));
-router.use("/coupons",auth.requireLogin, require("./couponRoutes"));
-router.use("/categories",auth.requireLogin, require("./categroiesRoutes"));
-router.use("/referrals",auth.requireLogin, require("./referralsRoutes"));
+router.use("/auth", auth.isLoggedIn, require("./authRoutes"));
+router.use(auth.requireLogin);
+router.use("/dashboard", require("./dashboardRoutes"));
+router.use("/orders", require("./orderRoutes"));
+router.use("/products", require("./productsRoutes"));
+router.use("/salesReport", require("./salesReportRoutes"));
+router.use("/customers", require("./customersRoutes"));
+router.use("/coupons", require("./couponRoutes"));
+router.use("/categories", require("./categroiesRoutes"));
+router.use("/referrals", require("./referralsRoutes"));
 
 module.exports = router;
